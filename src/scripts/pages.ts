@@ -129,7 +129,7 @@ export function initAbout(root: HTMLElement): Destroy {
 }
 
 /** Design Lab: the previous page hangs above as a "ceiling"; scrolling descends into the dark. */
-export function initLab(root: HTMLElement, entering: boolean): Destroy {
+export function initLab(root: HTMLElement, entering: boolean, onAscend: () => void): Destroy {
   const triggers: ScrollTrigger[] = [];
   const ceiling = root.querySelector<HTMLElement>('[data-ceiling]')!;
   const inner = root.querySelector<HTMLElement>('[data-ceiling-inner]')!;
@@ -160,5 +160,67 @@ export function initLab(root: HTMLElement, entering: boolean): Destroy {
   const head = root.querySelectorAll('.lab-head > *');
   if (entering) gsap.from(head, { y: 30, opacity: 0, duration: 0.7, ease: ease.out, stagger: stagger.item, delay: 0.3 });
 
-  return () => triggers.forEach((t) => t.kill());
+  // pull up at the very top to climb back to the page you came from
+  const back = root.querySelector<HTMLElement>('[data-lab-back]');
+  const PULL = 260;
+  let pull = 0;
+  let done = false;
+  let idle: number | undefined;
+  const show = () => {
+    const k = Math.min(pull / PULL, 1);
+    gsap.to(ceiling, { y: k * 70, duration: 0.25, ease: ease.ui, overwrite: true });
+    if (back) gsap.to(back, { opacity: 0.45 + k * 0.55, y: -k * 8, duration: 0.25, overwrite: true });
+  };
+  const release = () => {
+    pull = 0;
+    gsap.to(ceiling, { y: 0, duration: 0.6, ease: 'elastic.out(1, 0.6)', overwrite: true });
+    if (back) gsap.to(back, { opacity: 0.45, y: 0, duration: 0.4, overwrite: true });
+  };
+  const add = (d: number) => {
+    if (done) return;
+    pull += d;
+    show();
+    clearTimeout(idle);
+    if (pull >= PULL) {
+      done = true;
+      onAscend();
+      return;
+    }
+    idle = window.setTimeout(release, 220);
+  };
+  const atTop = () => window.scrollY <= 2;
+  // armed only after a pause at the top, so momentum from scrolling up doesn't eject you
+  let armed = atTop();
+  let lastWheel = 0;
+  const onWheel = (e: WheelEvent) => {
+    const now = performance.now();
+    if (!atTop()) armed = false;
+    else if (!armed && now - lastWheel > 280) armed = true;
+    lastWheel = now;
+    if (e.deltaY < 0 && armed) add(-e.deltaY);
+    else if (e.deltaY > 0 && pull > 0) release();
+  };
+  let ty = 0;
+  let tracking = false;
+  const onTouchStart = (e: TouchEvent) => {
+    tracking = atTop();
+    ty = e.touches[0].clientY;
+  };
+  const onTouchMove = (e: TouchEvent) => {
+    if (!tracking) return;
+    const y = e.touches[0].clientY;
+    if (y > ty) add((y - ty) * 1.6);
+    ty = y;
+  };
+  window.addEventListener('wheel', onWheel, { passive: true });
+  window.addEventListener('touchstart', onTouchStart, { passive: true });
+  window.addEventListener('touchmove', onTouchMove, { passive: true });
+
+  return () => {
+    triggers.forEach((t) => t.kill());
+    clearTimeout(idle);
+    window.removeEventListener('wheel', onWheel);
+    window.removeEventListener('touchstart', onTouchStart);
+    window.removeEventListener('touchmove', onTouchMove);
+  };
 }

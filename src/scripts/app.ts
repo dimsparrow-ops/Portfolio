@@ -69,7 +69,7 @@ function mount(id: PageId, el: HTMLElement, entering: boolean) {
     };
   } else if (id === 'services') destroy = initServices(el, entering);
   else if (id === 'about') destroy = initAbout(el);
-  else if (id === 'lab') destroy = initLab(el, entering);
+  else if (id === 'lab') destroy = initLab(el, entering, () => go(labReturn, true, 'ascend'));
   current = { id, el, destroy };
   document.body.dataset.page = id;
   ORDER.forEach((p) => document.body.classList.toggle(`is-${p}`, p === id));
@@ -110,6 +110,27 @@ function slide(oldEl: HTMLElement, newEl: HTMLElement, dir: 1 | -1) {
     });
 }
 
+/** Reverse of descend: the page you came from drops back down over the lab. */
+function ascend(labEl: HTMLElement, newEl: HTMLElement) {
+  const y = window.scrollY;
+  labEl.classList.add('is-transit');
+  labEl.scrollTop = y;
+  labEl.style.zIndex = '1';
+  newEl.classList.add('is-transit');
+  newEl.style.zIndex = '2';
+  document.getElementById('pages')!.appendChild(newEl);
+  lenis.scrollTo(0, { immediate: true, force: true });
+  return gsap
+    .timeline()
+    .fromTo(newEl, { yPercent: -50 }, { yPercent: 0, duration: dur.page, ease: ease.inOut }, 0)
+    .to(labEl, { yPercent: 30, duration: dur.page, ease: ease.inOut }, 0)
+    .add(() => {
+      labEl.remove();
+      newEl.classList.remove('is-transit');
+      gsap.set(newEl, { clearProps: 'transform,zIndex' });
+    });
+}
+
 function descend(oldEl: HTMLElement, labEl: HTMLElement) {
   const y = window.scrollY;
   oldEl.classList.add('is-transit');
@@ -138,7 +159,9 @@ function descend(oldEl: HTMLElement, labEl: HTMLElement) {
     });
 }
 
-async function go(href: string, push = true) {
+let labReturn = '/';
+
+async function go(href: string, push = true, mode?: 'ascend') {
   const url = new URL(href, location.href);
   const path = norm(url.pathname);
   const slug = caseSlug(path);
@@ -193,6 +216,7 @@ async function go(href: string, push = true) {
   const newEl = document.importNode(fresh, true);
   const oldEl = current.el;
   const from = current.id;
+  if (target === 'lab') labReturn = norm(location.pathname);
   current.destroy();
   if (push) history.pushState({}, '', path + url.hash);
   document.title = doc.title;
@@ -200,7 +224,12 @@ async function go(href: string, push = true) {
   const dir: 1 | -1 = ORDER.indexOf(target) > ORDER.indexOf(from) ? 1 : -1;
   ORDER.forEach((p) => document.body.classList.toggle(`is-${p}`, p === target));
   updateNav(target, true);
-  const tl = target === 'lab' ? descend(oldEl, newEl) : slide(oldEl, newEl, dir);
+  const tl =
+    target === 'lab'
+      ? descend(oldEl, newEl)
+      : mode === 'ascend' || (from === 'lab' && !push && path === labReturn)
+        ? ascend(oldEl, newEl)
+        : slide(oldEl, newEl, dir);
   mount(target, newEl, true);
   if (target === 'work') work?.intro(0.35);
   await tl.then();
