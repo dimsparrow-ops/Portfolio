@@ -102,7 +102,7 @@ function slide(oldEl: HTMLElement, newEl: HTMLElement, dir: 1 | -1) {
   return gsap
     .timeline()
     .fromTo(newEl, { xPercent: 100 * dir }, { xPercent: 0, duration: dur.page, ease: ease.inOut }, 0)
-    .to(oldEl, { xPercent: -30 * dir, filter: 'brightness(0.72)', duration: dur.page, ease: ease.inOut }, 0)
+    .to(oldEl, { xPercent: -30 * dir, duration: dur.page, ease: ease.inOut }, 0)
     .add(() => {
       oldEl.remove();
       newEl.classList.remove('is-transit');

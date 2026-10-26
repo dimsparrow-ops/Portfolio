@@ -1,5 +1,4 @@
 @import '@fontsource-variable/inter-tight';
-@import '@fontsource/jetbrains-mono/400.css';
 @import '@fontsource-variable/archivo/wdth.css';
 
 /* ---------- tokens ---------- */
@@ -15,8 +14,9 @@
   --key: #d9c8ff;
   --key-edge: #a68fd9;
 
-  --font: 'Inter Tight Variable', 'Inter Tight', system-ui, sans-serif;
-  --mono: 'JetBrains Mono', ui-monospace, monospace;
+  /* SF Pro on Apple devices (system font); Inter Tight elsewhere */
+  --font: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text', 'Inter Tight Variable', 'Inter Tight', system-ui, sans-serif;
+  --mono: var(--font);
 
   /* motion tokens — mirrored in src/scripts/motion.ts */
   --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
@@ -113,18 +113,20 @@ img, video { display: block; max-width: 100%; }
 .nav {
   position: absolute; left: 50%; bottom: 18px; transform: translateX(-50%);
   display: flex; align-items: center; gap: 2px;
-  padding: 6px 12px 6px 6px;
+  padding: 6px;
   border-radius: 999px;
   /* frosted glass, brandappart.com: heavy blur + translucent tint + soft sheen */
   background:
     linear-gradient(90deg, rgba(255, 255, 255, 0.14), rgba(255, 255, 255, 0.04) 60%),
     rgba(58, 58, 62, 0.52);
-  backdrop-filter: blur(32px) saturate(1.6);
-  -webkit-backdrop-filter: blur(32px) saturate(1.6);
+  /* via a variable: the CSS minifier otherwise drops the unprefixed property */
+  --glass: blur(32px) saturate(1.6);
+  backdrop-filter: var(--glass);
+  -webkit-backdrop-filter: var(--glass);
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.22), inset 0 0 0 1px rgba(255, 255, 255, 0.08), 0 12px 32px rgba(0, 0, 0, 0.16);
 }
 .nav a {
-  position: relative; z-index: 1;
+  position: relative; z-index: 1; -webkit-tap-highlight-color: transparent;
   height: 40px; padding: 0 18px;
   display: inline-flex; align-items: center;
   font-size: 15px; color: rgba(255, 255, 255, 0.62);
@@ -230,7 +232,8 @@ html.is-loaded .loader { display: none; }
   position: absolute; left: 12px; top: 10px;
   font-size: 15px; font-weight: 500; color: #fff; letter-spacing: -0.01em;
 }
-.stage.is-hovering .card:not(.is-hover) { filter: saturate(0.6) brightness(0.92); }
+.card { transition: filter 0.35s var(--ease-ui); }
+.card.is-hover { filter: brightness(1.1) saturate(1.12); }
 
 /* hover tag (laurent.fyi) */
 .tag {
@@ -303,7 +306,7 @@ html.is-loaded .loader { display: none; }
 .acc-item { border-top: 1px solid var(--line); }
 .acc-item:last-child { border-bottom: 1px solid var(--line); }
 .acc-btn { width: 100%; display: flex; justify-content: space-between; align-items: center; padding: 18px 0; text-align: left; }
-.acc-btn .mono { font-size: 12px; }
+.acc-btn .mono { font: 500 16px/1.2 var(--font); text-transform: none; letter-spacing: -0.01em; }
 .acc-icon { position: relative; width: 14px; height: 14px; }
 .acc-icon::before, .acc-icon::after { content: ''; position: absolute; left: 0; top: 6.5px; width: 14px; height: 1px; background: currentColor; transition: transform 0.35s var(--ease-out); }
 .acc-icon::after { transform: rotate(90deg); }
@@ -336,7 +339,7 @@ html.is-loaded .loader { display: none; }
 
 /* ---------- about (laurent.fyi + joshpuckett.me) ---------- */
 .about { position: relative; }
-.about-content { position: relative; z-index: 2; background: var(--bg); padding: 120px var(--gutter) 120px; box-shadow: 0 40px 60px -30px rgba(0,0,0,.35); }
+.about-content { position: relative; z-index: 2; background: var(--bg); padding: 120px var(--gutter) 120px; border-radius: 0 0 36px 36px; box-shadow: 0 40px 60px -30px rgba(0,0,0,.35); }
 .about-intro { max-width: 640px; margin: 0 auto 72px; }
 .about-intro h1 { font-size: 22px; font-weight: 500; margin: 0 0 18px; letter-spacing: -0.01em; }
 .about-intro p { margin: 0 0 14px; color: rgba(0, 0, 0, 0.65); }
@@ -367,7 +370,7 @@ html.is-loaded .loader { display: none; }
   padding: 90px var(--gutter) 150px;
   overflow: hidden;
 }
-.hi-links { display: flex; justify-content: center; gap: 28px; color: rgba(255, 255, 255, 0.6); font-size: 13px; }
+.hi-links { position: relative; z-index: 2; display: flex; justify-content: center; gap: 28px; color: rgba(255, 255, 255, 0.6); font-size: 13px; }
 .hi-links a { transition: color var(--dur-micro) var(--ease-ui); }
 .hi-links a:hover { color: var(--key); }
 .hi-word {
@@ -378,13 +381,14 @@ html.is-loaded .loader { display: none; }
   text-transform: uppercase; color: var(--key);
   user-select: none; white-space: nowrap;
 }
+.hi-word { pointer-events: none; }
 .hi-word span { display: inline-block; transform-origin: 50% 100%; will-change: transform; cursor: default; }
 .hi-word .sp { width: 0.12em; }
 @media (max-width: 767px) { .hi { padding-bottom: 170px; } }
 
 /* ---------- design lab ---------- */
 .page--lab { background: transparent; }
-.lab-ceiling { position: relative; height: 50vh; overflow: hidden; z-index: 2; }
+.lab-ceiling { position: relative; height: 50vh; overflow: hidden; z-index: 2; border-radius: 0 0 36px 36px; }
 .lab-ceiling-inner { position: absolute; left: 0; right: 0; bottom: 0; height: 100vh; background: var(--bg); }
 .lab-ceiling-inner > .page { position: absolute !important; inset: 0; min-height: 0; pointer-events: none; }
 .lab-ceiling-ph { position: absolute; inset: 0; display: grid; place-items: end center; padding-bottom: 32px; color: var(--ink-3); }
@@ -396,7 +400,7 @@ html.is-loaded .loader { display: none; }
 .masonry { columns: 4 260px; column-gap: 14px; }
 .lab-item { break-inside: avoid; margin: 0 0 14px; border-radius: 12px; overflow: hidden; position: relative; }
 .lab-item .ph { width: 100%; }
-.lab-chip { position: absolute; left: 10px; top: 10px; z-index: 1; padding: 5px 10px; border-radius: 999px; background: rgba(0,0,0,.55); color: #fff; font-size: 12px; backdrop-filter: blur(8px); }
+.lab-chip { position: absolute; left: 10px; top: 10px; z-index: 1; padding: 5px 10px; border-radius: 999px; background: rgba(0,0,0,.55); color: #fff; font-size: 12px; --chip-glass: blur(8px); backdrop-filter: var(--chip-glass); -webkit-backdrop-filter: var(--chip-glass); }
 body.is-lab .nav { background: rgba(255, 255, 255, 0.1); }
 
 @media (prefers-reduced-motion: reduce) {

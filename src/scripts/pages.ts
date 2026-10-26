@@ -110,13 +110,12 @@ export function initAbout(root: HTMLElement): Destroy {
       const r = l.getBoundingClientRect();
       const d = (e.clientX - (r.left + r.width / 2)) / (r.width * 1.4);
       const inf = Math.exp(-d * d);
-      to[i].sy(1 + 0.75 * inf);
+      to[i].sy(1 + 0.4 * inf);
       to[i].sx(1 + 0.06 * inf);
     });
   };
-  const onLeave = () => {
-    gsap.to(letters, { scaleX: 1, scaleY: 1, duration: 0.9, ease: 'elastic.out(1, 0.4)', overwrite: true });
-  };
+  // return through the same quickTo tweens (overwriting them would kill the dock for good)
+  const onLeave = () => to.forEach((t) => (t.sy(1), t.sx(1)));
   hi.addEventListener('pointermove', onMove);
   hi.addEventListener('pointerleave', onLeave);
 

@@ -68,6 +68,9 @@ export function initWork(
   let time = 0;
   let autoHold = 0;
   const AUTO = { showcase: 0.12, slider: 0.16 }; // cards per second
+  const NO_TILT_BOTTOM = 120; // px: controls + nav strip, no section tilt there
+  // one gap between neighbouring cards, shared by showcase and slider
+  const cardGap = () => (dims().mobile ? 24 : 64);
   const TILT = 10; // deg, bencho.dev
   const WORLD_TILT = { x: 4, y: 6 }; // deg, whole section
 
@@ -103,7 +106,7 @@ export function initWork(
     }
     if (v === 'slider') {
       const w = mobile ? vw * 0.64 : Math.min(vw * 0.22, vh * 0.38, 340);
-      return { w, h: w, gap: 6 };
+      return { w, h: w, gap: cardGap() };
     }
     // grid
     const n = Math.max(1, visible().length);
@@ -133,7 +136,10 @@ export function initWork(
     if (v === 'showcase') {
       const step = 360 / Math.max(n, 3);
       const { vw, mobile } = dims();
-      const R = mobile ? sz.w * 1.25 : Math.max(sz.w * 1.8, vw * 0.42);
+      // radius that leaves exactly gap() between the front card and its neighbours
+      const th = (step * Math.PI) / 180;
+      const R = (cardGap() + (sz.w / 2) * (1 + Math.cos(th))) / Math.sin(th);
+      void vw; void mobile;
       const rel = wrap(idx - offset, n);
       const a = rel * step;
       const rad = (a * Math.PI) / 180;
@@ -434,11 +440,11 @@ export function initWork(
   const onPointer = (e: PointerEvent) => {
     mx = e.clientX;
     my = e.clientY;
-    inside = true;
+    inside = my < window.innerHeight - NO_TILT_BOTTOM;
   };
   const onOut = () => (inside = false);
-  stage.addEventListener('pointermove', onPointer);
-  stage.addEventListener('pointerleave', onOut);
+  window.addEventListener('pointermove', onPointer);
+  document.documentElement.addEventListener('pointerleave', onOut);
   stage.addEventListener('wheel', onWheel, { passive: false });
   stage.addEventListener('pointerdown', onDown);
   window.addEventListener('pointermove', onMove);
@@ -462,8 +468,8 @@ export function initWork(
       cards.forEach((c) => gsap.killTweensOf(c.blend));
       enters.forEach((off) => off());
       stage.removeEventListener('wheel', onWheel);
-      stage.removeEventListener('pointermove', onPointer);
-      stage.removeEventListener('pointerleave', onOut);
+      window.removeEventListener('pointermove', onPointer);
+      document.documentElement.removeEventListener('pointerleave', onOut);
       stage.removeEventListener('pointerdown', onDown);
       window.removeEventListener('pointermove', onMove);
       window.removeEventListener('pointerup', onUp);
