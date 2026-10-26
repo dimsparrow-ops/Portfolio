@@ -50,7 +50,7 @@ const fullTitle = title ? `${title} — ${site.name}` : `${site.name} — ${site
             {p.id === 'lab' ? <><svg class="nav-ico" viewBox="0 0 48 48" aria-hidden="true" fill="currentColor"><path d="M22.14 6c-.46-.26-1.01-.26-1.46 0L9.31 12.7c-.55.33-.89.91-.89 1.56v13.58c0 .88.96 1.43 1.72.98l11.83-6.98c.55-.33.89-.92.89-1.56V7.26c0-.53-.27-1-.73-1.26Z"/><path d="M39.59 32.61c0-.14-.04-.27-.1-.39-.07-.17-.2-.29-.35-.37l-13.77-8.02c-.24-.14-.54.03-.54.31v2.89c0 .13.07.25.18.31l10.78 6.28-5.54 3.23-10-5.82c-.14-.08-.31.02-.31.18v2.72c0 .21.11.41.29.51l7.05 4.13-3.06 1.78c-.09.05-.2.05-.29 0l-7.9-4.6 2.26-1.34c.18-.11.29-.3.29-.51v-3.59c0-.11.06-.21.15-.27l4.42-2.62c.11-.06.18-.18.18-.31v-2.98c0-.28-.3-.45-.54-.31L9.01 31.85c-.59.35-.58 1.21 0 1.56l14.14 8.23c.29.17.61.26.93.26s.63-.08.91-.25l6.75-3.93 5.54-3.23 1.85-1.08c.14-.09.24-.2.32-.33.06-.12.1-.26.1-.39v-.08Z"/></svg><span class="lbl-long">{p.label}</span><span class="lbl-short">lab</span></> : p.label}
           </a>
         ))}
-        <a class="sayhi-btn" href="/about/#say-hi" data-route data-sayhi><span class="arrow" aria-hidden="true">↳</span> Say hi</a>
+        <a class="sayhi-btn" href="/about/#say-hi" data-route data-sayhi aria-keyshortcuts="Enter" title="Say hi (Enter)"><span class="arrow" aria-hidden="true">↳</span> Say hi</a>
       </nav>
     </div>
 

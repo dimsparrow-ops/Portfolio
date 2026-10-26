@@ -96,7 +96,7 @@ img, video { display: block; max-width: 100%; }
   font: 500 13px/1 var(--font); letter-spacing: 0.02em; text-transform: uppercase;
   color: #1b1530;
   background: linear-gradient(180deg, #e9deff 0%, var(--key) 55%, #cdb8fb 100%);
-  border-radius: 6px;
+  border-radius: 999px;
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.8),
     inset 0 -2px 0 rgba(0, 0, 0, 0.06),
@@ -106,7 +106,7 @@ img, video { display: block; max-width: 100%; }
   transition: transform 0.12s var(--ease-ui), box-shadow 0.12s var(--ease-ui);
 }
 .sayhi-btn:hover { transform: translateY(1px); box-shadow: inset 0 1px 0 rgba(255,255,255,.8), inset 0 -2px 0 rgba(0,0,0,.06), 0 2px 0 var(--key-edge), 0 5px 12px rgba(60,30,120,.22); }
-.sayhi-btn:active { transform: translateY(3px); box-shadow: inset 0 1px 0 rgba(255,255,255,.6), inset 0 -1px 0 rgba(0,0,0,.08), 0 0 0 var(--key-edge), 0 2px 6px rgba(60,30,120,.2); }
+.sayhi-btn:active, .sayhi-btn.is-pressed { transform: translateY(3px); box-shadow: inset 0 1px 0 rgba(255,255,255,.6), inset 0 -1px 0 rgba(0,0,0,.08), 0 0 0 var(--key-edge), 0 2px 6px rgba(60,30,120,.2); }
 .sayhi-btn .arrow { font-size: 15px; transform: translateY(-1px); }
 
 /* Bottom navigation pill (leoleo.studio) with blurred glass (Brand Appart) */
@@ -115,10 +115,13 @@ img, video { display: block; max-width: 100%; }
   display: flex; align-items: center; gap: 2px;
   padding: 6px 12px 6px 6px;
   border-radius: 999px;
-  background: rgba(22, 22, 24, 0.62);
-  backdrop-filter: blur(36px) saturate(1.8);
-  -webkit-backdrop-filter: blur(36px) saturate(1.8);
-  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.08), 0 10px 30px rgba(0, 0, 0, 0.18);
+  /* frosted glass, brandappart.com: heavy blur + translucent tint + soft sheen */
+  background:
+    linear-gradient(90deg, rgba(255, 255, 255, 0.14), rgba(255, 255, 255, 0.04) 60%),
+    rgba(58, 58, 62, 0.52);
+  backdrop-filter: blur(32px) saturate(1.6);
+  -webkit-backdrop-filter: blur(32px) saturate(1.6);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.22), inset 0 0 0 1px rgba(255, 255, 255, 0.08), 0 12px 32px rgba(0, 0, 0, 0.16);
 }
 .nav a {
   position: relative; z-index: 1;
@@ -130,7 +133,7 @@ img, video { display: block; max-width: 100%; }
   white-space: nowrap;
 }
 .nav a:hover, .nav a[aria-current='page'] { color: #fff; }
-.nav a.sayhi-btn, .nav a.sayhi-btn:hover { color: #1b1530; font-size: 13px; border-radius: 8px; padding: 0 16px; }
+.nav a.sayhi-btn, .nav a.sayhi-btn:hover { color: #1b1530; font-size: 13px; border-radius: 999px; padding: 0 18px; }
 .nav .lbl-short { display: none; }
 .nav .nav-ico { width: 24px; height: 24px; margin-right: 4px; flex: none; }
 @media (max-width: 767px) { .nav .lbl-long { display: none; } .nav .lbl-short { display: inline; } }
@@ -359,11 +362,11 @@ html.is-loaded .loader { display: none; }
   position: sticky; bottom: 0; z-index: 1;
   height: 100vh; min-height: 520px;
   background: #050505; color: var(--key);
-  display: flex; flex-direction: column; justify-content: space-between;
-  padding: 120px var(--gutter) 96px;
+  display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 40px;
+  padding: 90px var(--gutter) 150px;
   overflow: hidden;
 }
-.hi-links { display: flex; gap: 28px; color: rgba(255, 255, 255, 0.6); font-size: 13px; }
+.hi-links { display: flex; justify-content: center; gap: 28px; color: rgba(255, 255, 255, 0.6); font-size: 13px; }
 .hi-links a { transition: color var(--dur-micro) var(--ease-ui); }
 .hi-links a:hover { color: var(--key); }
 .hi-word {
@@ -376,7 +379,7 @@ html.is-loaded .loader { display: none; }
 }
 .hi-word span { display: inline-block; transform-origin: 50% 100%; will-change: transform; cursor: default; }
 .hi-word .sp { width: 0.12em; }
-@media (max-width: 767px) { .hi { padding-bottom: 120px; } }
+@media (max-width: 767px) { .hi { padding-bottom: 170px; } }
 
 /* ---------- design lab ---------- */
 .page--lab { background: transparent; }

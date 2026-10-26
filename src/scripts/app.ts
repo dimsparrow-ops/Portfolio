@@ -322,4 +322,19 @@ export function boot() {
   });
 
   window.addEventListener('resize', () => updateNav(current?.id ?? 'work', false));
+
+  // the ↳ on the Say hi keycap is the Enter key: pressing Enter presses the button
+  window.addEventListener('keydown', (e) => {
+    if (e.key !== 'Enter' || e.repeat || e.metaKey || e.ctrlKey || e.altKey || caseIsOpen()) return;
+    const a = document.activeElement as HTMLElement | null;
+    if (a && a !== document.body && a.closest('a, button, input, textarea, select, [contenteditable]')) return;
+    const key = document.querySelector<HTMLAnchorElement>('.nav .sayhi-btn');
+    if (!key) return;
+    e.preventDefault();
+    key.classList.add('is-pressed');
+    setTimeout(() => {
+      key.classList.remove('is-pressed');
+      go(key.href);
+    }, 140);
+  });
 }
