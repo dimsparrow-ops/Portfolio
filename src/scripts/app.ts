@@ -242,7 +242,7 @@ function runLoader(): Promise<void> {
       bar.style.transform = `scaleX(${p.v / 100})`;
     };
     // count to 90 while loading, finish once everything is ready (min ~1.4s total)
-    const first = gsap.to(p, { v: 90, duration: 1.1, ease: ease.inOut, onUpdate: show });
+    const first = gsap.to(p, { v: 90, duration: 0.8, ease: ease.inOut, onUpdate: show });
     Promise.all([ready, first.then()]).then(() => {
       gsap
         .timeline({ onComplete: () => html.classList.add('is-loaded') })

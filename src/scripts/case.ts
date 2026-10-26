@@ -64,7 +64,7 @@ function wire(article: HTMLElement, scroller: HTMLElement) {
         scroller,
         start: 'top 92%',
         once: true,
-        onEnter: () => gsap.to(m, { y: 0, opacity: 1, duration: 1, ease: ease.out }),
+        onEnter: () => gsap.to(m, { y: 0, opacity: 1, duration: 0.7, ease: ease.out }),
       }),
     );
   });
@@ -111,8 +111,8 @@ export function openCase(opts: { html?: string; animate?: boolean; onClose: () =
   } else {
     tl.fromTo(backdrop, { opacity: 0 }, { opacity: 1, duration: dur.base, ease: ease.ui }, 0)
       .fromTo(scroller, { y: '105%' }, { y: 0, duration: dur.overlayIn, ease: ease.out }, 0)
-      .from(chars, { yPercent: 105, duration: 0.9, ease: ease.out, stagger: stagger.char }, 0.35)
-      .from(rest, { y: 18, opacity: 0, duration: 0.8, ease: ease.out, stagger: stagger.item }, 0.5);
+      .from(chars, { yPercent: 105, duration: 0.65, ease: ease.out, stagger: stagger.char }, 0.2)
+      .from(rest, { y: 18, opacity: 0, duration: 0.6, ease: ease.out, stagger: stagger.item }, 0.3);
   }
   wire(article, scroller);
   document.title = `${article.dataset.title} — Dim`;

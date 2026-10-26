@@ -18,19 +18,19 @@ export const ease = {
 };
 
 export const dur = {
-  micro: 0.22,
-  base: 0.6,
-  layout: 1.1, // avea uses 0.9 — brief asks for a bit slower
-  page: 1.0,
-  overlayIn: 1.2,
-  overlayOut: 0.8,
-  intro: 1.4,
+  micro: 0.2,
+  base: 0.45,
+  layout: 0.75, // faster than avea's 0.9, closer to laurent's springs
+  page: 0.75,
+  overlayIn: 0.85,
+  overlayOut: 0.5,
+  intro: 1.0,
 };
 
-export const stagger = { char: 0.018, item: 0.06, card: 0.045 };
+export const stagger = { char: 0.012, item: 0.04, card: 0.03 };
 
 /** Smoothing for things that follow input (avea / laurent). */
-export const follow = { lerp: 0.075, lerpDrag: 0.12, inertia: 0.93 };
+export const follow = { lerp: 0.11, lerpDrag: 0.16, inertia: 0.93 };
 
 export const reduced =
   typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches;

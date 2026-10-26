@@ -191,7 +191,7 @@ export function initWork(
         v: 1,
         duration: dur.intro,
         ease: ease.out,
-        delay: delay + Math.abs(k - (visible().length - 1) / 2) * 0.07,
+        delay: delay + Math.abs(k - (visible().length - 1) / 2) * 0.05,
         onComplete: () => (introDone = true),
       });
     });

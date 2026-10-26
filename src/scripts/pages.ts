@@ -16,7 +16,7 @@ export function initServices(root: HTMLElement, entering: boolean): Destroy {
   items.forEach((it) => (it.style.overflow = 'hidden'));
   const spans = items.map((it) => it.querySelector<HTMLElement>('span')!);
   if (entering) {
-    gsap.from(spans, { yPercent: 110, duration: 1.1, ease: ease.out, stagger: stagger.item, delay: 0.25 });
+    gsap.from(spans, { yPercent: 110, duration: 0.8, ease: ease.out, stagger: stagger.item, delay: 0.15 });
     gsap.from(root.querySelectorAll('.svc-details li'), { opacity: 0, y: 8, duration: dur.base, ease: ease.out, stagger: 0.03, delay: 0.5 });
   }
 
@@ -71,70 +71,60 @@ export function initAbout(root: HTMLElement): Destroy {
         trigger: el,
         start: 'top 90%',
         once: true,
-        onEnter: () => gsap.to(el, { y: 0, opacity: 1, duration: 1, ease: ease.out }),
+        onEnter: () => gsap.to(el, { y: 0, opacity: 1, duration: 0.7, ease: ease.out }),
       }),
     );
   });
 
+  // fit the word to the viewport width (soscalemedia.se)
+  const fit = () => {
+    word.style.fontSize = '30vw';
+    const first = word.firstElementChild!.getBoundingClientRect();
+    const last = word.lastElementChild!.getBoundingClientRect();
+    const w = last.right - first.left;
+    const target = window.innerWidth - 2 * parseFloat(getComputedStyle(hi).paddingLeft);
+    word.style.fontSize = `${(30 * target) / w}vw`;
+  };
+  fit();
+  document.fonts?.ready.then(fit);
+  window.addEventListener('resize', fit);
+
   // letters rise as the section is uncovered
-  gsap.set(letters, { yPercent: 40, scaleY: 0.7 });
+  gsap.set(letters, { yPercent: 30, scaleY: 0.4 });
   triggers.push(
     ScrollTrigger.create({
       trigger: hi,
-      start: 'top 75%',
+      start: 'top 70%',
       onEnter: () =>
-        gsap.to(letters, { yPercent: 0, scaleY: 1, duration: 1.4, ease: 'elastic.out(1, 0.45)', stagger: 0.06, overwrite: 'auto' }),
-    }),
-  );
-  // slight parallax while the content slides away
-  triggers.push(
-    ScrollTrigger.create({
-      trigger: hi,
-      start: 'top bottom',
-      end: 'bottom bottom',
-      scrub: true,
-      animation: gsap.fromTo(word, { y: -140, scale: 0.92 }, { y: 0, scale: 1, ease: 'none' }),
+        gsap.to(letters, { yPercent: 0, scaleY: 1, duration: 0.9, ease: 'elastic.out(1, 0.5)', stagger: 0.04, overwrite: 'auto' }),
     }),
   );
 
-  // rubber interaction: letters stretch toward the pointer, spring back on leave
+  // dock magnification (macOS Dock): letters near the pointer grow taller
   const to = letters.map((l) => ({
-    sx: gsap.quickTo(l, 'scaleX', { duration: 0.5, ease: 'power3' }),
-    sy: gsap.quickTo(l, 'scaleY', { duration: 0.5, ease: 'power3' }),
-    y: gsap.quickTo(l, 'y', { duration: 0.5, ease: 'power3' }),
+    sy: gsap.quickTo(l, 'scaleY', { duration: 0.35, ease: 'power3' }),
+    sx: gsap.quickTo(l, 'scaleX', { duration: 0.35, ease: 'power3' }),
   }));
   const onMove = (e: PointerEvent) => {
     letters.forEach((l, i) => {
       const r = l.getBoundingClientRect();
-      const cx = r.left + r.width / 2;
-      const dist = Math.abs(e.clientX - cx);
-      const inf = Math.max(0, 1 - dist / (r.width * 1.6));
-      const up = e.clientY < r.top + r.height * 0.5 ? 1 : 0.4;
-      to[i].sy(1 + 0.32 * inf * up);
-      to[i].sx(1 - 0.1 * inf);
-      to[i].y(-18 * inf * up);
+      const d = (e.clientX - (r.left + r.width / 2)) / (r.width * 1.4);
+      const inf = Math.exp(-d * d);
+      to[i].sy(1 + 0.75 * inf);
+      to[i].sx(1 + 0.06 * inf);
     });
   };
   const onLeave = () => {
-    gsap.to(letters, { scaleX: 1, scaleY: 1, y: 0, duration: 1.4, ease: 'elastic.out(1, 0.28)', overwrite: true });
+    gsap.to(letters, { scaleX: 1, scaleY: 1, duration: 0.9, ease: 'elastic.out(1, 0.4)', overwrite: true });
   };
-  const onClick = (e: MouseEvent) => {
-    const l = (e.target as HTMLElement).closest<HTMLElement>('[data-hi] span');
-    if (!l || l.classList.contains('sp')) return;
-    gsap
-      .timeline({ overwrite: true })
-      .to(l, { scaleY: 0.62, scaleX: 1.22, y: 0, duration: 0.12, ease: 'power2.in' })
-      .to(l, { scaleY: 1, scaleX: 1, duration: 1.3, ease: 'elastic.out(1, 0.25)' });
-  };
-  word.addEventListener('pointermove', onMove);
-  word.addEventListener('pointerleave', onLeave);
-  word.addEventListener('click', onClick);
+  hi.addEventListener('pointermove', onMove);
+  hi.addEventListener('pointerleave', onLeave);
 
   return () => {
     triggers.forEach((t) => t.kill());
-    word.removeEventListener('pointermove', onMove);
-    word.removeEventListener('pointerleave', onLeave);
-    word.removeEventListener('click', onClick);
+    hi.removeEventListener('pointermove', onMove);
+    hi.removeEventListener('pointerleave', onLeave);
+    window.removeEventListener('resize', fit);
     gsap.killTweensOf(letters);
   };
 }
@@ -165,11 +155,11 @@ export function initLab(root: HTMLElement, entering: boolean): Destroy {
     ...ScrollTrigger.batch(items, {
       start: 'top 95%',
       once: true,
-      onEnter: (batch) => gsap.to(batch, { y: 0, opacity: 1, duration: 1, ease: ease.out, stagger: 0.06 }),
+      onEnter: (batch) => gsap.to(batch, { y: 0, opacity: 1, duration: 0.7, ease: ease.out, stagger: 0.04 }),
     }),
   );
   const head = root.querySelectorAll('.lab-head > *');
-  if (entering) gsap.from(head, { y: 30, opacity: 0, duration: 1, ease: ease.out, stagger: stagger.item, delay: 0.5 });
+  if (entering) gsap.from(head, { y: 30, opacity: 0, duration: 0.7, ease: ease.out, stagger: stagger.item, delay: 0.3 });
 
   return () => triggers.forEach((t) => t.kill());
 }
