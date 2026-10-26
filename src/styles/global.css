@@ -92,7 +92,7 @@ img, video { display: block; max-width: 100%; }
 .sayhi-btn {
   position: relative; z-index: 1; margin-left: 10px;
   display: inline-flex; align-items: center; gap: 8px;
-  height: 36px; padding: 0 16px; margin-bottom: 3px; white-space: nowrap;
+  height: 37px; padding: 0 16px; white-space: nowrap;
   font: 500 13px/1 var(--font); letter-spacing: 0.02em; text-transform: uppercase;
   color: #1b1530;
   background: linear-gradient(180deg, #e9deff 0%, var(--key) 55%, #cdb8fb 100%);
@@ -135,6 +135,8 @@ img, video { display: block; max-width: 100%; }
 .nav a:hover { color: #fff; }
 .nav a[aria-current='page'], .nav a[aria-current='page']:hover { color: #171412; }
 .nav a.sayhi-btn, .nav a.sayhi-btn:hover { color: #1b1530; font-size: 13px; border-radius: 999px; padding: 0 18px; }
+/* keycap face (37px) + its 3px edge = the 40px row every tab sits in, so all insets stay 6px */
+.nav a.sayhi-btn { height: 37px; align-self: flex-start; margin-bottom: 0; }
 .nav .lbl-short { display: none; }
 .nav .nav-ico { width: 24px; height: 24px; margin-right: 4px; flex: none; }
 @media (max-width: 767px) { .nav .lbl-long { display: none; } .nav .lbl-short { display: inline; } }
@@ -162,7 +164,7 @@ body:not(.is-work) .ctrl { opacity: 0; transform: translateY(16px); pointer-even
   .nav { bottom: 12px; width: calc(100% - 24px); justify-content: space-between; }
   .nav a { padding: 0 10px; font-size: 14px; flex: 1; justify-content: center; }
   .ctrl { bottom: 76px; font-size: 15px; gap: 12px; }
-  .nav a.sayhi-btn { height: 34px; padding: 0 12px; font-size: 12px; margin-left: 4px; flex: none; }
+  .nav a.sayhi-btn { height: 37px; padding: 0 12px; font-size: 12px; margin-left: 4px; flex: none; }
   .nav a:not(.sayhi-btn) { padding: 0 6px; }
   .logo { top: 20px; width: 30px; height: 30px; }
 }
