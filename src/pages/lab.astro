@@ -1,0 +1,29 @@
+---
+import Base from '../layouts/Base.astro';
+import Ph from '../components/Ph.astro';
+import { labItems } from '../data/site';
+---
+<Base page="lab" title="Design Lab">
+  <main class="page page--lab" data-page="lab">
+    <div class="lab-ceiling" data-ceiling>
+      <div class="lab-ceiling-inner" data-ceiling-inner>
+        <div class="lab-ceiling-ph mono">↓ downstairs</div>
+      </div>
+      <div class="lab-ceiling-shade" data-ceiling-shade></div>
+    </div>
+    <section class="lab-body">
+      <header class="lab-head">
+        <h1>Design Lab</h1>
+        <p>Placeholder. Experiments, prototypes and side projects — things made to learn, not to ship.</p>
+      </header>
+      <div class="masonry">
+        {labItems.map((it) => (
+          <figure class="lab-item" data-lab-item>
+            {it.demo && <span class="lab-chip">Demo</span>}
+            <Ph hue={it.hue} label={it.title} style={`aspect-ratio:1/${it.h}`} />
+          </figure>
+        ))}
+      </div>
+    </section>
+  </main>
+</Base>

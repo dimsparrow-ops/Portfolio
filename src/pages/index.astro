@@ -1,0 +1,7 @@
+---
+import { getCollection } from 'astro:content';
+import Base from '../layouts/Base.astro';
+import WorkStage from '../components/WorkStage.astro';
+const cases = (await getCollection('cases')).sort((a, b) => a.data.order - b.data.order);
+---
+<Base page="work"><WorkStage cases={cases} /></Base>

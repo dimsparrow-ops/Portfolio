@@ -1,0 +1,17 @@
+---
+import { getCollection, type CollectionEntry } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+import WorkStage from '../../components/WorkStage.astro';
+import CaseBody from '../../components/CaseBody.astro';
+
+export async function getStaticPaths() {
+  const cases = (await getCollection('cases')).sort((a, b) => a.data.order - b.data.order);
+  return cases.map((entry) => ({ params: { slug: entry.id }, props: { entry, cases } }));
+}
+interface Props { entry: CollectionEntry<'cases'>; cases: CollectionEntry<'cases'>[]; }
+const { entry, cases } = Astro.props;
+---
+<Base page="work" title={entry.data.title} description={entry.data.summary}>
+  <WorkStage cases={cases} />
+  <CaseBody slot="case" entry={entry} />
+</Base>

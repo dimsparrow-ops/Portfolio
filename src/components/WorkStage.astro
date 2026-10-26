@@ -1,0 +1,35 @@
+---
+import type { CollectionEntry } from 'astro:content';
+import Ph from './Ph.astro';
+interface Props { cases: CollectionEntry<'cases'>[]; }
+const { cases } = Astro.props;
+---
+<main class="page page--work" data-page="work">
+  <h1 class="sr-only">Selected work</h1>
+  <div class="stage is-showcase" data-stage>
+    <div class="stage-world" data-world>
+      {cases.map((c, i) => (
+        <a
+          class="card"
+          href={`/work/${c.id}/`}
+          data-case={c.id}
+          data-title={c.data.title}
+          data-platform={c.data.platform}
+          data-country={c.data.country}
+          data-year={c.data.year}
+          data-summary={c.data.summary}
+          data-index={String(i + 1).padStart(3, '0')}
+          aria-label={`${c.data.title} — ${c.data.platform}, ${c.data.country}`}
+        >
+          {c.data.cover
+            ? <img src={c.data.cover} alt="" loading="eager" />
+            : <Ph hue={c.data.hue} label={c.data.platform} />}
+          <span class="card-title">{c.data.title}</span>
+          <span class="card-index">{String(i + 1).padStart(3, '0')}</span>
+        </a>
+      ))}
+    </div>
+  </div>
+  <div class="slider-label mono" data-slider-label><span data-sl-a></span><span data-sl-b></span></div>
+  <div class="stage-hint mono">scroll or drag</div>
+</main>

@@ -1,0 +1,21 @@
+---
+import Base from '../layouts/Base.astro';
+import Ph from '../components/Ph.astro';
+import { services, serviceDetails } from '../data/site';
+---
+<Base page="services" title="Services">
+  <main class="page page--services" data-page="services">
+    <section class="services">
+      <h1 class="sr-only">Services</h1>
+      <ul class="svc-list" data-svc-list>
+        {services.map((s, i) => (
+          <li class="svc-item" data-hue={s.hue} data-i={i}>
+            <a href="/about/#say-hi" data-route data-sayhi><span>{s.title}</span></a>
+          </li>
+        ))}
+      </ul>
+      <ul class="svc-details mono">{serviceDetails.map((d) => <li>{d}</li>)}</ul>
+    </section>
+    <div class="svc-preview" data-svc-preview><Ph hue={212} label="preview" /></div>
+  </main>
+</Base>

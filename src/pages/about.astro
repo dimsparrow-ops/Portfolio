@@ -1,0 +1,44 @@
+---
+import Base from '../layouts/Base.astro';
+import { site, timeline } from '../data/site';
+---
+<Base page="about" title="About">
+  <main class="page page--about about" data-page="about">
+    <div class="about-content">
+      <section class="about-intro">
+        <h1>{site.name}</h1>
+        <hr />
+        <p>Placeholder. {site.role} based in {site.location}. A short paragraph about how I work and what I care about — two or three sentences, calm and specific.</p>
+        <p>Placeholder. Teams, products and clients worth naming go here, written as plain text.</p>
+      </section>
+
+      <ol class="timeline">
+        {timeline.map((t) => (
+          <li class="tl-item" data-reveal>
+            <span class="tl-chip" style={`background:${t.accent}`}>{t.when} · {t.where}</span>
+            <h3>{t.title}</h3>
+            <p>{t.text}</p>
+          </li>
+        ))}
+      </ol>
+
+      <section class="cta" data-reveal>
+        <h2>Working on something?<br />Let’s talk.</h2>
+        <div class="cta-actions">
+          <a class="btn btn--solid" href={site.resume} download>Download résumé ↓</a>
+          <a class="btn" href={`mailto:${site.email}`}>{site.email}</a>
+        </div>
+      </section>
+    </div>
+
+    <section class="hi" id="say-hi" aria-label="Say hi">
+      <div class="hi-word" data-hi aria-label="Say hi">
+        <span>S</span><span>a</span><span>y</span><span class="sp"></span><span>h</span><span>i</span>
+      </div>
+      <div class="hi-links mono">
+        <a href={`mailto:${site.email}`}>Email</a><a href="#">LinkedIn</a><a href="#">Instagram</a>
+      </div>
+      <div class="hi-foot mono"><span>© {new Date().getFullYear()} {site.name}</span><span>{site.location}</span></div>
+    </section>
+  </main>
+</Base>

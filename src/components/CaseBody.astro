@@ -1,0 +1,55 @@
+---
+import type { CollectionEntry } from 'astro:content';
+import Ph from './Ph.astro';
+interface Props { entry: CollectionEntry<'cases'>; }
+const { entry } = Astro.props;
+const d = entry.data;
+const order = ['input', 'reasoning', 'process', 'outcomes'] as const;
+const label = { input: 'Input', reasoning: 'Reasoning', process: 'Process', outcomes: 'Outcomes' };
+---
+<article class="case" data-case-body={entry.id} data-title={d.title}>
+  <header class="case-head">
+    <h1 class="case-title" data-split>{d.title}{d.client && <span class="client"> — {d.client}</span>}</h1>
+    <div class="case-meta mono">
+      <span>{d.year}</span><span>{d.country}</span><span>{d.services.join(', ')}</span>
+    </div>
+    {d.link && <a class="case-link" href={d.link.url} target="_blank" rel="noopener">{d.link.label} ↗</a>}
+  </header>
+
+  {d.metrics && d.metrics.length > 0 && (
+    <section class="metrics" aria-label="Impact">
+      {d.metrics.map((m) => <div class="metric"><b>{m.value}</b><span>{m.label}</span></div>)}
+    </section>
+  )}
+
+  <div class="case-body">
+    <div class="case-media">
+      {order.map((k) => (
+        <section class="media-group" data-section={k} aria-label={label[k]}>
+          {d.sections[k].media.map((m, j) =>
+            m.kind === 'quote' ? (
+              <blockquote class="case-quote"><p>“{m.quote}”</p><cite class="mono">{m.author}</cite></blockquote>
+            ) : m.src ? (
+              m.kind === 'video'
+                ? <video src={m.src} autoplay muted loop playsinline></video>
+                : <img src={m.src} alt={m.alt ?? ''} loading="lazy" />
+            ) : (
+              <Ph hue={d.hue + j * 18} label={`${label[k]} · ${m.alt ?? m.kind}`} />
+            )
+          )}
+        </section>
+      ))}
+    </div>
+
+    <aside class="acc" aria-label="Story">
+      {order.map((k, i) => (
+        <div class:list={['acc-item', { 'is-open': i === 0 }]} data-acc={k}>
+          <button class="acc-btn" type="button" aria-expanded={i === 0 ? 'true' : 'false'} aria-controls={`acc-${entry.id}-${k}`}>
+            <span class="mono">{label[k]}</span><span class="acc-icon" aria-hidden="true"></span>
+          </button>
+          <div class="acc-panel" id={`acc-${entry.id}-${k}`} style={i === 0 ? 'height:auto' : undefined}><p>{d.sections[k].text}</p></div>
+        </div>
+      ))}
+    </aside>
+  </div>
+</article>

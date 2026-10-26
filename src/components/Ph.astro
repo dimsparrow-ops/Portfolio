@@ -1,0 +1,5 @@
+---
+interface Props { hue?: number; label?: string; class?: string; style?: string; }
+const { hue = 220, label = '', class: cls = '', style = '' } = Astro.props;
+---
+<div class:list={['ph', cls]} style={`--h:${hue};${style}`} data-label={label} role="img" aria-label={label || 'placeholder'}></div>
