@@ -115,34 +115,33 @@ img, video { display: block; max-width: 100%; }
   display: flex; align-items: center; gap: 2px;
   padding: 6px;
   border-radius: 999px;
-  /* frosted glass, brandappart.com: heavy blur + translucent tint + soft sheen */
-  background:
-    linear-gradient(90deg, rgba(255, 255, 255, 0.14), rgba(255, 255, 255, 0.04) 60%),
-    rgba(58, 58, 62, 0.52);
+  /* brandappart.com project nav: dark translucent glass, very heavy blur */
+  background: rgba(0, 0, 0, 0.5);
   /* via a variable: the CSS minifier otherwise drops the unprefixed property */
-  --glass: blur(32px) saturate(1.6);
+  --glass: blur(75px) saturate(1.4);
   backdrop-filter: var(--glass);
   -webkit-backdrop-filter: var(--glass);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.22), inset 0 0 0 1px rgba(255, 255, 255, 0.08), 0 12px 32px rgba(0, 0, 0, 0.16);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.06), 0 12px 32px rgba(0, 0, 0, 0.18);
 }
 .nav a {
   position: relative; z-index: 1; -webkit-tap-highlight-color: transparent;
   height: 40px; padding: 0 18px;
   display: inline-flex; align-items: center;
-  font-size: 15px; color: rgba(255, 255, 255, 0.62);
+  font-size: 15px; color: rgba(255, 255, 255, 0.5);
   border-radius: 999px;
-  transition: color var(--dur-micro) var(--ease-ui);
+  transition: color 0.3s var(--ease-ui);
   white-space: nowrap;
 }
-.nav a:hover, .nav a[aria-current='page'] { color: #fff; }
+.nav a:hover { color: #fff; }
+.nav a[aria-current='page'], .nav a[aria-current='page']:hover { color: #171412; }
 .nav a.sayhi-btn, .nav a.sayhi-btn:hover { color: #1b1530; font-size: 13px; border-radius: 999px; padding: 0 18px; }
 .nav .lbl-short { display: none; }
 .nav .nav-ico { width: 24px; height: 24px; margin-right: 4px; flex: none; }
 @media (max-width: 767px) { .nav .lbl-long { display: none; } .nav .lbl-short { display: inline; } }
 .nav-indicator {
   position: absolute; top: 6px; left: 0; height: 40px; width: 0;
-  border-radius: 999px; background: rgba(255, 255, 255, 0.14);
-  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.06);
+  border-radius: 999px; background: #fff;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
 }
 
 /* Work controls: view switcher (bottom-left) + filter (bottom-right), laurent.fyi */
