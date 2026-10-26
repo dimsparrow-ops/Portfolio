@@ -367,7 +367,7 @@ html.is-loaded .loader { display: none; }
 .hi {
   position: sticky; bottom: 0; z-index: 1;
   height: 100vh; min-height: 520px;
-  background: #050505; color: #fff;
+  background: var(--lab); color: #fff;
   display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 40px;
   padding: 200px var(--gutter) 110px;
   overflow: hidden;
