@@ -5,9 +5,9 @@ import { site, timeline } from '../data/site';
 <Base page="about" title="About">
   <main class="page page--about about" data-page="about">
     <div class="about-content">
+      <a class="btn about-mail" href={`mailto:${site.email}`}>{site.email}</a>
       <section class="about-intro">
         <h1>{site.name}</h1>
-        <hr />
         <p>Placeholder. {site.role} based in {site.location}. A short paragraph about how I work and what I care about — two or three sentences, calm and specific.</p>
         <p>Placeholder. Teams, products and clients worth naming go here, written as plain text.</p>
       </section>
@@ -22,21 +22,14 @@ import { site, timeline } from '../data/site';
         ))}
       </ol>
 
-      <section class="cta" data-reveal>
-        <h2>Working on something?<br />Let’s talk.</h2>
-        <div class="cta-actions">
-          <a class="btn btn--solid" href={site.resume} download>Download résumé ↓</a>
-          <a class="btn" href={`mailto:${site.email}`}>{site.email}</a>
-        </div>
-      </section>
     </div>
 
     <section class="hi" id="say-hi" aria-label="Say hi">
       <div class="hi-word" data-hi aria-label="Say hi">
-        <span>S</span><span>A</span><span>Y</span><span class="sp"></span><span>H</span><span>I</span>
+        <span>S</span><span>A</span><span>Y</span><span class="sp"></span><span>H</span><span class="dot-i">I</span>
       </div>
       <div class="hi-links mono">
-        <a href="#" target="_blank" rel="noopener">X / Twitter</a><a href="#" target="_blank" rel="noopener">LinkedIn</a><a href="#" target="_blank" rel="noopener">Instagram</a>
+        <a href={`mailto:${site.email}`}>Email</a><a href="#" target="_blank" rel="noopener">X / Twitter</a><a href="#" target="_blank" rel="noopener">LinkedIn</a><a href="#" target="_blank" rel="noopener">Instagram</a>
       </div>
     </section>
   </main>

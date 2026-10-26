@@ -138,8 +138,9 @@ export function initWork(
       const { vw, mobile } = dims();
       // radius that leaves exactly gap() between the front card and its neighbours
       const th = (step * Math.PI) / 180;
-      const R = (cardGap() + (sz.w / 2) * (1 + Math.cos(th))) / Math.sin(th);
-      void vw; void mobile;
+      // showcase keeps the wide, airy ring (back cards visible); slider uses cardGap()
+      void th;
+      const R = mobile ? sz.w * 1.25 : Math.max(sz.w * 1.8, vw * 0.42);
       const rel = wrap(idx - offset, n);
       const a = rel * step;
       const rad = (a * Math.PI) / 180;

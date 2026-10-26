@@ -339,13 +339,14 @@ html.is-loaded .loader { display: none; }
 
 /* ---------- about (laurent.fyi + joshpuckett.me) ---------- */
 .about { position: relative; }
+.about-mail { position: absolute; top: 20px; right: var(--gutter); height: 42px; padding: 0 18px; font-size: 14px; }
 .about-content { position: relative; z-index: 2; background: var(--bg); padding: 120px var(--gutter) 120px; border-radius: 0 0 36px 36px; box-shadow: 0 40px 60px -30px rgba(0,0,0,.35); }
 .about-intro { max-width: 640px; margin: 0 auto 72px; }
 .about-intro h1 { font-size: 22px; font-weight: 500; margin: 0 0 18px; letter-spacing: -0.01em; }
 .about-intro p { margin: 0 0 14px; color: rgba(0, 0, 0, 0.65); }
 .about-intro hr { width: 40px; margin: 0 0 22px; border: 0; border-top: 1px solid var(--line); }
 .timeline { list-style: none; margin: 0 auto; padding: 0; max-width: 640px; }
-.tl-item { padding: 26px 0; border-top: 1px solid var(--line); display: grid; gap: 10px; }
+.tl-item { padding: 26px 0; display: grid; gap: 10px; }
 .tl-chip { justify-self: start; padding: 3px 6px; font: 10px/1.2 var(--mono); text-transform: lowercase; color: #fff; }
 .tl-item h3 { margin: 0; font-size: 19px; font-weight: 500; letter-spacing: -0.01em; }
 .tl-item p { margin: 0; color: rgba(0, 0, 0, 0.62); }
@@ -365,26 +366,29 @@ html.is-loaded .loader { display: none; }
 .hi {
   position: sticky; bottom: 0; z-index: 1;
   height: 100vh; min-height: 520px;
-  background: #050505; color: var(--key);
+  background: #050505; color: #fff;
   display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 40px;
-  padding: 90px var(--gutter) 150px;
+  padding: 200px var(--gutter) 110px;
   overflow: hidden;
 }
 .hi-links { position: relative; z-index: 2; display: flex; justify-content: center; gap: 28px; color: rgba(255, 255, 255, 0.6); font-size: 13px; }
 .hi-links a { transition: color var(--dur-micro) var(--ease-ui); }
-.hi-links a:hover { color: var(--key); }
+.hi-links a:hover { color: #fff; }
 .hi-word {
   display: flex; justify-content: center; align-items: flex-end;
   font-family: 'Archivo Variable', var(--font);
   font-weight: 900; font-stretch: 62%;
   font-size: 30vw; line-height: 0.78; letter-spacing: -0.01em;
-  text-transform: uppercase; color: var(--key);
+  text-transform: uppercase; color: #fff;
   user-select: none; white-space: nowrap;
 }
 .hi-word { pointer-events: none; }
 .hi-word span { display: inline-block; transform-origin: 50% 100%; will-change: transform; cursor: default; }
+.hi-word .dot-i { position: relative; }
+/* tittle over the capital I: same width as the stem, scales with the letter */
+.hi-word .dot-i::after { content: ''; position: absolute; left: 13%; right: 8%; bottom: calc(100% + 0.035em); aspect-ratio: 1; background: currentColor; }
 .hi-word .sp { width: 0.12em; }
-@media (max-width: 767px) { .hi { padding-bottom: 170px; } }
+@media (max-width: 767px) { .hi { padding: 140px var(--gutter) 150px; } }
 
 /* ---------- design lab ---------- */
 .page--lab { background: transparent; }
