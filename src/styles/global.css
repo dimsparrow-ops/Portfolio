@@ -3,8 +3,8 @@
 
 /* ---------- tokens ---------- */
 :root {
-  --bg: #bfbfbf;
-  --bg-soft: #c9c9c9;
+  --bg: #ffffff;
+  --bg-soft: #f4f4f3;
   --ink: #1c1c1e;
   --ink-2: rgba(0, 0, 0, 0.45);
   --ink-3: rgba(0, 0, 0, 0.3);
@@ -89,9 +89,9 @@ img, video { display: block; max-width: 100%; }
 
 /* Say hi — keycap button (soscalemedia.se) */
 .sayhi-btn {
-  position: absolute; top: 20px; right: var(--gutter);
+  position: relative; z-index: 1; margin-left: 6px;
   display: inline-flex; align-items: center; gap: 8px;
-  height: 40px; padding: 0 16px;
+  height: 36px; padding: 0 16px; margin-bottom: 3px; white-space: nowrap;
   font: 500 13px/1 var(--font); letter-spacing: 0.02em; text-transform: uppercase;
   color: #1b1530;
   background: linear-gradient(180deg, #e9deff 0%, var(--key) 55%, #cdb8fb 100%);
@@ -99,13 +99,13 @@ img, video { display: block; max-width: 100%; }
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.8),
     inset 0 -2px 0 rgba(0, 0, 0, 0.06),
-    0 5px 0 var(--key-edge),
-    0 9px 18px rgba(60, 30, 120, 0.25);
+    0 3px 0 var(--key-edge),
+    0 6px 14px rgba(60, 30, 120, 0.3);
   transform: translateY(0);
   transition: transform 0.12s var(--ease-ui), box-shadow 0.12s var(--ease-ui);
 }
-.sayhi-btn:hover { transform: translateY(1px); box-shadow: inset 0 1px 0 rgba(255,255,255,.8), inset 0 -2px 0 rgba(0,0,0,.06), 0 4px 0 var(--key-edge), 0 7px 14px rgba(60,30,120,.22); }
-.sayhi-btn:active { transform: translateY(5px); box-shadow: inset 0 1px 0 rgba(255,255,255,.6), inset 0 -1px 0 rgba(0,0,0,.08), 0 0 0 var(--key-edge), 0 2px 6px rgba(60,30,120,.2); }
+.sayhi-btn:hover { transform: translateY(1px); box-shadow: inset 0 1px 0 rgba(255,255,255,.8), inset 0 -2px 0 rgba(0,0,0,.06), 0 2px 0 var(--key-edge), 0 5px 12px rgba(60,30,120,.22); }
+.sayhi-btn:active { transform: translateY(3px); box-shadow: inset 0 1px 0 rgba(255,255,255,.6), inset 0 -1px 0 rgba(0,0,0,.08), 0 0 0 var(--key-edge), 0 2px 6px rgba(60,30,120,.2); }
 .sayhi-btn .arrow { font-size: 15px; transform: translateY(-1px); }
 
 /* Bottom navigation pill (leoleo.studio) with blurred glass (Brand Appart) */
@@ -114,7 +114,7 @@ img, video { display: block; max-width: 100%; }
   display: flex; align-items: center; gap: 2px;
   padding: 6px;
   border-radius: 999px;
-  background: rgba(24, 24, 26, 0.55);
+  background: rgba(22, 22, 24, 0.78);
   backdrop-filter: blur(18px) saturate(1.4);
   -webkit-backdrop-filter: blur(18px) saturate(1.4);
   box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.08), 0 10px 30px rgba(0, 0, 0, 0.18);
@@ -129,6 +129,9 @@ img, video { display: block; max-width: 100%; }
   white-space: nowrap;
 }
 .nav a:hover, .nav a[aria-current='page'] { color: #fff; }
+.nav a.sayhi-btn, .nav a.sayhi-btn:hover { color: #1b1530; font-size: 13px; border-radius: 8px; padding: 0 16px; }
+.nav .lbl-short { display: none; }
+@media (max-width: 767px) { .nav .lbl-long { display: none; } .nav .lbl-short { display: inline; } }
 .nav-indicator {
   position: absolute; top: 6px; left: 0; height: 40px; width: 0;
   border-radius: 999px; background: rgba(255, 255, 255, 0.14);
@@ -153,7 +156,8 @@ body:not(.is-work) .ctrl { opacity: 0; transform: translateY(16px); pointer-even
   .nav { bottom: 12px; width: calc(100% - 24px); justify-content: space-between; }
   .nav a { padding: 0 10px; font-size: 14px; flex: 1; justify-content: center; }
   .ctrl { bottom: 76px; font-size: 15px; gap: 12px; }
-  .sayhi-btn { top: 18px; height: 36px; padding: 0 12px; font-size: 12px; }
+  .nav a.sayhi-btn { height: 34px; padding: 0 12px; font-size: 12px; margin-left: 4px; flex: none; }
+  .nav a:not(.sayhi-btn) { padding: 0 6px; }
   .logo { top: 20px; width: 30px; height: 30px; }
 }
 
