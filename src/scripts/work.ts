@@ -1,4 +1,4 @@
-import { gsap, ease, dur, stagger, follow } from './motion';
+import { gsap, ease, dur, stagger, follow, reduced } from './motion';
 
 /**
  * Work stage — one render loop drives all three views (approach from avea.studio):
@@ -21,6 +21,8 @@ interface Card {
   hiddenPose?: Pose;
   w: number;
   h: number;
+  sheen: HTMLElement | null;
+  tilt: { x: number; y: number; a: number }; // smoothed tilt (bencho.dev)
 }
 
 export interface WorkApi {
@@ -57,6 +59,17 @@ export function initWork(
   let paused = false;
   let hovered: Card | null = null;
   let introDone = false;
+  // pointer, section tilt, auto-motion
+  let mx = 0;
+  let my = 0;
+  let inside = false;
+  const world3d = { x: 0, y: 0 };
+  let lastT = performance.now();
+  let time = 0;
+  let autoHold = 0;
+  const AUTO = { showcase: 0.12, slider: 0.16 }; // cards per second
+  const TILT = 10; // deg, bencho.dev
+  const WORLD_TILT = { x: 4, y: 6 }; // deg, whole section
 
   const zero: Pose = { x: 0, y: 60, z: -1800, ry: 0, s: 0.35, w: 280, h: 280, o: 0 };
   const cards: Card[] = Array.from(world.querySelectorAll<HTMLAnchorElement>('.card')).map((el, i) => ({
@@ -68,6 +81,8 @@ export function initWork(
     blend: { v: 0 },
     w: 0,
     h: 0,
+    sheen: el.querySelector<HTMLElement>('.card-sheen'),
+    tilt: { x: 0, y: 0, a: 0 },
   }));
 
   const visible = () => cards.filter((c) => filter === 'all' || c.platform === filter);
@@ -200,6 +215,14 @@ export function initWork(
   // ---------- render ----------
   function render() {
     if (paused) return;
+    const now = performance.now();
+    const dt = Math.min(0.05, (now - lastT) / 1000);
+    lastT = now;
+    time += dt;
+    // slow endless drift until a project is hovered (showcase ring / infinite slider)
+    const canAuto = !reduced && introDone && !hovered && !dragging && now > autoHold;
+    if (canAuto && view === 'showcase') target += AUTO.showcase * dt;
+    if (canAuto && view === 'slider' && sliderWraps()) target += AUTO.slider * dt;
     if (view !== 'grid') {
       const n = visible().length;
       if (view === 'slider' && !sliderWraps()) target = clamp(target, 0, Math.max(0, n - 1));
@@ -232,9 +255,42 @@ export function initWork(
         c.el.style.height = `${p.h}px`;
       }
       const sk = t > 0.98 ? skew : skew * t;
+
+      // levitation: gentle bob + sway, off in grid
+      const lev = view === 'grid' || reduced ? 0 : t;
+      const fy = Math.sin(time * 0.9 + c.i * 1.7) * 7 * lev;
+      const fz = Math.sin(time * 0.6 + c.i * 1.1) * 1.2 * lev;
+
+      // tilt toward the pointer on the hovered card
+      const tt = c.tilt;
+      let gx = 0;
+      let gy = 0;
+      let ga = 0;
+      if (hovered === c) {
+        const r = c.el.getBoundingClientRect();
+        gx = clamp(((mx - r.left) / r.width) * 2 - 1, -1, 1);
+        gy = clamp(((my - r.top) / r.height) * 2 - 1, -1, 1);
+        ga = 1;
+      }
+      tt.x += (gx - tt.x) * 0.14;
+      tt.y += (gy - tt.y) * 0.14;
+      tt.a += (ga - tt.a) * 0.14;
+      const tiltStr =
+        tt.a > 0.002 ? ` translateZ(${-14 * tt.a}px) rotateX(${-tt.y * TILT * tt.a}deg) rotateY(${tt.x * TILT * tt.a}deg)` : '';
+      if (c.sheen) {
+        if (tt.a > 0.002) {
+          const ox = ((tt.x + 1) / 2) * 100;
+          const oy = ((tt.y + 1) / 2) * 100;
+          c.sheen.style.backgroundImage =
+            `radial-gradient(42% 34% at ${ox}% ${oy}%, rgba(9,14,28,${0.33 * tt.a}) 0%, rgba(9,14,28,0) 100%),` +
+            `radial-gradient(52% 42% at ${100 - ox}% ${100 - oy}%, rgba(255,255,255,${0.2 * tt.a}) 0%, rgba(255,255,255,0) 100%)`;
+        } else if (c.sheen.style.backgroundImage) c.sheen.style.backgroundImage = '';
+      }
+
       c.el.style.transform =
-        `translate3d(${p.x - p.w / 2}px, ${p.y - p.h / 2}px, ${p.z}px) rotateY(${p.ry}deg) ` +
-        `scale(${p.s * squeeze}) skewX(${sk}deg)` +
+        `translate3d(${p.x - p.w / 2}px, ${p.y - p.h / 2 + fy}px, ${p.z}px) rotateY(${p.ry}deg) rotateZ(${fz}deg)` +
+        tiltStr +
+        ` scale(${p.s * squeeze}) skewX(${sk}deg)` +
         (Math.abs(((p.ry % 360) + 540) % 360 - 180) > 90 ? ' scaleX(-1)' : '');
       const vis = visible().includes(c);
       c.el.style.opacity = String(p.o);
@@ -242,6 +298,13 @@ export function initWork(
       c.el.style.pointerEvents = vis && p.o > 0.3 ? 'auto' : 'none';
       c.el.tabIndex = vis ? 0 : -1;
     }
+
+    // the whole section leans toward the pointer too
+    const wtx = inside && !reduced ? (mx / window.innerWidth) * 2 - 1 : 0;
+    const wty = inside && !reduced ? (my / window.innerHeight) * 2 - 1 : 0;
+    world3d.x += (wtx - world3d.x) * 0.06;
+    world3d.y += (wty - world3d.y) * 0.06;
+    world.style.transform = `rotateX(${-world3d.y * WORLD_TILT.x}deg) rotateY(${world3d.x * WORLD_TILT.y}deg)`;
 
     // slider label above the centred card (avea.studio)
     if (view === 'slider') {
@@ -289,6 +352,7 @@ export function initWork(
     e.preventDefault();
     const delta = Math.abs(e.deltaX) > Math.abs(e.deltaY) ? e.deltaX : e.deltaY;
     target += delta * 0.0016;
+    autoHold = performance.now() + 2500;
     snap();
   };
   const onDown = (e: PointerEvent) => {
@@ -310,6 +374,7 @@ export function initWork(
   const onUp = () => {
     if (!dragging) return;
     dragging = false;
+    autoHold = performance.now() + 2500;
     stage.classList.remove('is-dragging');
     target = Math.round(target - vel * 6);
   };
@@ -329,6 +394,7 @@ export function initWork(
   };
   const onKey = (e: KeyboardEvent) => {
     if (paused || view === 'grid') return;
+    if (e.key === 'ArrowRight' || e.key === 'ArrowLeft') autoHold = performance.now() + 2500;
     if (e.key === 'ArrowRight') target = Math.round(target) + 1;
     if (e.key === 'ArrowLeft') target = Math.round(target) - 1;
   };
@@ -345,6 +411,7 @@ export function initWork(
   const hideTag = (c: Card) => {
     if (hovered !== c) return;
     hovered = null;
+    autoHold = performance.now() + 600;
     stage.classList.remove('is-hovering');
     c.el.classList.remove('is-hover');
     gsap.to(tag, { opacity: 0, duration: 0.15, ease: ease.ui, overwrite: true });
@@ -364,6 +431,14 @@ export function initWork(
     };
   });
 
+  const onPointer = (e: PointerEvent) => {
+    mx = e.clientX;
+    my = e.clientY;
+    inside = true;
+  };
+  const onOut = () => (inside = false);
+  stage.addEventListener('pointermove', onPointer);
+  stage.addEventListener('pointerleave', onOut);
   stage.addEventListener('wheel', onWheel, { passive: false });
   stage.addEventListener('pointerdown', onDown);
   window.addEventListener('pointermove', onMove);
@@ -387,6 +462,8 @@ export function initWork(
       cards.forEach((c) => gsap.killTweensOf(c.blend));
       enters.forEach((off) => off());
       stage.removeEventListener('wheel', onWheel);
+      stage.removeEventListener('pointermove', onPointer);
+      stage.removeEventListener('pointerleave', onOut);
       stage.removeEventListener('pointerdown', onDown);
       window.removeEventListener('pointermove', onMove);
       window.removeEventListener('pointerup', onUp);

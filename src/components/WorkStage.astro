@@ -24,6 +24,7 @@ const { cases } = Astro.props;
           {c.data.cover
             ? <img src={c.data.cover} alt="" loading="eager" />
             : <Ph hue={c.data.hue} label={c.data.platform} />}
+          <span class="card-sheen" aria-hidden="true"></span>
           <span class="card-title">{c.data.title}</span>
           <span class="card-index">{String(i + 1).padStart(3, '0')}</span>
         </a>

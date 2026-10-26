@@ -221,6 +221,7 @@ html.is-loaded .loader { display: none; }
   opacity: 0;
 }
 .card .ph { position: absolute; inset: 0; }
+.card-sheen { position: absolute; inset: 0; z-index: 2; pointer-events: none; }
 .card-index {
   position: absolute; right: 10px; top: 8px;
   font: 10px/1 var(--mono); color: rgba(255, 255, 255, 0.8);
