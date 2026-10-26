@@ -47,7 +47,7 @@ const fullTitle = title ? `${title} — ${site.name}` : `${site.name} — ${site
         <span class="nav-indicator" aria-hidden="true"></span>
         {pages.map((p) => (
           <a href={p.href} data-route data-nav={p.id} aria-current={p.id === page ? 'page' : undefined}>
-            {p.id === 'lab' ? <><span class="lbl-long">{p.label}</span><span class="lbl-short">Lab</span></> : p.label}
+            {p.id === 'lab' ? <><span class="lbl-long">{p.label}</span><span class="lbl-short">lab</span></> : p.label}
           </a>
         ))}
         <a class="sayhi-btn" href="/about/#say-hi" data-route data-sayhi><span class="arrow" aria-hidden="true">↳</span> Say hi</a>

@@ -10,10 +10,10 @@ export const site = {
 
 /** Page order drives the direction of the horizontal page slide. */
 export const pages = [
-  { id: 'work', label: 'Work', href: '/' },
-  { id: 'services', label: 'Services', href: '/services/' },
-  { id: 'about', label: 'About', href: '/about/' },
-  { id: 'lab', label: 'Design Lab', href: '/lab/' },
+  { id: 'work', label: 'work', href: '/' },
+  { id: 'about', label: 'about', href: '/about/' },
+  { id: 'services', label: 'services', href: '/services/' },
+  { id: 'lab', label: 'design lab', href: '/lab/' },
 ] as const;
 
 export type PageId = (typeof pages)[number]['id'];

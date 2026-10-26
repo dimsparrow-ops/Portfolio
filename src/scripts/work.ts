@@ -117,12 +117,13 @@ export function initWork(
     const sz = sizes(v);
     if (v === 'showcase') {
       const step = 360 / Math.max(n, 3);
-      const R = (sz.w * 0.5) / Math.tan(((step / 2) * Math.PI) / 180) * (dims().mobile ? 1.0 : 1.32) + sz.w * 0.15;
+      const { vw, mobile } = dims();
+      const R = mobile ? sz.w * 1.25 : Math.max(sz.w * 1.8, vw * 0.42);
       const rel = wrap(idx - offset, n);
       const a = rel * step;
       const rad = (a * Math.PI) / 180;
       const back = Math.abs(a);
-      const o = back < 70 ? 1 : clamp(1 - (back - 70) / 50, 0, 1);
+      const o = 1;
       return { x: Math.sin(rad) * R, y: 0, z: Math.cos(rad) * R - R, ry: a, s: 1, w: sz.w, h: sz.h, o };
     }
     if (v === 'slider') {
@@ -233,7 +234,8 @@ export function initWork(
       const sk = t > 0.98 ? skew : skew * t;
       c.el.style.transform =
         `translate3d(${p.x - p.w / 2}px, ${p.y - p.h / 2}px, ${p.z}px) rotateY(${p.ry}deg) ` +
-        `scale(${p.s * squeeze}) skewX(${sk}deg)`;
+        `scale(${p.s * squeeze}) skewX(${sk}deg)` +
+        (Math.abs(((p.ry % 360) + 540) % 360 - 180) > 90 ? ' scaleX(-1)' : '');
       const vis = visible().includes(c);
       c.el.style.opacity = String(p.o);
       c.el.style.zIndex = String(Math.round(1000 + p.z));

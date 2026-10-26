@@ -9,7 +9,7 @@ import { initServices, initAbout, initLab } from './pages';
  * Pages slide sideways in nav order; Design Lab is the exception — the previous page
  * rises and stays above as a ceiling while the dark lab opens below.
  */
-const ORDER = ['work', 'services', 'about', 'lab'] as const;
+const ORDER = ['work', 'about', 'services', 'lab'] as const;
 type PageId = (typeof ORDER)[number];
 
 let lenis: Lenis;

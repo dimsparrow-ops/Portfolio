@@ -89,7 +89,7 @@ img, video { display: block; max-width: 100%; }
 
 /* Say hi — keycap button (soscalemedia.se) */
 .sayhi-btn {
-  position: relative; z-index: 1; margin-left: 6px;
+  position: relative; z-index: 1; margin-left: 10px;
   display: inline-flex; align-items: center; gap: 8px;
   height: 36px; padding: 0 16px; margin-bottom: 3px; white-space: nowrap;
   font: 500 13px/1 var(--font); letter-spacing: 0.02em; text-transform: uppercase;
@@ -112,7 +112,7 @@ img, video { display: block; max-width: 100%; }
 .nav {
   position: absolute; left: 50%; bottom: 18px; transform: translateX(-50%);
   display: flex; align-items: center; gap: 2px;
-  padding: 6px;
+  padding: 6px 12px 6px 6px;
   border-radius: 999px;
   background: rgba(22, 22, 24, 0.78);
   backdrop-filter: blur(18px) saturate(1.4);
@@ -245,12 +245,12 @@ html.is-loaded .loader { display: none; }
   opacity: 0; transition: opacity 0.5s var(--ease-ui);
 }
 .stage.is-slider ~ .slider-label { opacity: 1; }
-.stage-hint {
+.stage-hint-removed {
   position: fixed; left: 50%; bottom: 84px; transform: translateX(-50%);
   color: var(--ink-3); pointer-events: none; transition: opacity 0.5s var(--ease-ui);
 }
-.stage.is-grid ~ .stage-hint { opacity: 0; }
-@media (max-width: 767px) { .stage-hint { display: none; } }
+.stage.is-grid ~ .stage-hint-removed { opacity: 0; }
+@media (max-width: 767px) { .stage-hint-removed { display: none; } }
 
 /* ---------- case overlay (leoleo.studio) ---------- */
 .case-layer { position: fixed; inset: 0; z-index: 60; pointer-events: none; }
@@ -396,5 +396,5 @@ body.is-lab .nav { background: rgba(255, 255, 255, 0.1); }
 /* old page kept as the Lab ceiling */
 .lab-ceiling-inner > .page { overflow: hidden; }
 .is-ceiling .stage { position: absolute; cursor: default; }
-.is-ceiling .slider-label, .is-ceiling .stage-hint { display: none; }
+.is-ceiling .slider-label, .is-ceiling .stage-hint-removed { display: none; }
 .is-ceiling .hi { position: relative; }
