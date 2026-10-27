@@ -85,7 +85,7 @@ export function initWork(
     blend: { v: 0 },
     w: 0,
     h: 0,
-    sheen: el.querySelector<HTMLElement>('.card-sheen'),
+    sheen: null, // glare off — was el.querySelector('.card-sheen')
     tilt: { x: 0, y: 0, a: 0 },
   }));
 
