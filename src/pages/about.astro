@@ -5,7 +5,7 @@ import { site, timeline, socials, stats } from '../data/site';
 <Base page="about" title="About">
   <main class="page page--about about" data-page="about">
     <div class="about-content">
-      <a class="btn about-mail" href={`mailto:${site.email}`}>{site.email}</a>
+      <a class="btn about-mail" href={`mailto:${site.email}`} title={site.email}>Email me</a>
       <section class="about-intro">
         <h1>{site.name}</h1>
         <p>Hey, I'm Dim — a product designer from Ukraine, living in Lisbon. I've been designing since 2016 and today I'm {site.role} at Qubstudio, designing experiences for big SaaS products and systems.</p>

@@ -10,8 +10,6 @@ export const site = {
 
 export const socials = [
   { label: 'LinkedIn', href: 'https://www.linkedin.com/in/dimsi/' },
-  { label: 'Dribbble', href: 'https://dribbble.com/dimsy' },
-  { label: 'Behance', href: 'https://www.behance.net/dimsy' },
   { label: 'Instagram', href: 'https://www.instagram.com/dimsparrow/' },
 ];
 
