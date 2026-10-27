@@ -156,7 +156,7 @@ img, video { display: block; max-width: 100%; }
   display: inline-flex; align-items: center; gap: var(--s-2);
   height: calc(var(--control-h) - 4px); padding: 0 var(--s-4); white-space: nowrap;
   font: 500 var(--fs-xs)/1 var(--font); letter-spacing: var(--ls-caps); text-transform: uppercase;
-  color: var(--ink);
+  color: var(--on-dark);
   background: linear-gradient(180deg, color-mix(in srgb, var(--key), #fff 28%) 0%, var(--key) 100%);
   border-radius: var(--r-pill);
   box-shadow:
@@ -194,7 +194,7 @@ img, video { display: block; max-width: 100%; }
 }
 .nav a:hover { color: var(--on-dark); }
 .nav a[aria-current='page'], .nav a[aria-current='page']:hover { color: var(--ink); }
-.nav a.sayhi-btn, .nav a.sayhi-btn:hover { color: var(--ink); font-size: var(--fs-xs); }
+.nav a.sayhi-btn, .nav a.sayhi-btn:hover { color: var(--on-dark); font-size: var(--fs-xs); }
 /* keycap face (36px) + its 4px edge = the 40px row every tab sits in, so all insets stay 4px */
 .nav a.sayhi-btn { height: calc(var(--control-h) - 4px); align-self: flex-start; }
 .nav .lbl-short { display: none; }
