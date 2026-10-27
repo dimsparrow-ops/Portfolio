@@ -6,7 +6,7 @@ const { cases } = Astro.props;
 ---
 <main class="page page--work" data-page="work">
   <h1 class="sr-only">Selected work</h1>
-  <canvas class="dots" data-dots aria-hidden="true"></canvas>
+  {/* polka-dot field off for now — restore: <canvas class="dots" data-dots aria-hidden="true"></canvas> */}
   <div class="stage is-showcase" data-stage>
     <div class="stage-world" data-world>
       {cases.map((c, i) => (
