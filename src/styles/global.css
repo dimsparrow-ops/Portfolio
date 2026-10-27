@@ -30,8 +30,8 @@
   --on-dark-2: rgba(255, 255, 255, 0.5);
   --scrim: rgba(0, 0, 0, 0.5);        /* nav glass, case backdrop, chips on media */
   --glass-light: rgba(255, 255, 255, 0.1);
-  --key: #ff6b2c;                     /* signal orange */
-  --key-edge: #c2410c;
+  --key: #f26d90;                     /* say hi pink */
+  --key-edge: #c4456a;
   --blue: #2979ff;                    /* focus ring */
 
   /* type */
@@ -162,7 +162,7 @@ img, video { display: block; max-width: 100%; }
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.8),
     0 var(--depth) 0 var(--key-edge),
-    0 calc(var(--depth) * 2) calc(var(--depth) * 4) rgba(194, 65, 12, 0.3);
+    0 calc(var(--depth) * 2) calc(var(--depth) * 4) rgba(196, 69, 106, 0.3);
   transform: translateY(calc(4px - var(--depth)));
   transition: transform 0.12s var(--ease-ui), box-shadow 0.12s var(--ease-ui);
 }
