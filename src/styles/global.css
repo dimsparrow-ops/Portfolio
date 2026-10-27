@@ -430,10 +430,19 @@ html.is-loaded .loader { display: none; }
 .tl-item h3 { margin: 0; font-size: var(--fs-m); line-height: var(--lh-ui); font-weight: 500; letter-spacing: var(--ls-text); }
 .tl-item p { margin: 0; color: var(--ink-body); }
 .btn {
+  position: relative; overflow: hidden; isolation: isolate;
   display: inline-flex; align-items: center; gap: var(--s-2); height: var(--control-h); padding: 0 var(--s-4); border-radius: var(--r-pill);
-  border: 1px solid var(--ink); transition: background-color var(--dur-micro) var(--ease-ui), color var(--dur-micro) var(--ease-ui), transform var(--dur-micro) var(--ease-ui);
+  border: 1px solid var(--ink); transition: color 0.45s var(--ease-out), transform var(--dur-micro) var(--ease-ui);
 }
-.btn:hover { background: var(--ink); color: var(--bg); }
+/* karim-saab.com: a dark disc grows from the bottom centre and fills the pill */
+.btn::before {
+  content: ''; position: absolute; z-index: -1; left: 50%; top: 100%;
+  width: 150%; aspect-ratio: 1; border-radius: 50%; background: var(--ink);
+  transform: translate(-50%, -50%) scale(0);
+  transition: transform 0.6s var(--ease-out);
+}
+.btn:hover { color: var(--bg); }
+.btn:hover::before { transform: translate(-50%, -50%) scale(1); }
 .btn:active { transform: scale(0.97); }
 
 /* SUMMON ME reveal (soscalemedia.se): sits under the content and is uncovered at the end */
