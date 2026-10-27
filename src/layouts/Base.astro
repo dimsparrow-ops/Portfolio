@@ -55,6 +55,8 @@ const fullTitle = title ? `${title} — ${site.name}` : `${site.name} — ${site
 
     <div id="pages"><slot /></div>
 
+    <div class="case-cursor" data-case-cursor aria-hidden="true"><span class="case-cursor-dot"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></div>
+
     <div class="case-layer" aria-hidden="true">
       <div class="case-backdrop" data-case-close></div>
       <div class="case-scroller" role="dialog" aria-modal="true" aria-label="Case study">

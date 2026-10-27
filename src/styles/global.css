@@ -316,6 +316,22 @@ html.is-loaded .loader { display: none; }
 .card.is-hover .card-meta { transition-delay: 0.05s; }
 .card.is-hover .card-tags { transition-delay: 0.08s; }
 
+/* case cursor: white disc with an arrow follows the pointer over a card (leoleo.studio about block) */
+@media (hover: hover) and (pointer: fine) {
+  .stage .card { cursor: none; }
+}
+.case-cursor { position: fixed; left: 0; top: 0; z-index: 40; pointer-events: none; }
+.case-cursor-dot {
+  display: grid; place-items: center;
+  width: 64px; height: 64px; margin: -32px 0 0 -32px; border-radius: var(--r-pill);
+  background: #fff; color: var(--ink); box-shadow: var(--shadow-s);
+  transform: scale(0); opacity: 0;
+  transition: transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.2s var(--ease-ui);
+}
+.case-cursor-dot svg { width: 24px; height: 24px; }
+.case-cursor.is-on .case-cursor-dot { transform: scale(1); opacity: 1; }
+@media (hover: none) { .case-cursor { display: none; } }
+
 /* polka-dot field behind the hero (carterogunsola.com) */
 .dots { position: fixed; inset: 0; width: 100%; height: 100%; pointer-events: none; }
 .page.is-transit .dots, .is-ceiling .dots { position: absolute; }

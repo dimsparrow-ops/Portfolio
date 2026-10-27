@@ -44,6 +44,9 @@ export function initWork(
 ): WorkApi {
   const stage = root.querySelector<HTMLElement>('[data-stage]')!;
   const world = root.querySelector<HTMLElement>('[data-world]')!;
+  const cursor = document.querySelector<HTMLElement>('[data-case-cursor]');
+  const cx = cursor ? gsap.quickTo(cursor, 'x', { duration: 0.45, ease: 'power3.out' }) : null;
+  const cy = cursor ? gsap.quickTo(cursor, 'y', { duration: 0.45, ease: 'power3.out' }) : null;
   const dotsEl = root.querySelector<HTMLCanvasElement>('[data-dots]');
   const dots = dotsEl ? initDots(dotsEl, reduced) : null;
 
@@ -287,9 +290,8 @@ export function initWork(
         if (tt.a > 0.002) {
           const ox = ((tt.x + 1) / 2) * 100;
           const oy = ((tt.y + 1) / 2) * 100;
-          c.sheen.style.backgroundImage =
-            `radial-gradient(42% 34% at ${ox}% ${oy}%, rgba(9,14,28,${0.33 * tt.a}) 0%, rgba(9,14,28,0) 100%),` +
-            `radial-gradient(52% 42% at ${100 - ox}% ${100 - oy}%, rgba(255,255,255,${0.2 * tt.a}) 0%, rgba(255,255,255,0) 100%)`;
+          // light-only glare that slides with the tilt (no dark spot)
+          c.sheen.style.backgroundImage = `linear-gradient(${115 + tt.x * 25}deg, rgba(255,255,255,0) ${oy * 0.4 + ox * 0.3 - 10}%, rgba(255,255,255,${0.22 * tt.a}) ${oy * 0.4 + ox * 0.3 + 8}%, rgba(255,255,255,0) ${oy * 0.4 + ox * 0.3 + 30}%)`;
         } else if (c.sheen.style.backgroundImage) c.sheen.style.backgroundImage = '';
       }
 
@@ -387,6 +389,10 @@ export function initWork(
     hovered = c;
     stage.classList.add('is-hovering');
     c.el.classList.add('is-hover');
+    if (cursor && !reduced) {
+      gsap.set(cursor, { x: mx, y: my });
+      cursor.classList.add('is-on');
+    }
   };
   const hideTag = (c: Card) => {
     if (hovered !== c) return;
@@ -394,6 +400,7 @@ export function initWork(
     autoHold = performance.now() + 600;
     stage.classList.remove('is-hovering');
     c.el.classList.remove('is-hover');
+    cursor?.classList.remove('is-on');
   };
   const enters = cards.map((c) => {
     const on = () => !dragging && showTag(c);
@@ -413,6 +420,8 @@ export function initWork(
   const onPointer = (e: PointerEvent) => {
     mx = e.clientX;
     my = e.clientY;
+    cx?.(mx);
+    cy?.(my);
     inside = my < window.innerHeight - NO_TILT_BOTTOM;
   };
   const onOut = () => (inside = false);
@@ -449,6 +458,7 @@ export function initWork(
       stage.removeEventListener('click', onClick);
       window.removeEventListener('keydown', onKey);
       dots?.destroy();
+      cursor?.classList.remove('is-on');
       void introDone;
     },
   };
