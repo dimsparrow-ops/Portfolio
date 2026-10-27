@@ -62,7 +62,7 @@ const pageOf = (path: string): PageId => {
 function mount(id: PageId, el: HTMLElement, entering: boolean) {
   let destroy = () => {};
   if (id === 'work') {
-    work = initWork(el, { view: store.view, filter: store.filter, onOpen: (slug) => go(`/work/${slug}/`) });
+    work = initWork(el, { view: store.view, filter: 'all', onOpen: (slug) => go(`/work/${slug}/`) });
     destroy = () => {
       work?.destroy();
       work = null;
@@ -81,7 +81,8 @@ function mount(id: PageId, el: HTMLElement, entering: boolean) {
 function updateNav(id: PageId, animate: boolean) {
   const nav = document.querySelector<HTMLElement>('.nav')!;
   const ind = nav.querySelector<HTMLElement>('.nav-indicator')!;
-  const link = nav.querySelector<HTMLElement>(`[data-nav="${id}"]`)!;
+  // the Lab is reached from Work's cases / design lab switch, so Work stays lit there
+  const link = nav.querySelector<HTMLElement>(`[data-nav="${id === 'lab' ? 'work' : id}"]`)!;
   nav.querySelectorAll('[data-nav]').forEach((a) => a.removeAttribute('aria-current'));
   link.setAttribute('aria-current', 'page');
   const props = { x: link.offsetLeft, width: link.offsetWidth };
@@ -340,16 +341,6 @@ export function boot() {
       work?.setView(v);
     });
   });
-  document.querySelectorAll<HTMLButtonElement>('[data-filter]').forEach((b) => {
-    b.classList.toggle('is-active', b.dataset.filter === store.filter);
-    b.addEventListener('click', () => {
-      const f = b.dataset.filter as Filter;
-      store.filter = f;
-      document.querySelectorAll('[data-filter]').forEach((x) => x.classList.toggle('is-active', x === b));
-      work?.setFilter(f);
-    });
-  });
-
   window.addEventListener('resize', () => updateNav(current?.id ?? 'work', false));
 
   // the ↳ on the Say hi keycap is the Enter key: pressing Enter presses the button

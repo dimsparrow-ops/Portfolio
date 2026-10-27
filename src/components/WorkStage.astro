@@ -23,7 +23,6 @@ const { cases } = Astro.props;
               ? <img src={c.data.cover} alt="" loading="eager" />
               : <Ph hue={c.data.hue} />}
             <span class="card-sheen" aria-hidden="true"></span>
-            <span class="card-tags" aria-hidden="true">{c.data.services.map((s) => <span>{s}</span>)}</span>
           </span>
           <span class="card-task" aria-hidden="true">{c.data.task}</span>
           <span class="card-meta" aria-hidden="true">{c.data.client ?? c.data.title} • {c.data.country}, {c.data.year}</span>

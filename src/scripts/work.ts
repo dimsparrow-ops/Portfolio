@@ -99,11 +99,11 @@ export function initWork(
   function sizes(v: View) {
     const { vw, vh, mobile } = dims();
     if (v === 'showcase') {
-      const w = mobile ? Math.min(vw * 0.6, 280) : Math.min(vw * 0.22, vh * 0.44, 360);
+      const w = mobile ? Math.min(vw * 0.75, 350) : Math.min(vw * 0.275, vh * 0.55, 450);
       return { w, h: w * RATIO, gap: 0 };
     }
     if (v === 'slider') {
-      const w = mobile ? vw * 0.72 : Math.min(vw * 0.26, vh * 0.48, 400);
+      const w = mobile ? vw * 0.86 : Math.min(vw * 0.325, vh * 0.6, 500);
       return { w, h: w * RATIO, gap: cardGap() };
     }
     // grid
@@ -111,7 +111,7 @@ export function initWork(
     const cols = mobile ? 2 : n <= 3 ? n : n === 4 ? 2 : 3;
     const rows = Math.ceil(n / cols);
     const gap = cardGap(); // same rhythm as the slider
-    const availW = vw - (mobile ? 32 : 220);
+    const availW = vw - (mobile ? 32 : 120);
     const availH = vh - (mobile ? 220 : 240);
     let w = (availW - gap * (cols - 1)) / cols;
     let h = w * RATIO;
@@ -119,7 +119,7 @@ export function initWork(
       h = (availH - gap * (rows - 1)) / rows;
       w = h / RATIO;
     }
-    return { w: Math.min(w, 400), h: Math.min(h, 400 * RATIO), gap, cols, rows };
+    return { w: Math.min(w, 500), h: Math.min(h, 500 * RATIO), gap, cols, rows };
   }
 
   function poseFor(c: Card, v: View): Pose {
