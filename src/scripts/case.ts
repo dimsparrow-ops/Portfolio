@@ -27,8 +27,8 @@ function setAcc(item: HTMLElement, open: boolean, instant = false) {
     return;
   }
   gsap.to(panel, { height: open ? 'auto' : 0, duration: dur.base, ease: ease.ui });
-  const p = panel.querySelector('p');
-  if (open && p) gsap.fromTo(p, { y: 10, opacity: 0 }, { y: 0, opacity: 1, duration: dur.base, ease: ease.out, delay: 0.08 });
+  const ps = panel.querySelectorAll('p');
+  if (open && ps.length) gsap.fromTo(ps, { y: 10, opacity: 0 }, { y: 0, opacity: 1, duration: dur.base, ease: ease.out, delay: 0.08, stagger: 0.04 });
 }
 
 function wire(article: HTMLElement, scroller: HTMLElement) {

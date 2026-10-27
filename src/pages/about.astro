@@ -1,6 +1,6 @@
 ---
 import Base from '../layouts/Base.astro';
-import { site, timeline } from '../data/site';
+import { site, timeline, socials, stats } from '../data/site';
 ---
 <Base page="about" title="About">
   <main class="page page--about about" data-page="about">
@@ -8,8 +8,9 @@ import { site, timeline } from '../data/site';
       <a class="btn about-mail" href={`mailto:${site.email}`}>{site.email}</a>
       <section class="about-intro">
         <h1>{site.name}</h1>
-        <p>Placeholder. {site.role} based in {site.location}. A short paragraph about how I work and what I care about — two or three sentences, calm and specific.</p>
-        <p>Placeholder. Teams, products and clients worth naming go here, written as plain text.</p>
+        <p>Hey, I'm Dim — a product designer from Ukraine, living in Lisbon. I've been designing since 2016 and today I'm {site.role} at Qubstudio, designing experiences for big SaaS products and systems.</p>
+        <p>I also led a team of 10 designers as a Design Manager for three years, and I like the work where research, systems thinking and craft meet: SaaS platforms, mobile apps and AI-driven products.</p>
+        <div class="about-stats">{stats.map((s) => <div class="metric"><b>{s.value}</b><span>{s.label}</span></div>)}</div>
       </section>
 
       <ol class="timeline">
@@ -29,7 +30,7 @@ import { site, timeline } from '../data/site';
         <span>S</span><span>U</span><span>M</span><span>M</span><span>O</span><span>N</span><span class="sp"></span><span>M</span><span>E</span>
       </div>
       <div class="hi-links mono">
-        <a href={`mailto:${site.email}`}>Email</a><a href="#" target="_blank" rel="noopener">X / Twitter</a><a href="#" target="_blank" rel="noopener">LinkedIn</a><a href="#" target="_blank" rel="noopener">Instagram</a>
+        <a href={`mailto:${site.email}`}>Email</a>{socials.map((l) => <a href={l.href} target="_blank" rel="noopener">{l.label}</a>)}
       </div>
     </section>
   </main>

@@ -9,7 +9,7 @@ const label = { input: 'Input', reasoning: 'Reasoning', process: 'Process', outc
 ---
 <article class="case" data-case-body={entry.id} data-title={d.title}>
   <header class="case-head">
-    <h1 class="case-title" data-split>{d.title}{d.client && <span class="client"> — {d.client}</span>}</h1>
+    <h1 class="case-title" data-split>{d.title}{d.client && d.client !== d.title && <span class="client"> — {d.client}</span>}</h1>
     <div class="case-meta mono">
       <span>{d.year}</span><span>{d.country}</span><span>{d.services.join(', ')}</span>
     </div>
@@ -47,7 +47,7 @@ const label = { input: 'Input', reasoning: 'Reasoning', process: 'Process', outc
           <button class="acc-btn" type="button" aria-expanded={i === 0 ? 'true' : 'false'} aria-controls={`acc-${entry.id}-${k}`}>
             <span class="mono">{label[k]}</span><span class="acc-icon" aria-hidden="true"></span>
           </button>
-          <div class="acc-panel" id={`acc-${entry.id}-${k}`} style={i === 0 ? 'height:auto' : undefined}><p>{d.sections[k].text}</p></div>
+          <div class="acc-panel" id={`acc-${entry.id}-${k}`} style={i === 0 ? 'height:auto' : undefined}>{d.sections[k].text.split(/\n\s*\n/).map((t) => <p>{t}</p>)}</div>
         </div>
       ))}
     </aside>
