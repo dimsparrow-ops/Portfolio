@@ -1,5 +1,6 @@
 ---
 title: "Project 06"
+task: "Turn city transport, bikes and scooters into one ticket" # placeholder — the design task, 2–3 lines max
 client: "Mobility client"
 order: 6
 year: 2023

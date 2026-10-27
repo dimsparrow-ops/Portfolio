@@ -1,5 +1,6 @@
 ---
 title: "Project 04"
+task: "Unify 7 different products into a single SaaS ecosystem" # placeholder — the design task, 2–3 lines max
 client: "Safety client"
 order: 4
 year: 2024

@@ -1,5 +1,6 @@
 ---
 title: "Project 01"
+task: "Make everyday investing feel calm for first-time users" # placeholder — the design task, 2–3 lines max
 client: "Fintech client"
 order: 1
 year: 2025

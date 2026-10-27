@@ -1,6 +1,16 @@
 @import '@fontsource-variable/inter-tight';
 @import '@fontsource-variable/archivo/wdth.css';
 
+/* Google Sans Flex (OFL), self-hosted: latin subset, wght 300–700, wdth 75–125, opsz, ROND */
+@font-face {
+  font-family: 'Google Sans Flex';
+  src: url('/fonts/GoogleSansFlex.woff2') format('woff2-variations'), url('/fonts/GoogleSansFlex.woff2') format('woff2');
+  font-weight: 300 700;
+  font-stretch: 75% 125%;
+  font-style: normal;
+  font-display: swap;
+}
+
 /* ---------- tokens ----------
    Every size is on a 4px grid. Exceptions on purpose: 1px hairlines, 2px focus ring.
    Mirrored in the UI kit (tokens.json). */
@@ -22,13 +32,10 @@
   --glass-light: rgba(255, 255, 255, 0.1);
   --key: #d9c8ff;
   --key-edge: #a68fd9;
-  --blue: #2979ff;
-  --pink: #ff2fae;
-  --yellow: #ffc400;
-  --green: #00c853;
+  --blue: #2979ff;                    /* focus ring */
 
   /* type */
-  --font: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text', 'Inter Tight Variable', 'Inter Tight', system-ui, sans-serif;
+  --font: 'Google Sans Flex', 'Inter Tight Variable', 'Inter Tight', system-ui, sans-serif;
   --font-display: 'Archivo Variable', var(--font);
   --fs-xs: 12px;                                  /* caption, tag, keycap */
   --fs-s: 16px;                                   /* body, UI */
@@ -61,6 +68,7 @@
   /* radius */
   --r-s: 4px;       /* cards, focus */
   --r-m: 12px;      /* media, tiles, sheet, logo */
+  --r-card: 16px;   /* project cards (≈6% of the card width) */
   --r-l: 32px;      /* white page → dark space */
   --r-pill: 999px;
 
@@ -106,15 +114,17 @@ img, video { display: block; max-width: 100%; }
 .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 :focus-visible { outline: 2px solid var(--blue); outline-offset: var(--s-1); border-radius: var(--r-s); }
 
-/* placeholder visual used everywhere until real media exists */
+/* placeholder visual until real media exists: soft "creative gradients" mesh, no text */
 .ph {
   position: relative;
   overflow: hidden;
   background:
-    radial-gradient(120% 90% at 20% 15%, hsl(var(--h, 220) 70% 78%) 0%, transparent 55%),
-    radial-gradient(110% 100% at 85% 90%, hsl(calc(var(--h, 220) + 40) 60% 60%) 0%, transparent 60%),
-    hsl(var(--h, 220) 25% 22%);
+    radial-gradient(70% 60% at 12% 8%, hsl(calc(var(--h, 220) + 50) 70% 88%) 0%, transparent 62%),
+    radial-gradient(60% 70% at 92% 96%, hsl(calc(var(--h, 220) - 30) 72% 76%) 0%, transparent 60%),
+    radial-gradient(55% 55% at 70% 28%, hsl(calc(var(--h, 220) + 15) 60% 58%) 0%, transparent 70%),
+    linear-gradient(160deg, hsl(var(--h, 220) 58% 64%), hsl(calc(var(--h, 220) - 15) 62% 50%));
 }
+.ph[data-label='']::after { content: none; }
 .ph::after {
   content: attr(data-label);
   position: absolute;
@@ -261,47 +271,51 @@ html.is-loaded .loader { display: none; }
 .stage-world { position: absolute; left: 50%; top: 46%; transform-style: preserve-3d; }
 .card {
   position: absolute; left: 0; top: 0;
-  width: 280px; height: 280px;
+  width: 280px; height: 210px;
   transform-style: preserve-3d;
   will-change: transform, opacity;
-  border-radius: var(--r-s);
-  overflow: hidden;
-  box-shadow: var(--highlight), var(--shadow-m);
   cursor: pointer;
   opacity: 0;
+}
+.card-face {
+  position: absolute; inset: 0;
+  border-radius: var(--r-card);
+  overflow: hidden;
+  box-shadow: var(--highlight), var(--shadow-m);
   transition: filter 0.35s var(--ease-ui);
 }
-.card.is-hover { filter: brightness(1.1) saturate(1.12); }
-.card .ph { position: absolute; inset: 0; }
+.card.is-hover .card-face { filter: brightness(1.06) saturate(1.1); }
+.card-face .ph, .card-face img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
 .card-sheen { position: absolute; inset: 0; z-index: 2; pointer-events: none; }
-.card-index {
-  position: absolute; right: var(--s-3); top: var(--s-3);
-  font: var(--fs-xs)/1 var(--font); color: var(--on-dark-body);
-}
-.card-title {
-  position: absolute; left: var(--s-3); top: var(--s-3);
-  font-size: var(--fs-s); line-height: 1; font-weight: 500; color: var(--on-dark); letter-spacing: var(--ls-text);
-}
 
-/* hover tag (laurent.fyi) */
-.tag {
-  position: fixed; left: 0; top: 0; z-index: 30; pointer-events: none;
-  display: flex; flex-direction: column; align-items: flex-start; gap: var(--s-1);
-  opacity: 0;
+/* hover copy rides on the card, so it follows the tilt (cappen.com + Figma note) */
+.card-task, .card-meta, .card-tags {
+  position: absolute; pointer-events: none;
+  opacity: 0; transform: translateY(var(--s-2));
+  transition: opacity 0.3s var(--ease-ui), transform 0.45s var(--ease-out);
 }
-.tag span {
-  display: block; padding: var(--s-1) var(--s-2);
-  font: var(--fs-xs)/var(--lh-ui) var(--font); text-transform: lowercase; white-space: nowrap;
-  color: var(--on-dark); background: var(--blue);
+.card-task {
+  left: 0; right: 4%; bottom: calc(100% + var(--s-3));
+  font-size: var(--fs-m); line-height: var(--lh-ui); letter-spacing: var(--ls-text); color: var(--ink);
+  display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 3; overflow: hidden;
 }
-.tag span + span { background: var(--ink); }
-.slider-label {
-  position: fixed; left: 50%; top: 0; z-index: 3; pointer-events: none;
-  display: flex; justify-content: space-between;
-  color: var(--ink);
-  opacity: 0; transition: opacity 0.5s var(--ease-ui);
+.stage.is-grid .card-task { -webkit-line-clamp: 2; }
+.card-meta { left: 0; top: calc(100% + var(--s-2)); font-size: var(--fs-s); line-height: var(--lh-ui); color: var(--ink-3); white-space: nowrap; }
+.card-tags { right: var(--s-3); bottom: var(--s-3); z-index: 3; display: flex; flex-wrap: wrap; justify-content: flex-end; gap: var(--s-1); max-width: calc(100% - var(--s-6)); }
+.card-tags span {
+  padding: var(--s-1) var(--s-2);
+  font-size: var(--fs-xs); line-height: var(--lh-ui); letter-spacing: var(--ls-caps); text-transform: uppercase; white-space: nowrap;
+  color: var(--on-dark); background: rgba(0, 0, 0, 0.16);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.5);
+  --tag-glass: blur(8px); backdrop-filter: var(--tag-glass); -webkit-backdrop-filter: var(--tag-glass);
 }
-.stage.is-slider ~ .slider-label { opacity: 1; }
+.card.is-hover .card-task, .card.is-hover .card-meta, .card.is-hover .card-tags { opacity: 1; transform: none; }
+.card.is-hover .card-meta { transition-delay: 0.05s; }
+.card.is-hover .card-tags { transition-delay: 0.08s; }
+
+/* polka-dot field behind the hero (carterogunsola.com) */
+.dots { position: fixed; inset: 0; width: 100%; height: 100%; pointer-events: none; }
+.page.is-transit .dots, .is-ceiling .dots { position: absolute; }
 
 /* ---------- case overlay (leoleo.studio) ---------- */
 .case-layer { position: fixed; inset: 0; z-index: 60; pointer-events: none; }
@@ -388,7 +402,7 @@ html.is-loaded .loader { display: none; }
 .about-intro p { margin: 0 0 var(--s-4); color: var(--ink-body); }
 .timeline { list-style: none; margin: 0 auto; padding: 0; max-width: 640px; }
 .tl-item { padding: var(--s-6) 0; display: grid; gap: var(--s-3); }
-.tl-chip { justify-self: start; padding: var(--s-1) var(--s-2); font: var(--fs-xs)/var(--lh-ui) var(--font); text-transform: lowercase; color: var(--on-dark); }
+.tl-when { color: var(--ink-2); }
 .tl-item h3 { margin: 0; font-size: var(--fs-m); line-height: var(--lh-ui); font-weight: 500; letter-spacing: var(--ls-text); }
 .tl-item p { margin: 0; color: var(--ink-body); }
 .btn {
@@ -429,7 +443,6 @@ html.is-loaded .loader { display: none; }
 .lab-ceiling-inner { position: absolute; left: 0; right: 0; bottom: 0; height: 100vh; background: var(--bg); }
 .lab-ceiling-inner > .page { position: absolute !important; inset: 0; min-height: 0; pointer-events: none; overflow: hidden; }
 .lab-ceiling-ph { position: absolute; inset: 0; display: grid; place-items: end center; padding-bottom: var(--s-8); color: var(--ink-3); }
-.lab-back { position: absolute; left: 50%; bottom: var(--s-4); transform: translateX(-50%); z-index: 3; color: var(--on-dark); opacity: 0.45; pointer-events: none; white-space: nowrap; mix-blend-mode: difference; }
 .lab-ceiling-shade { position: absolute; inset: 0; background: linear-gradient(to bottom, transparent 30%, var(--scrim)); opacity: 0.4; pointer-events: none; }
 .lab-body { position: relative; z-index: 1; background: var(--lab); color: var(--on-dark); padding: var(--s-16) var(--gutter) var(--s-40); min-height: 100vh; }
 .lab-head { display: flex; justify-content: space-between; align-items: end; gap: var(--s-6); margin-bottom: var(--s-12); }
@@ -447,5 +460,4 @@ body.is-lab .nav { background: var(--glass-light); }
 
 /* old page kept as the Lab ceiling */
 .is-ceiling .stage { position: absolute; cursor: default; }
-.is-ceiling .slider-label { display: none; }
 .is-ceiling .hi { position: relative; }

@@ -42,11 +42,11 @@ export const serviceDetails = [
 
 /** About timeline, newest first. Accent = chip colour, like laurent.fyi. */
 export const timeline = [
-  { when: 'today · 2026', where: 'lisbon, pt', title: 'Placeholder — what I do now', text: 'Placeholder. One or two sentences about the current role and focus.', accent: "var(--ink)" },
-  { when: 'company · 2023 — 2026', where: 'remote', title: 'Placeholder role', text: 'Placeholder. What I owned, who I worked with, what shipped.', accent: "var(--blue)" },
-  { when: 'company · 2020 — 2023', where: 'kyiv, ua', title: 'Placeholder role', text: 'Placeholder. What I owned, who I worked with, what shipped.', accent: "var(--pink)" },
-  { when: 'company · 2017 — 2020', where: 'kyiv, ua', title: 'Placeholder role', text: 'Placeholder. What I owned, who I worked with, what shipped.', accent: "var(--yellow)" },
-  { when: 'start · 2015', where: 'ua', title: 'Placeholder — where it started', text: 'Placeholder. The first design work.', accent: "var(--green)" },
+  { when: 'today · 2026', where: 'lisbon, pt', title: 'Placeholder — what I do now', text: 'Placeholder. One or two sentences about the current role and focus.' },
+  { when: 'company · 2023 — 2026', where: 'remote', title: 'Placeholder role', text: 'Placeholder. What I owned, who I worked with, what shipped.' },
+  { when: 'company · 2020 — 2023', where: 'kyiv, ua', title: 'Placeholder role', text: 'Placeholder. What I owned, who I worked with, what shipped.' },
+  { when: 'company · 2017 — 2020', where: 'kyiv, ua', title: 'Placeholder role', text: 'Placeholder. What I owned, who I worked with, what shipped.' },
+  { when: 'start · 2015', where: 'ua', title: 'Placeholder — where it started', text: 'Placeholder. The first design work.' },
 ];
 
 /** Design Lab items. h = placeholder height ratio for the masonry. */

@@ -15,7 +15,7 @@ import { site, timeline } from '../data/site';
       <ol class="timeline">
         {timeline.map((t) => (
           <li class="tl-item" data-reveal>
-            <span class="tl-chip" style={`background:${t.accent}`}>{t.when} · {t.where}</span>
+            <span class="tl-when mono">{t.when} · {t.where}</span>
             <h3>{t.title}</h3>
             <p>{t.text}</p>
           </li>

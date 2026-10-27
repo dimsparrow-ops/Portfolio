@@ -1,5 +1,6 @@
 ---
 title: "Project 03"
+task: "Help patients book and track care in under a minute" # placeholder — the design task, 2–3 lines max
 client: "Health client"
 order: 3
 year: 2024

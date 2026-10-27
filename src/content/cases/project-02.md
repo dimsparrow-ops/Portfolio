@@ -1,5 +1,6 @@
 ---
 title: "Project 02"
+task: "Redesign a data-heavy SaaS dashboard around one daily task" # placeholder — the design task, 2–3 lines max
 client: "SaaS client"
 order: 2
 year: 2025

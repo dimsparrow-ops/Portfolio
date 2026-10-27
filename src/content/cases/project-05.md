@@ -1,5 +1,6 @@
 ---
 title: "Project 05"
+task: "Rebuild checkout so returning customers never fill a form twice" # placeholder — the design task, 2–3 lines max
 client: "E-commerce client"
 order: 5
 year: 2023

@@ -1,4 +1,5 @@
 import { gsap, ease, dur, stagger, follow, reduced } from './motion';
+import { initDots } from './dots';
 
 /**
  * Work stage — one render loop drives all three views (approach from avea.studio):
@@ -43,12 +44,8 @@ export function initWork(
 ): WorkApi {
   const stage = root.querySelector<HTMLElement>('[data-stage]')!;
   const world = root.querySelector<HTMLElement>('[data-world]')!;
-  const sliderLabel = root.querySelector<HTMLElement>('[data-slider-label]')!;
-  const slA = root.querySelector<HTMLElement>('[data-sl-a]')!;
-  const slB = root.querySelector<HTMLElement>('[data-sl-b]')!;
-  const tag = document.querySelector<HTMLElement>('.tag')!;
-  const tagA = tag.querySelector<HTMLElement>('.tag-a')!;
-  const tagB = tag.querySelector<HTMLElement>('.tag-b')!;
+  const dotsEl = root.querySelector<HTMLCanvasElement>('[data-dots]');
+  const dots = dotsEl ? initDots(dotsEl, reduced) : null;
 
   let view: View = opts.view;
   let filter: Filter = opts.filter;
@@ -74,7 +71,8 @@ export function initWork(
   const TILT = 10; // deg, bencho.dev
   const WORLD_TILT = { x: 4, y: 6 }; // deg, whole section
 
-  const zero: Pose = { x: 0, y: 60, z: -1800, ry: 0, s: 0.35, w: 280, h: 280, o: 0 };
+  const RATIO = 0.75; // card shape, 4:3 landscape
+  const zero: Pose = { x: 0, y: 60, z: -1800, ry: 0, s: 0.35, w: 280, h: 210, o: 0 };
   const cards: Card[] = Array.from(world.querySelectorAll<HTMLAnchorElement>('.card')).map((el, i) => ({
     el,
     i,
@@ -101,27 +99,27 @@ export function initWork(
   function sizes(v: View) {
     const { vw, vh, mobile } = dims();
     if (v === 'showcase') {
-      const w = mobile ? Math.min(vw * 0.5, 240) : Math.min(vw * 0.2, vh * 0.36, 320);
-      return { w, h: w * 1.0, gap: 0 };
+      const w = mobile ? Math.min(vw * 0.6, 280) : Math.min(vw * 0.22, vh * 0.44, 360);
+      return { w, h: w * RATIO, gap: 0 };
     }
     if (v === 'slider') {
-      const w = mobile ? vw * 0.64 : Math.min(vw * 0.22, vh * 0.38, 340);
-      return { w, h: w, gap: cardGap() };
+      const w = mobile ? vw * 0.72 : Math.min(vw * 0.26, vh * 0.48, 400);
+      return { w, h: w * RATIO, gap: cardGap() };
     }
     // grid
     const n = Math.max(1, visible().length);
     const cols = mobile ? 2 : n <= 3 ? n : n === 4 ? 2 : 3;
     const rows = Math.ceil(n / cols);
-    const gap = mobile ? 8 : 16;
+    const gap = cardGap(); // same rhythm as the slider
     const availW = vw - (mobile ? 32 : 220);
-    const availH = vh - (mobile ? 220 : 210);
+    const availH = vh - (mobile ? 220 : 240);
     let w = (availW - gap * (cols - 1)) / cols;
-    let h = w * 0.78;
+    let h = w * RATIO;
     if (h * rows + gap * (rows - 1) > availH) {
       h = (availH - gap * (rows - 1)) / rows;
-      w = h / 0.78;
+      w = h / RATIO;
     }
-    return { w: Math.min(w, 420), h: Math.min(h, 420 * 0.78), gap, cols, rows };
+    return { w: Math.min(w, 400), h: Math.min(h, 400 * RATIO), gap, cols, rows };
   }
 
   function poseFor(c: Card, v: View): Pose {
@@ -226,6 +224,7 @@ export function initWork(
     const dt = Math.min(0.05, (now - lastT) / 1000);
     lastT = now;
     time += dt;
+    dots?.tick(dt);
     // slow endless drift until a project is hovered (showcase ring / infinite slider)
     const canAuto = !reduced && introDone && !hovered && !dragging && now > autoHold;
     if (canAuto && view === 'showcase') target += AUTO.showcase * dt;
@@ -313,28 +312,6 @@ export function initWork(
     world3d.y += (wty - world3d.y) * 0.06;
     world.style.transform = `rotateX(${-world3d.y * WORLD_TILT.x}deg) rotateY(${world3d.x * WORLD_TILT.y}deg)`;
 
-    // slider label above the centred card (avea.studio)
-    if (view === 'slider') {
-      const vis = visible();
-      const k = ((Math.round(offset) % vis.length) + vis.length) % vis.length;
-      const c = vis[k];
-      if (c) {
-        const sz = sizes('slider');
-        const r = world.getBoundingClientRect();
-        sliderLabel.style.width = `${sz.w}px`;
-        sliderLabel.style.transform = `translate(${-sz.w / 2}px, ${r.top - sz.h / 2 - 20}px)`;
-        if (slA.textContent !== c.el.dataset.index) {
-          slA.textContent = c.el.dataset.index ?? '';
-          slB.textContent = c.el.dataset.title ?? '';
-        }
-      }
-    }
-
-    // hover tag follows the card's top-left corner (laurent.fyi)
-    if (hovered) {
-      const r = hovered.el.getBoundingClientRect();
-      tag.style.transform = `translate(${Math.round(r.left)}px, ${Math.round(r.top - 52)}px)`;
-    }
   }
   gsap.ticker.add(render);
 
@@ -410,10 +387,6 @@ export function initWork(
     hovered = c;
     stage.classList.add('is-hovering');
     c.el.classList.add('is-hover');
-    const d = c.el.dataset;
-    tagA.textContent = `${d.title} · ${d.platform}`;
-    tagB.textContent = `${d.country} · ${d.year}`;
-    gsap.to(tag, { opacity: 1, duration: dur.micro, ease: ease.ui, overwrite: true });
   };
   const hideTag = (c: Card) => {
     if (hovered !== c) return;
@@ -421,7 +394,6 @@ export function initWork(
     autoHold = performance.now() + 600;
     stage.classList.remove('is-hovering');
     c.el.classList.remove('is-hover');
-    gsap.to(tag, { opacity: 0, duration: 0.15, ease: ease.ui, overwrite: true });
   };
   const enters = cards.map((c) => {
     const on = () => !dragging && showTag(c);
@@ -476,7 +448,7 @@ export function initWork(
       window.removeEventListener('pointerup', onUp);
       stage.removeEventListener('click', onClick);
       window.removeEventListener('keydown', onKey);
-      gsap.set(tag, { opacity: 0 });
+      dots?.destroy();
       void introDone;
     },
   };

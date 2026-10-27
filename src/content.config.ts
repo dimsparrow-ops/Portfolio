@@ -25,6 +25,7 @@ const cases = defineCollection({
   loader: glob({ pattern: '**/*.md', base: './src/content/cases' }),
   schema: z.object({
     title: z.string(),
+    task: z.string(), // the design task, shown above the card on hover (2–3 lines max)
     client: z.string().optional(),
     order: z.number(),
     year: z.number(),
