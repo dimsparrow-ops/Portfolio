@@ -112,7 +112,7 @@ export function initWork(
     const n = Math.max(1, visible().length);
     const cols = mobile ? 2 : n <= 3 ? n : n === 4 ? 2 : 3;
     const rows = Math.ceil(n / cols);
-    const gap = mobile ? 10 : 18;
+    const gap = mobile ? 8 : 16;
     const availW = vw - (mobile ? 32 : 220);
     const availH = vh - (mobile ? 220 : 210);
     let w = (availW - gap * (cols - 1)) / cols;
@@ -333,7 +333,7 @@ export function initWork(
     // hover tag follows the card's top-left corner (laurent.fyi)
     if (hovered) {
       const r = hovered.el.getBoundingClientRect();
-      tag.style.transform = `translate(${Math.round(r.left)}px, ${Math.round(r.top - 44)}px)`;
+      tag.style.transform = `translate(${Math.round(r.left)}px, ${Math.round(r.top - 52)}px)`;
     }
   }
   gsap.ticker.add(render);
