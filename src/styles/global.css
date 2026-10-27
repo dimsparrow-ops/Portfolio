@@ -416,7 +416,7 @@ html.is-loaded .loader { display: none; }
 
 /* ---------- about (laurent.fyi + joshpuckett.me) ---------- */
 .about { position: relative; }
-.about-mail { position: absolute; top: var(--s-6); right: var(--gutter); }
+.btn.about-mail { position: absolute; top: var(--s-6); right: var(--gutter); }
 .about-content { position: relative; z-index: 2; background: var(--bg); padding: var(--s-32) var(--gutter); border-radius: 0 0 var(--r-l) var(--r-l); box-shadow: var(--shadow-l); }
 .about-intro { max-width: 640px; margin: 0 auto var(--s-16); }
 .about-intro h1 { font-size: var(--fs-m); line-height: var(--lh-ui); font-weight: 500; margin: 0 0 var(--s-4); letter-spacing: var(--ls-text); }
