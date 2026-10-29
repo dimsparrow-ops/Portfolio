@@ -141,7 +141,7 @@ export function initWork(
       const th = (step * Math.PI) / 180;
       // showcase keeps the wide, airy ring (back cards visible); slider uses cardGap()
       void th;
-      const R = mobile ? sz.w * 1.25 : Math.max(sz.w * 1.8, vw * 0.42);
+      const R = mobile ? sz.w * 1.25 : Math.max(sz.w * 1.8, vw * 0.6);
       const rel = wrap(idx - offset, n);
       const a = rel * step;
       const rad = (a * Math.PI) / 180;
