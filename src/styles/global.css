@@ -288,6 +288,8 @@ html.is-loaded .loader { display: none; }
   transition: filter 0.35s var(--ease-ui);
 }
 .card.is-hover .card-face { filter: brightness(1.06) saturate(1.1); }
+.card-face img { transition: transform 0.85s var(--ease-out, cubic-bezier(0.16, 1, 0.3, 1)); }
+.card.is-hover .card-face img { transform: scale(1.08); }
 .card-face .ph, .card-face img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
 .card-sheen { position: absolute; inset: 0; z-index: 2; pointer-events: none; }
 

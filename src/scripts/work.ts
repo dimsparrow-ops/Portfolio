@@ -24,6 +24,10 @@ interface Card {
   h: number;
   sheen: HTMLElement | null;
   tilt: { x: number; y: number; a: number }; // smoothed tilt (bencho.dev)
+  warp: number; // liquid distortion strength on the cover (cappen.com/works)
+  turb: SVGFETurbulenceElement | null;
+  disp: SVGFEDisplacementMapElement | null;
+  img: HTMLImageElement | null;
 }
 
 export interface WorkApi {
@@ -75,7 +79,7 @@ export function initWork(
   const WORLD_TILT = { x: 4, y: 6 }; // deg, whole section
 
   const RATIO = 1.1; // card shape, near-square portrait (cappen.com/works)
-  const SCALE = 1.25;
+  const SCALE = 1; // was 1.25; cards 20% smaller
   const zero: Pose = { x: 0, y: 60, z: -1800, ry: 0, s: 0.35, w: 280, h: 210, o: 0 };
   const cards: Card[] = Array.from(world.querySelectorAll<HTMLAnchorElement>('.card')).map((el, i) => ({
     el,
@@ -88,7 +92,48 @@ export function initWork(
     h: 0,
     sheen: null, // glare off — was el.querySelector('.card-sheen')
     tilt: { x: 0, y: 0, a: 0 },
+    warp: 0,
+    turb: null,
+    disp: null,
+    img: el.querySelector<HTMLImageElement>('.card-face img'),
   }));
+
+  // per-card SVG displacement filter: the cover ripples like liquid on hover
+  if (!reduced) {
+    const NS = 'http://www.w3.org/2000/svg';
+    const svg = document.createElementNS(NS, 'svg');
+    svg.setAttribute('width', '0');
+    svg.setAttribute('height', '0');
+    svg.setAttribute('aria-hidden', 'true');
+    svg.style.cssText = 'position:absolute;pointer-events:none';
+    cards.forEach((c) => {
+      if (!c.img) return;
+      const f = document.createElementNS(NS, 'filter');
+      f.setAttribute('id', `warp-${c.i}`);
+      f.setAttribute('x', '-5%');
+      f.setAttribute('y', '-5%');
+      f.setAttribute('width', '110%');
+      f.setAttribute('height', '110%');
+      f.setAttribute('color-interpolation-filters', 'sRGB');
+      const t = document.createElementNS(NS, 'feTurbulence');
+      t.setAttribute('type', 'fractalNoise');
+      t.setAttribute('baseFrequency', '0.008 0.012');
+      t.setAttribute('numOctaves', '2');
+      t.setAttribute('seed', String(c.i + 2));
+      t.setAttribute('result', 'n');
+      const d = document.createElementNS(NS, 'feDisplacementMap');
+      d.setAttribute('in', 'SourceGraphic');
+      d.setAttribute('in2', 'n');
+      d.setAttribute('scale', '0');
+      d.setAttribute('xChannelSelector', 'R');
+      d.setAttribute('yChannelSelector', 'G');
+      f.append(t, d);
+      svg.append(f);
+      c.turb = t;
+      c.disp = d;
+    });
+    root.append(svg);
+  }
 
   const visible = () => cards.filter((c) => filter === 'all' || c.platform === filter);
 
@@ -287,6 +332,15 @@ export function initWork(
       tt.a += (ga - tt.a) * 0.14;
       const tiltStr =
         tt.a > 0.002 ? ` translateZ(${-14 * tt.a}px) rotateX(${-tt.y * TILT * tt.a}deg) rotateY(${tt.x * TILT * tt.a}deg)` : '';
+      // liquid warp: a burst on enter that settles to a soft ripple, fades out on leave
+      if (c.img && c.disp && c.turb) {
+        c.warp += ((hovered === c ? 14 : 0) - c.warp) * 0.07;
+        if (c.warp > 0.4) {
+          c.disp.setAttribute('scale', c.warp.toFixed(2));
+          c.turb.setAttribute('baseFrequency', `${0.008 + Math.sin(time * 0.9 + c.i) * 0.002} ${0.012 + Math.cos(time * 0.7 + c.i) * 0.003}`);
+          c.img.style.filter = `url(#warp-${c.i})`;
+        } else if (c.img.style.filter) c.img.style.filter = '';
+      }
       if (c.sheen) {
         if (tt.a > 0.002) {
           const ox = ((tt.x + 1) / 2) * 100;
@@ -388,6 +442,7 @@ export function initWork(
 
   const showTag = (c: Card) => {
     hovered = c;
+    c.warp = Math.max(c.warp, 70);
     stage.classList.add('is-hovering');
     c.el.classList.add('is-hover');
     if (cursor && !reduced) {
