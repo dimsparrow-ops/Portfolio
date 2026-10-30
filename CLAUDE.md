@@ -41,10 +41,10 @@ Brief: impress by look and motion first, cases second. Simple structure, easy ca
   `--scrim` for nav glass/backdrops; `--key` #F26D90 + `--key-edge` #C4456A = Say hi keycap only (white label).
 - Type: Google Sans Flex (self-hosted, `public/fonts`, OFL) for everything; Archivo wdth 62% / 900 only for SUMMON ME.
   Scale 12 / 16 / 20 / 32 / 80 / 120 (big ones via clamp). Line heights 1 / 1.2 / 1.5.
-- Radius: `--r-s` 4, `--r-m` 12, `--r-card` 16, `--r-l` 32 (white page → dark space corners), `--r-pill`. Shadows: s / m / l.
+- Radius: `--r-s` 4, `--r-m` 12, `--r-card` 4, `--r-l` 32 (white page → dark space corners), `--r-pill`. Shadows: s / m / l.
 - Nav: bottom pill, dark glass (blur 80px), 4px inset on every side, white active pill (spring), items `work · about · services`, lowercase.
 - Work controls: `showcase · grid · slider` bottom-left; `cases · design lab` bottom-right (design lab = link to the Lab).
-- Cards: 4:3, radius 16, cover image only (no text on the card). Hover: tilt, slight brighten, task text above,
+- Cards: 10:11 near-square portrait (RATIO 1.1, like cappen.com/works), radius 4, sizes ×1.25, cover image only (no text on the card). Hover: tilt, slight brighten, task text above,
   "client • country, year" below, white 64px disc cursor with a ↗ arrow. No glare, no tags.
 - Buttons: outline pill; hover = dark disc grows from bottom-centre (karim-saab.com).
 - Motion: ease-out (0.16,1,0.3,1) reveals; ease-inout (0.45,0,0.15,1) layout/page; ease-ui (0.215,0.61,0.355,1) hovers/accordion;

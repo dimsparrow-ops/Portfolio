@@ -68,7 +68,7 @@
   /* radius */
   --r-s: 4px;       /* cards, focus */
   --r-m: 12px;      /* media, tiles, sheet, logo */
-  --r-card: 16px;   /* project cards (≈6% of the card width) */
+  --r-card: 4px;    /* project cards: tight corners like cappen.com */
   --r-l: 32px;      /* white page → dark space */
   --r-pill: 999px;
 

@@ -74,7 +74,8 @@ export function initWork(
   const TILT = 10; // deg, bencho.dev
   const WORLD_TILT = { x: 4, y: 6 }; // deg, whole section
 
-  const RATIO = 0.75; // card shape, 4:3 landscape
+  const RATIO = 1.1; // card shape, near-square portrait (cappen.com/works)
+  const SCALE = 1.25;
   const zero: Pose = { x: 0, y: 60, z: -1800, ry: 0, s: 0.35, w: 280, h: 210, o: 0 };
   const cards: Card[] = Array.from(world.querySelectorAll<HTMLAnchorElement>('.card')).map((el, i) => ({
     el,
@@ -102,11 +103,11 @@ export function initWork(
   function sizes(v: View) {
     const { vw, vh, mobile } = dims();
     if (v === 'showcase') {
-      const w = mobile ? Math.min(vw * 0.75, 350) : Math.min(vw * 0.275, vh * 0.55, 450);
+      const w = mobile ? Math.min(vw * 0.75, 350) : Math.min(vw * 0.275 * SCALE, (vh * 0.62) / RATIO, 450 * SCALE);
       return { w, h: w * RATIO, gap: 0 };
     }
     if (v === 'slider') {
-      const w = mobile ? vw * 0.86 : Math.min(vw * 0.325, vh * 0.6, 500);
+      const w = mobile ? vw * 0.86 : Math.min(vw * 0.325 * SCALE, (vh * 0.66) / RATIO, 500 * SCALE);
       return { w, h: w * RATIO, gap: cardGap() };
     }
     // grid
@@ -122,7 +123,7 @@ export function initWork(
       h = (availH - gap * (rows - 1)) / rows;
       w = h / RATIO;
     }
-    return { w: Math.min(w, 500), h: Math.min(h, 500 * RATIO), gap, cols, rows };
+    return { w: Math.min(w, 500 * SCALE), h: Math.min(h, 500 * SCALE * RATIO), gap, cols, rows };
   }
 
   function poseFor(c: Card, v: View): Pose {
