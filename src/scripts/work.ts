@@ -24,9 +24,8 @@ interface Card {
   h: number;
   sheen: HTMLElement | null;
   tilt: { x: number; y: number; a: number }; // smoothed tilt (bencho.dev)
-  warp: number; // liquid distortion strength on the cover (cappen.com/works)
-  turb: SVGFETurbulenceElement | null;
-  disp: SVGFEDisplacementMapElement | null;
+  warp: number; // 0..1 hover amount of the WebGL cover distortion
+  gl: CoverGL | null;
   img: HTMLImageElement | null;
 }
 
@@ -41,6 +40,84 @@ export interface WorkApi {
 const clamp = (v: number, a: number, b: number) => Math.min(b, Math.max(a, v));
 const lerp = (a: number, b: number, t: number) => a + (b - a) * t;
 const wrap = (v: number, n: number) => v - n * Math.round(v / n);
+
+const VERT = `attribute vec2 p;varying vec2 vUv;void main(){vUv=p*.5+.5;gl_Position=vec4(p,0.,1.);}`;
+// same falloff as cappen.com/works: uv is pulled toward the cursor by 1/(1+(d/r)^4 * k)
+const FRAG = `precision highp float;uniform sampler2D t;uniform vec2 m;uniform vec2 ratio;uniform float k;uniform float z;varying vec2 vUv;
+void main(){vec2 uv=vUv-m;float d=length(uv)/.8;uv*=1./(1.+pow(d,4.)*k);uv+=m;
+uv=(uv-.5)*z+.5;uv=vec2(uv.x*ratio.x+(1.-ratio.x)*.5,uv.y*ratio.y+(1.-ratio.y)*.5);
+gl_FragColor=vec4(texture2D(t,vec2(uv.x,1.-uv.y)).rgb,1.);}`;
+
+interface CoverGL {
+  draw(a: number, u: number, v: number): void;
+  hide(): void;
+}
+
+// one small WebGL canvas per card, created on first hover, sits over the cover <img>
+function createCoverGL(img: HTMLImageElement): CoverGL | null {
+  const face = img.parentElement;
+  if (!face || !img.complete || !img.naturalWidth) return null;
+  const canvas = document.createElement('canvas');
+  canvas.className = 'card-gl';
+  const gl = canvas.getContext('webgl', { antialias: true, alpha: false, premultipliedAlpha: false });
+  if (!gl) return null;
+  const sh = (type: number, src: string) => {
+    const o = gl.createShader(type)!;
+    gl.shaderSource(o, src);
+    gl.compileShader(o);
+    return o;
+  };
+  const pr = gl.createProgram()!;
+  gl.attachShader(pr, sh(gl.VERTEX_SHADER, VERT));
+  gl.attachShader(pr, sh(gl.FRAGMENT_SHADER, FRAG));
+  gl.linkProgram(pr);
+  gl.useProgram(pr);
+  gl.bindBuffer(gl.ARRAY_BUFFER, gl.createBuffer());
+  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 1, -1, -1, 1, 1, 1]), gl.STATIC_DRAW);
+  const loc = gl.getAttribLocation(pr, 'p');
+  gl.enableVertexAttribArray(loc);
+  gl.vertexAttribPointer(loc, 2, gl.FLOAT, false, 0, 0);
+  const tex = gl.createTexture();
+  gl.bindTexture(gl.TEXTURE_2D, tex);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+  gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGB, gl.RGB, gl.UNSIGNED_BYTE, img);
+  const U = (n: string) => gl.getUniformLocation(pr, n);
+  const uM = U('m');
+  const uK = U('k');
+  const uZ = U('z');
+  const uR = U('ratio');
+  let w = 0;
+  let h = 0;
+  face.append(canvas);
+  return {
+    draw(a, u, v) {
+      const cw = face.clientWidth;
+      const ch = face.clientHeight;
+      if (cw !== w || ch !== h) {
+        w = cw;
+        h = ch;
+        const dpr = Math.min(window.devicePixelRatio || 1, 1.5);
+        canvas.width = Math.round(w * dpr);
+        canvas.height = Math.round(h * dpr);
+        gl.viewport(0, 0, canvas.width, canvas.height);
+        const ia = img.naturalWidth / img.naturalHeight;
+        const ca = w / h;
+        gl.uniform2f(uR, Math.min(ca / ia, 1), Math.min(ia / ca, 1));
+      }
+      gl.uniform2f(uM, u, v);
+      gl.uniform1f(uK, a);
+      gl.uniform1f(uZ, 1 - 0.14 * a); // slight push-in so stretched edges never show the border
+      gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+      canvas.style.opacity = String(Math.min(1, a * 4));
+    },
+    hide() {
+      if (canvas.style.opacity !== '0') canvas.style.opacity = '0';
+    },
+  };
+}
 
 export function initWork(
   root: HTMLElement,
@@ -93,47 +170,9 @@ export function initWork(
     sheen: null, // glare off — was el.querySelector('.card-sheen')
     tilt: { x: 0, y: 0, a: 0 },
     warp: 0,
-    turb: null,
-    disp: null,
+    gl: null,
     img: el.querySelector<HTMLImageElement>('.card-face img'),
   }));
-
-  // per-card SVG displacement filter: the cover ripples like liquid on hover
-  if (!reduced) {
-    const NS = 'http://www.w3.org/2000/svg';
-    const svg = document.createElementNS(NS, 'svg');
-    svg.setAttribute('width', '0');
-    svg.setAttribute('height', '0');
-    svg.setAttribute('aria-hidden', 'true');
-    svg.style.cssText = 'position:absolute;pointer-events:none';
-    cards.forEach((c) => {
-      if (!c.img) return;
-      const f = document.createElementNS(NS, 'filter');
-      f.setAttribute('id', `warp-${c.i}`);
-      f.setAttribute('x', '-5%');
-      f.setAttribute('y', '-5%');
-      f.setAttribute('width', '110%');
-      f.setAttribute('height', '110%');
-      f.setAttribute('color-interpolation-filters', 'sRGB');
-      const t = document.createElementNS(NS, 'feTurbulence');
-      t.setAttribute('type', 'fractalNoise');
-      t.setAttribute('baseFrequency', '0.008 0.012');
-      t.setAttribute('numOctaves', '2');
-      t.setAttribute('seed', String(c.i + 2));
-      t.setAttribute('result', 'n');
-      const d = document.createElementNS(NS, 'feDisplacementMap');
-      d.setAttribute('in', 'SourceGraphic');
-      d.setAttribute('in2', 'n');
-      d.setAttribute('scale', '0');
-      d.setAttribute('xChannelSelector', 'R');
-      d.setAttribute('yChannelSelector', 'G');
-      f.append(t, d);
-      svg.append(f);
-      c.turb = t;
-      c.disp = d;
-    });
-    root.append(svg);
-  }
 
   const visible = () => cards.filter((c) => filter === 'all' || c.platform === filter);
 
@@ -332,14 +371,13 @@ export function initWork(
       tt.a += (ga - tt.a) * 0.14;
       const tiltStr =
         tt.a > 0.002 ? ` translateZ(${-14 * tt.a}px) rotateX(${-tt.y * TILT * tt.a}deg) rotateY(${tt.x * TILT * tt.a}deg)` : '';
-      // liquid warp: a burst on enter that settles to a soft ripple, fades out on leave
-      if (c.img && c.disp && c.turb) {
-        c.warp += ((hovered === c ? 14 : 0) - c.warp) * 0.07;
-        if (c.warp > 0.4) {
-          c.disp.setAttribute('scale', c.warp.toFixed(2));
-          c.turb.setAttribute('baseFrequency', `${0.008 + Math.sin(time * 0.9 + c.i) * 0.002} ${0.012 + Math.cos(time * 0.7 + c.i) * 0.003}`);
-          c.img.style.filter = `url(#warp-${c.i})`;
-        } else if (c.img.style.filter) c.img.style.filter = '';
+      // cover distortion (cappen.com/works): calm at the cursor, strong toward the far edges
+      c.warp += ((hovered === c ? 1 : 0) - c.warp) * 0.12;
+      if (c.img && !reduced) {
+        if (c.warp > 0.004) {
+          c.gl ??= createCoverGL(c.img);
+          c.gl?.draw(c.warp, (tt.x + 1) / 2, 1 - (tt.y + 1) / 2);
+        } else c.gl?.hide();
       }
       if (c.sheen) {
         if (tt.a > 0.002) {
@@ -442,7 +480,6 @@ export function initWork(
 
   const showTag = (c: Card) => {
     hovered = c;
-    c.warp = Math.max(c.warp, 70);
     stage.classList.add('is-hovering');
     c.el.classList.add('is-hover');
     if (cursor && !reduced) {
