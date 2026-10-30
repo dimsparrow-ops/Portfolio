@@ -1,4 +1,7 @@
-import { gsap, ScrollTrigger, ease, dur, stagger } from './motion';
+import { gsap, ScrollTrigger, ease, dur, stagger, reduced } from './motion';
+
+// hover-driven effects only make sense with a real pointer (taps fire pointerenter too)
+const finePointer = () => window.matchMedia('(hover: hover) and (pointer: fine)').matches;
 
 type Destroy = () => void;
 
@@ -23,9 +26,10 @@ export function initServices(root: HTMLElement, entering: boolean): Destroy {
   const onMove = (e: PointerEvent) => {
     xTo(e.clientX + 24);
     yTo(e.clientY - 90);
-    rTo(gsap.utils.clamp(-10, 10, (e.clientX - lastX) * 0.6));
+    rTo(reduced ? 0 : gsap.utils.clamp(-10, 10, (e.clientX - lastX) * 0.6));
     lastX = e.clientX;
   };
+  if (!finePointer()) return () => gsap.killTweensOf([preview, ...spans]);
   const offs = items.map((it, i) => {
     const span = spans[i];
     const enter = () => {
@@ -77,6 +81,7 @@ export function initAbout(root: HTMLElement): Destroy {
   });
 
   // fit the word to the viewport width (soscalemedia.se)
+  let fitRaf = 0;
   const fit = () => {
     word.style.fontSize = '30vw';
     const first = word.firstElementChild!.getBoundingClientRect();
@@ -87,7 +92,12 @@ export function initAbout(root: HTMLElement): Destroy {
   };
   fit();
   document.fonts?.ready.then(fit);
-  window.addEventListener('resize', fit);
+  // one measure per frame while resizing (each fit() forces layout)
+  const onResize = () => {
+    cancelAnimationFrame(fitRaf);
+    fitRaf = requestAnimationFrame(fit);
+  };
+  window.addEventListener('resize', onResize);
 
   // letters rise as the section is uncovered
   gsap.set(letters, { yPercent: 30, scaleY: 0.4 });
@@ -116,14 +126,18 @@ export function initAbout(root: HTMLElement): Destroy {
   };
   // return through the same quickTo tweens (overwriting them would kill the dock for good)
   const onLeave = () => to.forEach((t) => (t.sy(1), t.sx(1)));
-  hi.addEventListener('pointermove', onMove);
-  hi.addEventListener('pointerleave', onLeave);
+  const dock = finePointer() && !reduced;
+  if (dock) {
+    hi.addEventListener('pointermove', onMove);
+    hi.addEventListener('pointerleave', onLeave);
+  }
 
   return () => {
     triggers.forEach((t) => t.kill());
     hi.removeEventListener('pointermove', onMove);
     hi.removeEventListener('pointerleave', onLeave);
-    window.removeEventListener('resize', fit);
+    cancelAnimationFrame(fitRaf);
+    window.removeEventListener('resize', onResize);
     gsap.killTweensOf(letters);
   };
 }
@@ -161,7 +175,6 @@ export function initLab(root: HTMLElement, entering: boolean, onAscend: () => vo
   if (entering) gsap.from(head, { y: 30, opacity: 0, duration: 0.7, ease: ease.out, stagger: stagger.item, delay: 0.3 });
 
   // pull up at the very top to climb back to the page you came from
-  const back = root.querySelector<HTMLElement>('[data-lab-back]');
   const PULL = 260;
   let pull = 0;
   let done = false;
@@ -169,12 +182,10 @@ export function initLab(root: HTMLElement, entering: boolean, onAscend: () => vo
   const show = () => {
     const k = Math.min(pull / PULL, 1);
     gsap.to(ceiling, { y: k * 70, duration: 0.25, ease: ease.ui, overwrite: true });
-    if (back) gsap.to(back, { opacity: 0.45 + k * 0.55, y: -k * 8, duration: 0.25, overwrite: true });
   };
   const release = () => {
     pull = 0;
-    gsap.to(ceiling, { y: 0, duration: 0.6, ease: 'elastic.out(1, 0.6)', overwrite: true });
-    if (back) gsap.to(back, { opacity: 0.45, y: 0, duration: 0.4, overwrite: true });
+    gsap.to(ceiling, { y: 0, duration: 0.6, ease: reduced ? 'power2.out' : 'elastic.out(1, 0.6)', overwrite: true });
   };
   const add = (d: number) => {
     if (done) return;

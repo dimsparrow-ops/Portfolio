@@ -1,5 +1,5 @@
 import Lenis from 'lenis';
-import { gsap, ScrollTrigger, ease, dur, stagger, splitChars } from './motion';
+import { gsap, ScrollTrigger, ease, dur, stagger, splitChars, reduced } from './motion';
 
 /**
  * Case overlay (leoleo.studio): the panel rises over Work, keeps its own URL.
@@ -12,6 +12,11 @@ let lenis: Lenis | null = null;
 let triggers: ScrollTrigger[] = [];
 let cleanup: (() => void)[] = [];
 let isOpen = false;
+let opener: HTMLElement | null = null; // where keyboard focus returns on close
+// everything behind the dialog: made inert while it is open (focus trap + hidden from screen readers)
+const BACKGROUND = ['#pages', '.shell', '.logo'];
+const setBackgroundInert = (on: boolean) =>
+  BACKGROUND.forEach((s) => document.querySelector<HTMLElement>(s)?.toggleAttribute('inert', on));
 
 export const caseIsOpen = () => isOpen;
 
@@ -21,6 +26,7 @@ function setAcc(item: HTMLElement, open: boolean, instant = false) {
   if (item.classList.contains('is-open') === open && !instant) return;
   item.classList.toggle('is-open', open);
   btn.setAttribute('aria-expanded', String(open));
+  panel.inert = !open; // collapsed text is not read out
   gsap.killTweensOf(panel);
   if (instant) {
     gsap.set(panel, { height: open ? 'auto' : 0 });
@@ -33,6 +39,7 @@ function setAcc(item: HTMLElement, open: boolean, instant = false) {
 
 function wire(article: HTMLElement, scroller: HTMLElement) {
   const items = Array.from(article.querySelectorAll<HTMLElement>('.acc-item'));
+  items.forEach((it) => (it.querySelector<HTMLElement>('.acc-panel')!.inert = !it.classList.contains('is-open')));
   const openOnly = (key: string) => items.forEach((it) => setAcc(it, it.dataset.acc === key));
 
   items.forEach((it) => {
@@ -70,6 +77,26 @@ function wire(article: HTMLElement, scroller: HTMLElement) {
   });
 }
 
+/** Case videos: no autoplay under reduced motion (controls instead); otherwise only the visible ones play. */
+function wireVideos(slot: HTMLElement, scroller: HTMLElement) {
+  const videos = Array.from(slot.querySelectorAll<HTMLVideoElement>('video'));
+  if (!videos.length) return;
+  if (reduced) {
+    videos.forEach((v) => {
+      v.removeAttribute('autoplay');
+      v.pause();
+      v.controls = true;
+    });
+    return;
+  }
+  const io = new IntersectionObserver(
+    (entries) => entries.forEach((e) => (e.isIntersecting ? (e.target as HTMLVideoElement).play().catch(() => {}) : (e.target as HTMLVideoElement).pause())),
+    { root: scroller, threshold: 0.1 },
+  );
+  videos.forEach((v) => io.observe(v));
+  cleanup.push(() => io.disconnect());
+}
+
 export function openCase(opts: { html?: string; animate?: boolean; onClose: () => void }) {
   const L = layer();
   const scroller = L.querySelector<HTMLElement>('.case-scroller')!;
@@ -80,6 +107,9 @@ export function openCase(opts: { html?: string; animate?: boolean; onClose: () =
   if (!article) return;
 
   isOpen = true;
+  const active = document.activeElement as HTMLElement | null;
+  opener = active && active !== document.body && active.matches(':focus-visible') ? active : null;
+  setBackgroundInert(true);
   L.classList.add('is-open');
   L.setAttribute('aria-hidden', 'false');
   scroller.scrollTop = 0;
@@ -115,6 +145,7 @@ export function openCase(opts: { html?: string; animate?: boolean; onClose: () =
       .from(rest, { y: 18, opacity: 0, duration: 0.6, ease: ease.out, stagger: stagger.item }, 0.3);
   }
   wire(article, scroller);
+  wireVideos(slot, scroller);
   document.title = `${article.dataset.title} — Dim`;
   setTimeout(() => scroller.querySelector<HTMLElement>('.case-close')?.focus({ preventScroll: true, focusVisible: false } as FocusOptions), 50);
 }
@@ -135,8 +166,11 @@ export function closeCase(animate = true): Promise<void> {
       lenis?.destroy();
       lenis = null;
       slot.innerHTML = '';
+      setBackgroundInert(false);
       L.classList.remove('is-open');
       L.setAttribute('aria-hidden', 'true');
+      if (opener?.isConnected) opener.focus({ preventScroll: true });
+      opener = null;
       resolve();
     };
     if (!animate) return done();

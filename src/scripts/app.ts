@@ -1,5 +1,5 @@
 import Lenis from 'lenis';
-import { gsap, ScrollTrigger, ease, dur } from './motion';
+import { gsap, ScrollTrigger, ease, dur, reduced } from './motion';
 import { initWork, type WorkApi, type View, type Filter } from './work';
 import { openCase, closeCase, caseIsOpen } from './case';
 import { initServices, initAbout, initLab } from './pages';
@@ -153,6 +153,7 @@ function descend(oldEl: HTMLElement, labEl: HTMLElement) {
       gsap.set(oldEl, { clearProps: 'transform,zIndex' });
       oldEl.classList.add('is-ceiling');
       inner.innerHTML = '';
+      oldEl.inert = true; // a frozen copy: no tab stops, no screen-reader noise
       inner.appendChild(oldEl);
       oldEl.scrollTop = y;
       labEl.classList.remove('is-transit');
@@ -162,7 +163,17 @@ function descend(oldEl: HTMLElement, labEl: HTMLElement) {
 
 let labReturn = '/';
 
+// a failed fetch must not leave the router stuck in `busy`: fall back to a normal page load
 async function go(href: string, push = true, mode?: 'ascend') {
+  try {
+    await navigate(href, push, mode);
+  } catch {
+    busy = false;
+    location.href = href;
+  }
+}
+
+async function navigate(href: string, push: boolean, mode?: 'ascend') {
   const url = new URL(href, location.href);
   const path = norm(url.pathname);
   const slug = caseSlug(path);
@@ -236,6 +247,9 @@ async function go(href: string, push = true, mode?: 'ascend') {
   await tl.then();
   ScrollTrigger.refresh();
   busy = false;
+  // new page: move focus into it so keyboard and screen-reader users start from the top
+  newEl.tabIndex = -1;
+  newEl.focus({ preventScroll: true });
 
   if (slug) go(path, false);
   if (url.hash === '#say-hi') setTimeout(() => scrollToHi(1.8), 150);
@@ -289,7 +303,7 @@ function runLoader(): Promise<void> {
 
 // ---------- boot ----------
 export function boot() {
-  lenis = new Lenis({ lerp: 0.1 });
+  lenis = new Lenis({ lerp: 0.1, smoothWheel: !reduced });
   gsap.ticker.add((t) => lenis.raf(t * 1000));
   gsap.ticker.lagSmoothing(0);
   lenis.on('scroll', ScrollTrigger.update);
@@ -334,10 +348,14 @@ export function boot() {
   // work controls
   document.querySelectorAll<HTMLButtonElement>('[data-view]').forEach((b) => {
     b.classList.toggle('is-active', b.dataset.view === store.view);
+    b.setAttribute('aria-pressed', String(b.dataset.view === store.view));
     b.addEventListener('click', () => {
       const v = b.dataset.view as View;
       store.view = v;
-      document.querySelectorAll('[data-view]').forEach((x) => x.classList.toggle('is-active', x === b));
+      document.querySelectorAll('[data-view]').forEach((x) => {
+        x.classList.toggle('is-active', x === b);
+        x.setAttribute('aria-pressed', String(x === b));
+      });
       work?.setView(v);
     });
   });

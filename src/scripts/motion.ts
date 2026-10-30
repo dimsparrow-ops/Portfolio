@@ -14,7 +14,6 @@ export const ease = {
   in: CustomEase.create('m-in', '0.7,0,0.84,0'), // exits
   ui: CustomEase.create('m-ui', '0.215,0.61,0.355,1'), // accordion, hovers (thegradient)
   spring: 'back.out(1.6)', // nav indicator, taps (laurent spring 480/30 approximated)
-  rubber: 'elastic.out(1, 0.32)', // Say hi letters
 };
 
 export const dur = {
@@ -30,7 +29,7 @@ export const dur = {
 export const stagger = { char: 0.012, item: 0.04, card: 0.03 };
 
 /** Smoothing for things that follow input (avea / laurent). */
-export const follow = { lerp: 0.11, lerpDrag: 0.16, inertia: 0.93 };
+export const follow = { lerp: 0.11, lerpDrag: 0.16 };
 
 export const reduced =
   typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches;

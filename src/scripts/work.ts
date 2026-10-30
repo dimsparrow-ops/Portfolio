@@ -22,11 +22,13 @@ interface Card {
   hiddenPose?: Pose;
   w: number;
   h: number;
-  sheen: HTMLElement | null;
   tilt: { x: number; y: number; a: number }; // smoothed tilt (bencho.dev)
   warp: number; // 0..1 hover amount of the WebGL cover distortion
   gl: CoverGL | null;
+  glTried: boolean; // createCoverGL runs once per card (it can legitimately return null)
   img: HTMLImageElement | null;
+  // last values written to the DOM, so unchanged styles aren't re-set every frame
+  out: { o: number; z: number; live: boolean; vis: boolean };
 }
 
 export interface WorkApi {
@@ -167,10 +169,11 @@ export function initWork(
     blend: { v: 0 },
     w: 0,
     h: 0,
-    sheen: null, // glare off — was el.querySelector('.card-sheen')
     tilt: { x: 0, y: 0, a: 0 },
     warp: 0,
     gl: null,
+    glTried: false,
+    out: { o: -1, z: NaN, live: false, vis: true },
     img: el.querySelector<HTMLImageElement>('.card-face img'),
   }));
 
@@ -210,33 +213,41 @@ export function initWork(
     return { w: Math.min(w, 500 * SCALE), h: Math.min(h, 500 * SCALE * RATIO), gap, cols, rows };
   }
 
-  function poseFor(c: Card, v: View): Pose {
+  // everything poseFor needs that is the same for all cards, computed once per frame
+  interface Frame {
+    vis: Card[];
+    sz: ReturnType<typeof sizes>;
+    wraps: boolean;
+    vw: number;
+    mobile: boolean;
+  }
+  function frameFor(v: View): Frame {
     const vis = visible();
+    const { vw, mobile } = dims();
+    const sz = sizes(v);
+    return { vis, sz, wraps: v === 'slider' && wrapsFor(vis.length, sz, vw), vw, mobile };
+  }
+
+  function poseFor(c: Card, v: View, f: Frame): Pose {
+    const { vis, sz, wraps, vw, mobile } = f;
     const idx = vis.indexOf(c);
     if (idx < 0) {
       const base = c.hiddenPose ?? c.cur;
       return { ...base, z: base.z - 220, s: base.s * 0.7, o: 0 };
     }
     const n = vis.length;
-    const sz = sizes(v);
     if (v === 'showcase') {
       const step = 360 / Math.max(n, 3);
-      const { vw, mobile } = dims();
-      // radius that leaves exactly gap() between the front card and its neighbours
-      const th = (step * Math.PI) / 180;
-      // showcase keeps the wide, airy ring (back cards visible); slider uses cardGap()
-      void th;
+      // wide, airy ring (back cards stay visible); slider uses cardGap()
       const R = mobile ? sz.w * 1.25 : Math.max(sz.w * 1.8, vw * 0.6);
       const rel = wrap(idx - offset, n);
       const a = rel * step;
       const rad = (a * Math.PI) / 180;
-      const back = Math.abs(a);
-      const o = 1;
-      return { x: Math.sin(rad) * R, y: 0, z: Math.cos(rad) * R - R, ry: a, s: 1, w: sz.w, h: sz.h, o };
+      return { x: Math.sin(rad) * R, y: 0, z: Math.cos(rad) * R - R, ry: a, s: 1, w: sz.w, h: sz.h, o: 1 };
     }
     if (v === 'slider') {
       // infinite like avea.studio when the row is wider than the screen, otherwise clamped
-      const rel = sliderWraps() ? wrap(idx - offset, n) : idx - offset;
+      const rel = wraps ? wrap(idx - offset, n) : idx - offset;
       return { x: rel * (sz.w + sz.gap), y: 0, z: 0, ry: 0, s: 1, w: sz.w, h: sz.h, o: 1 };
     }
     const cols = sz.cols!;
@@ -249,9 +260,11 @@ export function initWork(
     return { x, y, z: 0, ry: 0, s: 1, w: sz.w, h: sz.h, o: 1 };
   }
 
+  function wrapsFor(n: number, sz: { w: number; gap: number }, vw: number) {
+    return n * (sz.w + sz.gap) > vw + sz.w * 1.2;
+  }
   function sliderWraps() {
-    const sz = sizes('slider');
-    return visible().length * (sz.w + sz.gap) > dims().vw + sz.w * 1.2;
+    return wrapsFor(visible().length, sizes('slider'), dims().vw);
   }
 
   // ---------- transitions ----------
@@ -312,25 +325,28 @@ export function initWork(
     const dt = Math.min(0.05, (now - lastT) / 1000);
     lastT = now;
     time += dt;
+    // smoothing factors were tuned at 60fps; this keeps them identical on 120Hz screens
+    const k = (r: number) => 1 - Math.pow(1 - r, dt * 60);
+    const frame = frameFor(view);
     dots?.tick(dt);
     // slow endless drift until a project is hovered (showcase ring / infinite slider)
     const canAuto = !reduced && introDone && !hovered && !dragging && now > autoHold;
     if (canAuto && view === 'showcase') target += AUTO.showcase * dt;
-    if (canAuto && view === 'slider' && sliderWraps()) target += AUTO.slider * dt;
+    if (canAuto && view === 'slider' && frame.wraps) target += AUTO.slider * dt;
     if (view !== 'grid') {
       const n = visible().length;
-      if (view === 'slider' && !sliderWraps()) target = clamp(target, 0, Math.max(0, n - 1));
-      offset += (target - offset) * (dragging ? follow.lerpDrag : follow.lerp);
+      if (view === 'slider' && !frame.wraps) target = clamp(target, 0, Math.max(0, n - 1));
+      offset += (target - offset) * k(dragging ? follow.lerpDrag : follow.lerp);
       if (Math.abs(target - offset) < 1e-4) offset = target;
     }
     const d = offset - prev;
     prev = offset;
-    vel += (d - vel) * 0.25;
+    vel += (d - vel) * k(0.25);
     const skew = view === 'showcase' ? clamp(vel * 55, -12, 12) : 0;
     const squeeze = view === 'showcase' ? 1 - Math.min(Math.abs(vel) * 1.4, 0.1) : 1;
 
     for (const c of cards) {
-      const to = poseFor(c, view);
+      const to = poseFor(c, view, frame);
       const t = c.blend.v;
       const p = c.cur;
       p.x = lerp(c.from.x, to.x, t);
@@ -360,32 +376,27 @@ export function initWork(
       let gx = 0;
       let gy = 0;
       let ga = 0;
-      if (hovered === c) {
+      if (hovered === c && !reduced) {
         const r = c.el.getBoundingClientRect();
         gx = clamp(((mx - r.left) / r.width) * 2 - 1, -1, 1);
         gy = clamp(((my - r.top) / r.height) * 2 - 1, -1, 1);
         ga = 1;
       }
-      tt.x += (gx - tt.x) * 0.14;
-      tt.y += (gy - tt.y) * 0.14;
-      tt.a += (ga - tt.a) * 0.14;
+      tt.x += (gx - tt.x) * k(0.14);
+      tt.y += (gy - tt.y) * k(0.14);
+      tt.a += (ga - tt.a) * k(0.14);
       const tiltStr =
         tt.a > 0.002 ? ` translateZ(${-14 * tt.a}px) rotateX(${-tt.y * TILT * tt.a}deg) rotateY(${tt.x * TILT * tt.a}deg)` : '';
       // cover distortion (cappen.com/works): calm at the cursor, strong toward the far edges
-      c.warp += ((hovered === c ? 1 : 0) - c.warp) * 0.12;
+      c.warp += ((hovered === c ? 1 : 0) - c.warp) * k(0.12);
       if (c.img && !reduced) {
         if (c.warp > 0.004) {
-          c.gl ??= createCoverGL(c.img);
+          if (!c.glTried) {
+            c.glTried = true;
+            c.gl = createCoverGL(c.img);
+          }
           c.gl?.draw(c.warp, (tt.x + 1) / 2, 1 - (tt.y + 1) / 2);
         } else c.gl?.hide();
-      }
-      if (c.sheen) {
-        if (tt.a > 0.002) {
-          const ox = ((tt.x + 1) / 2) * 100;
-          const oy = ((tt.y + 1) / 2) * 100;
-          // light-only glare that slides with the tilt (no dark spot)
-          c.sheen.style.backgroundImage = `linear-gradient(${115 + tt.x * 25}deg, rgba(255,255,255,0) ${oy * 0.4 + ox * 0.3 - 10}%, rgba(255,255,255,${0.22 * tt.a}) ${oy * 0.4 + ox * 0.3 + 8}%, rgba(255,255,255,0) ${oy * 0.4 + ox * 0.3 + 30}%)`;
-        } else if (c.sheen.style.backgroundImage) c.sheen.style.backgroundImage = '';
       }
 
       c.el.style.transform =
@@ -393,20 +404,36 @@ export function initWork(
         tiltStr +
         ` scale(${p.s * squeeze}) skewX(${sk}deg)` +
         (Math.abs(((p.ry % 360) + 540) % 360 - 180) > 90 ? ' scaleX(-1)' : '');
-      const vis = visible().includes(c);
-      c.el.style.opacity = String(p.o);
-      c.el.style.zIndex = String(Math.round(1000 + p.z));
-      c.el.style.pointerEvents = vis && p.o > 0.3 ? 'auto' : 'none';
-      c.el.tabIndex = vis ? 0 : -1;
+      const isVis = frame.vis.includes(c);
+      const o = c.out;
+      if (Math.abs(p.o - o.o) > 0.002) {
+        o.o = p.o;
+        c.el.style.opacity = String(p.o);
+      }
+      const z = Math.round(1000 + p.z);
+      if (z !== o.z) {
+        o.z = z;
+        c.el.style.zIndex = String(z);
+      }
+      const live = isVis && p.o > 0.3;
+      if (live !== o.live) {
+        o.live = live;
+        c.el.style.pointerEvents = live ? 'auto' : 'none';
+      }
+      // filtered-out cards leave the tab order and the accessibility tree
+      if (isVis !== o.vis) {
+        o.vis = isVis;
+        c.el.tabIndex = isVis ? 0 : -1;
+        c.el.toggleAttribute('inert', !isVis);
+      }
     }
 
     // the whole section leans toward the pointer too
     const wtx = inside && !reduced ? (mx / window.innerWidth) * 2 - 1 : 0;
     const wty = inside && !reduced ? (my / window.innerHeight) * 2 - 1 : 0;
-    world3d.x += (wtx - world3d.x) * 0.06;
-    world3d.y += (wty - world3d.y) * 0.06;
+    world3d.x += (wtx - world3d.x) * k(0.06);
+    world3d.y += (wty - world3d.y) * k(0.06);
     world.style.transform = `rotateX(${-world3d.y * WORLD_TILT.x}deg) rotateY(${world3d.x * WORLD_TILT.y}deg)`;
-
   }
   gsap.ticker.add(render);
 
@@ -496,16 +523,28 @@ export function initWork(
     cursor?.classList.remove('is-on');
   };
   const enters = cards.map((c) => {
+    // touch has no hover: a tap just opens the case (no tilt, WebGL warp or cursor disc)
+    const onPtr = (e: PointerEvent) => e.pointerType !== 'touch' && !dragging && showTag(c);
     const on = () => !dragging && showTag(c);
     const off = () => hideTag(c);
-    c.el.addEventListener('pointerenter', on);
+    c.el.addEventListener('pointerenter', onPtr);
     c.el.addEventListener('pointerleave', off);
-    c.el.addEventListener('focus', on);
+    // tabbing to a card brings it to the front of the ring / row
+    const onFocus = () => {
+      if (view !== 'grid' && !paused && c.el.matches(':focus-visible')) {
+        const idx = visible().indexOf(c);
+        const base = Math.round(target);
+        if (idx >= 0) target = base + (view === 'slider' && !sliderWraps() ? idx - base : wrap(idx - base, visible().length));
+        autoHold = performance.now() + 2500;
+      }
+      on();
+    };
+    c.el.addEventListener('focus', onFocus);
     c.el.addEventListener('blur', off);
     return () => {
-      c.el.removeEventListener('pointerenter', on);
+      c.el.removeEventListener('pointerenter', onPtr);
       c.el.removeEventListener('pointerleave', off);
-      c.el.removeEventListener('focus', on);
+      c.el.removeEventListener('focus', onFocus);
       c.el.removeEventListener('blur', off);
     };
   });
@@ -515,7 +554,7 @@ export function initWork(
     my = e.clientY;
     cx?.(mx);
     cy?.(my);
-    inside = my < window.innerHeight - NO_TILT_BOTTOM;
+    inside = e.pointerType !== 'touch' && my < window.innerHeight - NO_TILT_BOTTOM;
   };
   const onOut = () => (inside = false);
   window.addEventListener('pointermove', onPointer);
@@ -524,6 +563,7 @@ export function initWork(
   stage.addEventListener('pointerdown', onDown);
   window.addEventListener('pointermove', onMove);
   window.addEventListener('pointerup', onUp);
+  window.addEventListener('pointercancel', onUp);
   stage.addEventListener('click', onClick);
   window.addEventListener('keydown', onKey);
 
@@ -548,11 +588,11 @@ export function initWork(
       stage.removeEventListener('pointerdown', onDown);
       window.removeEventListener('pointermove', onMove);
       window.removeEventListener('pointerup', onUp);
+      window.removeEventListener('pointercancel', onUp);
       stage.removeEventListener('click', onClick);
       window.removeEventListener('keydown', onKey);
       dots?.destroy();
       cursor?.classList.remove('is-on');
-      void introDone;
     },
   };
 }
