@@ -268,7 +268,7 @@ body:not(.is-work) .ctrl { opacity: 0; transform: translateY(var(--s-4)); pointe
 html.is-loaded .loader { display: none; }
 
 /* ---------- work stage ---------- */
-.page--work { height: 100vh; height: 100dvh; overflow: hidden; }
+.page--work { height: 100vh; height: 100dvh; overflow: hidden; background: #FCFCFD; }
 .stage {
   position: fixed; inset: 0;
   perspective: 1500px;
@@ -411,9 +411,9 @@ html.is-loaded .loader { display: none; }
 @media (max-width: 767px) { .services { grid-template-columns: 1fr; padding-top: var(--s-24); } .svc-preview { display: none; } }
 
 /* ---------- about (laurent.fyi + joshpuckett.me) ---------- */
-.about { position: relative; --bg-about: #FCFCFD; background: var(--bg-about); }
+.about { position: relative; }
 .btn.about-mail { position: absolute; top: var(--s-6); right: var(--gutter); }
-.about-content { position: relative; z-index: 2; background: var(--bg-about); padding: var(--s-32) var(--gutter); border-radius: 0 0 var(--r-l) var(--r-l); box-shadow: var(--shadow-l); }
+.about-content { position: relative; z-index: 2; background: var(--bg); padding: var(--s-32) var(--gutter); border-radius: 0 0 var(--r-l) var(--r-l); box-shadow: var(--shadow-l); }
 .about-col { max-width: 560px; margin: 0 auto; }
 .timeline { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--s-12); }
 .tl-item { display: grid; gap: var(--s-2); }
