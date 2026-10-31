@@ -291,7 +291,7 @@ html.is-loaded .loader { display: none; }
   position: absolute; inset: 0;
   border-radius: var(--r-card);
   overflow: hidden;
-  box-shadow: var(--highlight), var(--shadow-m);
+  box-shadow: var(--highlight);
 }
 .card-face .ph, .card-face img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
 .card-gl { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; pointer-events: none; z-index: 1; }
