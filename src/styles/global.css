@@ -394,13 +394,12 @@ html.is-loaded .loader { display: none; }
 }
 
 /* ---------- services (leoleo.studio) ---------- */
-.services { padding: var(--s-32) var(--gutter) var(--s-40); min-height: 100vh; min-height: 100dvh; display: grid; grid-template-columns: 1fr auto; gap: var(--s-12); }
+.services { padding: var(--s-32) var(--gutter) var(--s-40); min-height: 100vh; min-height: 100dvh; display: grid; place-items: center; text-align: center; }
 .svc-list { list-style: none; margin: 0; padding: 0; }
 .svc-item { padding-bottom: 0.08em; }
-.svc-item a { display: block; font-size: var(--fs-2xl); line-height: var(--lh-display); letter-spacing: var(--ls-display); font-weight: 400; transition: opacity 0.4s var(--ease-ui); }
+.svc-item a { display: block; font-size: var(--fs-xl); line-height: var(--lh-display); letter-spacing: var(--ls-display); font-weight: 400; transition: opacity 0.4s var(--ease-ui); }
 .svc-item a span { display: inline-block; will-change: transform; }
 .svc-list.is-hovering .svc-item:not(.is-hover) a { opacity: 0.22; }
-.svc-details { list-style: none; margin: var(--s-2) 0 0; padding: 0; color: var(--ink-2); line-height: var(--lh-body); }
 .svc-preview {
   position: fixed; left: 0; top: 0; z-index: 20; pointer-events: none;
   width: 240px; aspect-ratio: 4 / 3; border-radius: var(--r-m); overflow: hidden;
@@ -408,7 +407,7 @@ html.is-loaded .loader { display: none; }
   box-shadow: var(--shadow-l);
 }
 .svc-preview .ph { position: absolute; inset: 0; }
-@media (max-width: 767px) { .services { grid-template-columns: 1fr; padding-top: var(--s-24); } .svc-preview { display: none; } }
+@media (max-width: 767px) { .services { padding-top: var(--s-24); } .svc-preview { display: none; } }
 
 /* ---------- about (laurent.fyi + joshpuckett.me) ---------- */
 .about { position: relative; }

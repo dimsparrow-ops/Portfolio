@@ -33,22 +33,12 @@ export const pageIndex = (id: PageId) => pages.findIndex((p) => p.id === id);
 
 export const services = [
   { title: 'Research & strategy', hue: 212 },
-  { title: '0 → 1 product design', hue: 28 },
-  { title: 'UX/UI design', hue: 265 },
+  { title: 'Product design', hue: 28 },
+  { title: 'Enterprise UX', hue: 265 },
   { title: 'Design systems', hue: 150 },
-  { title: 'Design management', hue: 340 },
-];
-
-export const serviceDetails = [
-  'Competitor analysis',
-  'User interviews',
-  'Usability testing',
-  'Concept prototyping',
-  'Interaction design',
-  'Accessibility',
-  'Design systems & libraries',
-  '1:1s and PDPs',
-  'Career goals & growth',
+  { title: 'Design engineering', hue: 190 },
+  { title: 'Design leadership', hue: 340 },
+  { title: 'Uncharted problems', hue: 50 },
 ];
 
 /** About timeline, newest first. Regular sentence case; `when` is the mono label. */

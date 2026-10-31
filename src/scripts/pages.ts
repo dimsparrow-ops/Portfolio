@@ -20,7 +20,6 @@ export function initServices(root: HTMLElement, entering: boolean): Destroy {
   const spans = items.map((it) => it.querySelector<HTMLElement>('span')!);
   if (entering) {
     gsap.from(spans, { yPercent: 110, duration: 0.8, ease: ease.out, stagger: stagger.item, delay: 0.15 });
-    gsap.from(root.querySelectorAll('.svc-details li'), { opacity: 0, y: 8, duration: dur.base, ease: ease.out, stagger: 0.03, delay: 0.5 });
   }
 
   const onMove = (e: PointerEvent) => {
