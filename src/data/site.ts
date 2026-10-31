@@ -32,13 +32,13 @@ export type PageId = (typeof pages)[number]['id'];
 export const pageIndex = (id: PageId) => pages.findIndex((p) => p.id === id);
 
 export const services = [
-  { title: 'Research & strategy', hue: 212 },
-  { title: 'Product design', hue: 28 },
-  { title: 'Enterprise UX', hue: 265 },
-  { title: 'Design systems', hue: 150 },
-  { title: 'Design engineering', hue: 190 },
-  { title: 'Design leadership', hue: 340 },
-  { title: 'Uncharted problems', hue: 50 },
+  { title: 'Research & strategy', hue: 212, text: 'Interviews, usability tests or competitor deep-dives, chosen to fit the question rather than a checklist. Then turning what I learn into product direction: priorities, a roadmap and a clear link to business goals.' },
+  { title: 'Product design', hue: 28, text: 'No two products work the same way, so I start by digging into the numbers and the people behind them. Then I design end to end, looking for the point where what users need and what the business needs actually meet.' },
+  { title: 'Enterprise UX', hue: 265, text: 'Workflows with dozens of edge cases, layered permissions and admin tools for people who use them eight hours a day. Complex on the inside, obvious on the outside.' },
+  { title: 'Design systems', hue: 150, text: 'Components, tokens, accessibility and writing rules, shaped around how your teams actually work. Built to scale, documented to last.' },
+  { title: 'Design engineering', hue: 190, text: 'Turning ideas into working things with AI: coded prototypes, internal tools and small products of my own, built faster than a spec could be written. AI is part of my everyday process, from research to shipping.' },
+  { title: 'Design leadership', hue: 340, text: 'Owning the design outcome, not just the files: setting direction, making the hard calls and standing behind them. Keeping product, engineering and stakeholders aligned, and growing the designers around me through honest critique and 1:1s.' },
+  { title: 'Uncharted problems', hue: 50, text: "If it's messy, unfamiliar or a little bit scary, I'm interested. The projects that stretch me are usually the ones I do best." },
 ];
 
 /** About timeline, newest first. Regular sentence case; `when` is the mono label. */

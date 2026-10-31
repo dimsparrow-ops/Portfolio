@@ -400,14 +400,13 @@ html.is-loaded .loader { display: none; }
 .svc-item a { display: block; font-size: var(--fs-xl); line-height: 1.2; letter-spacing: var(--ls-display); font-weight: 400; transition: opacity 0.4s var(--ease-ui); }
 .svc-item a span { display: inline-block; will-change: transform; }
 .svc-list.is-hovering .svc-item:not(.is-hover) a { opacity: 0.22; }
-.svc-preview {
-  position: fixed; left: 0; top: 0; z-index: 20; pointer-events: none;
-  width: 240px; aspect-ratio: 4 / 3; border-radius: var(--r-m); overflow: hidden;
-  opacity: 0; transform: scale(0.6);
-  box-shadow: var(--shadow-l);
+/* hover description: sits under the list, text swaps in place */
+.svc-desc {
+  position: fixed; left: 0; right: 0; z-index: 20; margin: 0 auto; pointer-events: none;
+  width: min(720px, calc(100vw - 2 * var(--gutter))); text-align: center; text-wrap: balance;
+  color: var(--ink-body); opacity: 0;
 }
-.svc-preview .ph { position: absolute; inset: 0; }
-@media (max-width: 767px) { .services { padding-top: var(--s-24); } .svc-preview { display: none; } }
+@media (max-width: 767px) { .services { padding-top: var(--s-24); } .svc-desc { display: none; } }
 
 /* ---------- about (laurent.fyi + joshpuckett.me) ---------- */
 .about { position: relative; }

@@ -1,6 +1,5 @@
 ---
 import Base from '../layouts/Base.astro';
-import Ph from '../components/Ph.astro';
 import { services } from '../data/site';
 ---
 <Base page="services" title="Services">
@@ -9,12 +8,12 @@ import { services } from '../data/site';
       <h1 class="sr-only">Services</h1>
       <ul class="svc-list" data-svc-list>
         {services.map((s, i) => (
-          <li class="svc-item" data-hue={s.hue} data-i={i}>
+          <li class="svc-item" data-text={s.text} data-i={i}>
             <a href="/about/#say-hi" data-route data-sayhi><span>{s.title}</span></a>
           </li>
         ))}
       </ul>
     </section>
-    <div class="svc-preview" data-svc-preview><Ph hue={212} label="preview" /></div>
+    <p class="svc-desc" data-svc-desc aria-live="polite"></p>
   </main>
 </Base>
