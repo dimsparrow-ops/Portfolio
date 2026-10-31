@@ -416,13 +416,13 @@ html.is-loaded .loader { display: none; }
 .svc-desc-text { margin: 0; font-size: 16px; line-height: var(--lh-body); text-wrap: pretty; }
 .svc-desc-bar { display: flex; align-items: center; gap: var(--s-2); }
 .svc-desc-bar svg { width: 20px; height: 20px; flex: none; }
-.svc-plus { display: grid; place-items: center; width: 32px; height: 32px; }
+.svc-plus { display: grid; place-items: center; width: 32px; height: 32px; margin-right: auto; }
 .svc-think {
   display: inline-flex; align-items: center; gap: var(--s-1); height: 32px; padding: 0 var(--s-3);
   border-radius: var(--r-pill); background: #e9eef9; color: #3b66c9; font-size: 12px;
 }
 .svc-send {
-  display: inline-flex; align-items: center; gap: var(--s-2); height: 36px; padding: 0 var(--s-4) 0 var(--s-5); margin-left: auto;
+  display: inline-flex; align-items: center; gap: var(--s-2); height: 36px; padding: 0 var(--s-4) 0 var(--s-5);
   border-radius: var(--r-pill); background: var(--key); color: var(--on-dark); font-size: 16px; white-space: nowrap;
 }
 
