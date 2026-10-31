@@ -101,12 +101,18 @@ export function initAbout(root: HTMLElement): Destroy {
 
   // letters rise as the section is uncovered
   gsap.set(letters, { yPercent: 30, scaleY: 0.4 });
+  let risen = false; // dock stays idle until the rise ends, so the two never fight over scale
   triggers.push(
     ScrollTrigger.create({
       trigger: hi,
       start: 'top 70%',
+      once: true,
       onEnter: () =>
-        gsap.to(letters, { yPercent: 0, scaleY: 1, duration: 0.9, ease: 'elastic.out(1, 0.5)', stagger: 0.04, overwrite: 'auto' }),
+        // no overwrite: 'auto' here, it would kill the dock's quickTo tweens on the same letters
+        gsap.to(letters, {
+          yPercent: 0, scaleY: 1, duration: 0.9, ease: 'elastic.out(1, 0.5)', stagger: 0.04,
+          onComplete: () => (risen = true),
+        }),
     }),
   );
 
@@ -116,6 +122,7 @@ export function initAbout(root: HTMLElement): Destroy {
     sx: gsap.quickTo(l, 'scaleX', { duration: 0.35, ease: 'power3' }),
   }));
   const onMove = (e: PointerEvent) => {
+    if (!risen) return;
     letters.forEach((l, i) => {
       const r = l.getBoundingClientRect();
       const d = (e.clientX - (r.left + r.width / 2)) / (r.width * 1.4);
