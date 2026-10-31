@@ -398,7 +398,8 @@ html.is-loaded .loader { display: none; }
 /* ---------- services (leoleo.studio) ---------- */
 .services { box-sizing: border-box; padding: var(--s-16) var(--gutter); height: 100vh; height: 100dvh; overflow: hidden; display: grid; place-items: center; text-align: center; }
 .svc-list { list-style: none; margin: 0; padding: 0; }
-.svc-item { padding-block: 0.04em; } /* items clip (overflow hidden for the reveal): keep room for descenders */
+/* items clip (overflow hidden for the reveal): keep room for descenders and for the 28px hover shift */
+.svc-item { padding-block: 0.04em; padding-inline: var(--s-8); }
 .svc-item a { display: block; font-size: var(--fs-xl); line-height: 1.2; letter-spacing: var(--ls-display); font-weight: 400; transition: opacity 0.4s var(--ease-ui); }
 .svc-item a span { display: inline-block; will-change: transform; }
 .svc-list.is-hovering .svc-item:not(.is-hover) a { opacity: 0.22; }
