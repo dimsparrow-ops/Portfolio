@@ -1,28 +1,22 @@
 ---
 import Base from '../layouts/Base.astro';
-import { site, timeline, socials, stats } from '../data/site';
+import { site, timeline, socials } from '../data/site';
 ---
 <Base page="about" title="About">
   <main class="page page--about about" data-page="about">
     <div class="about-content">
       <a class="btn about-mail" href={`mailto:${site.email}`} title={site.email}>Email me</a>
-      <section class="about-intro">
-        <h1>{site.name}</h1>
-        <p>Hey, I'm Dim — a product designer from Ukraine, living in Lisbon. I've been designing since 2016 and today I'm {site.role} at Qubstudio, designing experiences for big SaaS products and systems.</p>
-        <p>I also led a team of 10 designers as a Design Manager for three years, and I like the work where research, systems thinking and craft meet: SaaS platforms, mobile apps and AI-driven products.</p>
-        <div class="about-stats">{stats.map((s) => <div class="metric"><b>{s.value}</b><span>{s.label}</span></div>)}</div>
-      </section>
-
-      <ol class="timeline">
-        {timeline.map((t) => (
-          <li class="tl-item" data-reveal>
-            <span class="tl-when mono">{t.when} · {t.where}</span>
-            <h3>{t.title}</h3>
-            <p>{t.text}</p>
-          </li>
-        ))}
-      </ol>
-
+      <div class="about-col">
+        <h1 class="sr-only">{site.name}</h1>
+        <ol class="timeline">
+          {timeline.map((t) => (
+            <li class="tl-item" data-reveal>
+              <span class="tl-when mono">{t.when}</span>
+              <p>{t.text}</p>
+            </li>
+          ))}
+        </ol>
+      </div>
     </div>
 
     <section class="hi" id="say-hi" aria-label="Summon me">

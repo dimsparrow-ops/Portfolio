@@ -11,6 +11,14 @@
   font-display: swap;
 }
 
+@font-face {
+  font-family: 'IBM Plex Mono';
+  src: url('/fonts/IBMPlexMono-Regular.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
 /* ---------- tokens ----------
    Every size is on a 4px grid. Exceptions on purpose: 1px hairlines, 2px focus ring.
    Mirrored in the UI kit (tokens.json). */
@@ -36,6 +44,7 @@
 
   /* type */
   --font: 'Google Sans Flex', 'Inter Tight Variable', 'Inter Tight', system-ui, sans-serif;
+  --font-mono: 'IBM Plex Mono', ui-monospace, 'SF Mono', Menlo, monospace;
   --font-display: 'Archivo Variable', var(--font);
   --fs-xs: 12px;                                  /* caption, tag, keycap */
   --fs-s: 16px;                                   /* body, UI */
@@ -110,7 +119,7 @@ a { color: inherit; text-decoration: none; }
 button { font: inherit; color: inherit; background: none; border: 0; padding: 0; cursor: pointer; }
 img, video { display: block; max-width: 100%; }
 /* caption style (class name kept from the mono era) */
-.mono { font-size: var(--fs-xs); line-height: var(--lh-ui); letter-spacing: var(--ls-caps); text-transform: uppercase; }
+.mono { font-family: var(--font-mono); font-size: var(--fs-xs); line-height: var(--lh-ui); letter-spacing: var(--ls-caps); text-transform: uppercase; }
 .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 :focus-visible { outline: 2px solid var(--blue); outline-offset: var(--s-1); border-radius: var(--r-s); }
 
@@ -155,7 +164,7 @@ img, video { display: block; max-width: 100%; }
   position: relative; z-index: 1; margin-left: var(--s-2);
   display: inline-flex; align-items: center; gap: var(--s-2);
   height: calc(var(--control-h) - 4px); padding: 0 var(--s-4); white-space: nowrap;
-  font: 500 var(--fs-xs)/1 var(--font); letter-spacing: var(--ls-caps); text-transform: uppercase;
+  font: 400 var(--fs-xs)/1 var(--font-mono); letter-spacing: var(--ls-caps); text-transform: uppercase;
   color: var(--on-dark);
   background: linear-gradient(180deg, color-mix(in srgb, var(--key), #fff 28%) 0%, var(--key) 100%);
   border-radius: var(--r-pill);
@@ -405,17 +414,11 @@ html.is-loaded .loader { display: none; }
 .about { position: relative; }
 .btn.about-mail { position: absolute; top: var(--s-6); right: var(--gutter); }
 .about-content { position: relative; z-index: 2; background: var(--bg); padding: var(--s-32) var(--gutter); border-radius: 0 0 var(--r-l) var(--r-l); box-shadow: var(--shadow-l); }
-.about-intro { max-width: 640px; margin: 0 auto var(--s-16); }
-.about-intro h1 { font-size: var(--fs-m); line-height: var(--lh-ui); font-weight: 500; margin: 0 0 var(--s-4); letter-spacing: var(--ls-text); }
-.about-intro p { margin: 0 0 var(--s-4); color: var(--ink-body); }
-.about-stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--s-6); margin-top: var(--s-8); padding-top: var(--s-6); border-top: 1px solid var(--line); }
-.about-stats .metric b { font-size: var(--fs-l); }
-@media (max-width: 767px) { .about-stats { grid-template-columns: repeat(2, 1fr); } }
-.timeline { list-style: none; margin: 0 auto; padding: 0; max-width: 640px; }
-.tl-item { padding: var(--s-6) 0; display: grid; gap: var(--s-3); }
+.about-col { max-width: 384px; margin: 0 auto; }
+.timeline { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--s-12); }
+.tl-item { display: grid; gap: var(--s-2); }
 .tl-when { color: var(--ink-2); }
-.tl-item h3 { margin: 0; font-size: var(--fs-m); line-height: var(--lh-ui); font-weight: 500; letter-spacing: var(--ls-text); }
-.tl-item p { margin: 0; color: var(--ink-body); }
+.tl-item p { margin: 0; color: var(--ink); text-transform: lowercase; text-wrap: pretty; }
 .btn {
   position: relative; overflow: hidden; isolation: isolate;
   display: inline-flex; align-items: center; gap: var(--s-2); height: var(--control-h); padding: 0 var(--s-4); border-radius: var(--r-pill);
