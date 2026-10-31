@@ -43,7 +43,7 @@ export const services = [
 
 /** About timeline, newest first. Regular sentence case; `when` is the mono label. */
 export const timeline = [
-  { when: 'Today · 2026 · Lisbon, Portugal', text: "I'm Dim. I live in Lisbon and design the kind of software nobody posts on Dribbble but everybody depends on: the systems behind schools, hospitals, banks and HR teams. My favourite moment is when something hopelessly complicated suddenly feels obvious." },
+  { when: 'Today · 2026 · Lisbon, Portugal', text: "I'm Dim. I live in Lisbon and design the kind of software nobody posts on Dribbble but everybody depends on: the systems behind schools, hospitals, banks and HR teams." },
   { ai: true, when: 'AI · Ongoing · Everywhere', text: 'The day AI tools showed up, my curiosity went into overdrive. I poke at every new model, plug them into how I design, and build odd little experiments and real products with them. Half playground, half power tool.' },
   { when: 'Qubstudio · 2023 — Now · Lead Product Designer', text: "Several products walk into one login. I'm merging a US life-safety ecosystem used in schools and hospitals into a single platform, leading the design team that makes it happen. On the side: design systems for fintechs, an HR-tech redesign, and AI products. Check the main page." },
   { when: 'Qubstudio · 2021 — 2025 · Design Manager', text: 'Ten designers, countless 1:1s, and a competency matrix that turned “How do I grow?” into a map. Somewhere along the way I realized a team is just another system worth designing.' },
