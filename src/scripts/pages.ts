@@ -9,6 +9,7 @@ type Destroy = () => void;
 export function initServices(root: HTMLElement, entering: boolean): Destroy {
   const list = root.querySelector<HTMLElement>('[data-svc-list]')!;
   const desc = root.querySelector<HTMLElement>('[data-svc-desc]')!;
+  const descText = desc.querySelector<HTMLElement>('[data-svc-text]')!;
   const items = Array.from(list.querySelectorAll<HTMLElement>('.svc-item'));
 
   const xTo = gsap.quickTo(desc, 'x', { duration: dur.base, ease: ease.out });
@@ -37,7 +38,7 @@ export function initServices(root: HTMLElement, entering: boolean): Destroy {
     const enter = () => {
       list.classList.add('is-hovering');
       it.classList.add('is-hover');
-      desc.textContent = it.dataset.text ?? '';
+      descText.textContent = it.dataset.text ?? '';
       gsap.to(span, { x: 28, duration: dur.base, ease: ease.out });
       gsap.to(desc, { opacity: 1, scale: 1, duration: 0.45, ease: ease.out });
     };

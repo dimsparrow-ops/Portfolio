@@ -404,14 +404,27 @@ html.is-loaded .loader { display: none; }
 /* hover description rides the pointer like the old preview card: tilt, scale in/out */
 .svc-desc {
   position: fixed; left: 0; top: 0; z-index: 20; margin: 0; pointer-events: none;
-  width: 520px; max-width: calc(100vw - 2 * var(--gutter)); padding: var(--s-4); border-radius: var(--r-m);
-  font-size: 14px; line-height: var(--lh-body); text-align: left; text-wrap: pretty;
+  width: 560px; max-width: calc(100vw - 2 * var(--gutter)); padding: var(--s-5) var(--s-6) var(--s-4); border-radius: var(--r-l);
+  display: grid; gap: var(--s-4); text-align: left;
   color: var(--ink); background: rgba(255, 255, 255, 0.4); box-shadow: var(--shadow-l);
   /* via a variable: the CSS minifier otherwise drops the unprefixed property */
   --glass: blur(24px) saturate(1.4);
   backdrop-filter: var(--glass);
   -webkit-backdrop-filter: var(--glass);
   opacity: 0; transform: scale(0.6);
+}
+.svc-desc-text { margin: 0; font-size: 20px; line-height: var(--lh-body); text-wrap: pretty; }
+.svc-desc-bar { display: flex; align-items: center; gap: var(--s-2); }
+.svc-desc-bar svg { width: 24px; height: 24px; flex: none; }
+.svc-plus { display: grid; place-items: center; width: 40px; height: 40px; margin-right: auto; }
+.svc-think {
+  display: inline-flex; align-items: center; gap: var(--s-2); height: 40px; padding: 0 var(--s-4);
+  border-radius: var(--r-pill); background: rgba(0, 0, 0, 0.06); color: var(--blue); font-size: 16px;
+}
+.svc-mic { display: grid; place-items: center; width: 40px; height: 40px; }
+.svc-send {
+  display: inline-flex; align-items: center; gap: var(--s-2); height: 40px; padding: 0 var(--s-4) 0 var(--s-5);
+  border-radius: var(--r-pill); background: var(--ink); color: var(--bg); font-size: 16px;
 }
 @media (max-width: 767px) { .services { padding-top: var(--s-24); } .svc-desc { display: none; } }
 
