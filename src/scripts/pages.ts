@@ -9,7 +9,24 @@ type Destroy = () => void;
 export function initServices(root: HTMLElement, entering: boolean): Destroy {
   const list = root.querySelector<HTMLElement>('[data-svc-list]')!;
   const desc = root.querySelector<HTMLElement>('[data-svc-desc]')!;
-  const descText = desc.querySelector<HTMLElement>('[data-svc-text]')!;
+  const typed = desc.querySelector<HTMLElement>('[data-svc-typed]')!;
+  const rest = desc.querySelector<HTMLElement>('[data-svc-rest]')!;
+  const type = { n: 0 };
+  // typed live on hover; the untyped rest stays invisible so the box never changes size
+  const write = (full: string) => {
+    gsap.killTweensOf(type);
+    const text = full.replace(/\.$/, '');
+    const put = () => {
+      const n = Math.round(type.n);
+      typed.textContent = text.slice(0, n);
+      rest.textContent = text.slice(n);
+    };
+    type.n = reduced ? text.length : 0;
+    put();
+    if (reduced) return;
+    // ~110 chars/s, far quicker than reading speed, capped so long texts stay snappy
+    gsap.to(type, { n: text.length, duration: Math.min(text.length / 110, 1.6), ease: 'none', delay: 0.12, onUpdate: put });
+  };
   const items = Array.from(list.querySelectorAll<HTMLElement>('.svc-item'));
 
   const xTo = gsap.quickTo(desc, 'x', { duration: dur.base, ease: ease.out });
@@ -38,7 +55,7 @@ export function initServices(root: HTMLElement, entering: boolean): Destroy {
     const enter = () => {
       list.classList.add('is-hovering');
       it.classList.add('is-hover');
-      descText.textContent = it.dataset.text ?? '';
+      write(it.dataset.text ?? '');
       gsap.to(span, { x: 28, duration: dur.base, ease: ease.out });
       gsap.to(desc, { opacity: 1, scale: 1, duration: 0.45, ease: ease.out });
     };
@@ -59,7 +76,7 @@ export function initServices(root: HTMLElement, entering: boolean): Destroy {
   return () => {
     window.removeEventListener('pointermove', onMove);
     offs.forEach((f) => f());
-    gsap.killTweensOf([desc, ...spans]);
+    gsap.killTweensOf([desc, type, ...spans]);
   };
 }
 

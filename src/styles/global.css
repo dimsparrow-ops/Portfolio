@@ -415,6 +415,14 @@ html.is-loaded .loader { display: none; }
   opacity: 0; transform: scale(0.6);
 }
 .svc-desc-text { margin: 0; font-size: 16px; line-height: var(--lh-body); text-wrap: pretty; }
+.svc-rest { visibility: hidden; }
+.svc-caret { position: relative; display: inline-block; width: 0; height: 1em; vertical-align: text-bottom; }
+.svc-caret::after {
+  content: ''; position: absolute; left: 1px; top: 2px; width: 2px; height: calc(100% - 4px); background: var(--key);
+  animation: svc-blink 1s steps(1) infinite;
+}
+@keyframes svc-blink { 50% { opacity: 0; } }
+@media (prefers-reduced-motion: reduce) { .svc-caret::after { animation: none; } }
 .svc-desc-bar { display: flex; align-items: center; gap: var(--s-2); }
 .svc-desc-bar svg { width: 20px; height: 20px; flex: none; }
 .svc-plus { display: grid; place-items: center; width: 32px; height: 32px; margin-right: auto; }
