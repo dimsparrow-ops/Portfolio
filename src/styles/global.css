@@ -417,7 +417,7 @@ html.is-loaded .loader { display: none; }
 .about-col { max-width: 560px; margin: 0 auto; }
 .timeline { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--s-12); }
 .tl-item { display: grid; gap: var(--s-2); }
-.tl-when { color: var(--ink-2); text-transform: none; font-size: 14px; /* +2px on purpose, off the 4px grid */ }
+.tl-when { color: var(--ink-2); text-transform: lowercase; font-size: 14px; /* +2px on purpose, off the 4px grid */ }
 /* AI section: native cursor is swapped for a sparkle trail (see initAbout) */
 @media (hover: hover) and (pointer: fine) { .tl-item.is-spark, .tl-item.is-spark * { cursor: none; } }
 .sparks { position: fixed; left: 0; top: 0; z-index: 90; pointer-events: none; }
