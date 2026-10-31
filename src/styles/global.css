@@ -418,6 +418,11 @@ html.is-loaded .loader { display: none; }
 .timeline { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--s-12); }
 .tl-item { display: grid; gap: var(--s-2); }
 .tl-when { color: var(--ink-2); }
+/* AI section: native cursor is swapped for a sparkle trail (see initAbout) */
+@media (hover: hover) and (pointer: fine) { .tl-item.is-spark, .tl-item.is-spark * { cursor: none; } }
+.sparks { position: fixed; left: 0; top: 0; z-index: 90; pointer-events: none; }
+.spark { position: absolute; left: 0; top: 0; display: block; opacity: 0; will-change: transform; }
+
 .tl-item p { margin: 0; color: var(--ink); text-transform: lowercase; text-wrap: pretty; }
 .btn {
   position: relative; overflow: hidden; isolation: isolate;

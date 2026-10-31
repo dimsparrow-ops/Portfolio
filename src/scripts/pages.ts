@@ -132,13 +132,95 @@ export function initAbout(root: HTMLElement): Destroy {
     hi.addEventListener('pointerleave', onLeave);
   }
 
+  const stopSparks = initSparks(root);
+
   return () => {
+    stopSparks();
     triggers.forEach((t) => t.kill());
     hi.removeEventListener('pointermove', onMove);
     hi.removeEventListener('pointerleave', onLeave);
     cancelAnimationFrame(fitRaf);
     window.removeEventListener('resize', onResize);
     gsap.killTweensOf(letters);
+  };
+}
+
+/** AI timeline item: the cursor turns into a trail of 4-point sparkles, each following with its own lag. */
+function initSparks(root: HTMLElement): Destroy {
+  const item = root.querySelector<HTMLElement>('[data-ai]');
+  if (!item || !finePointer() || reduced) return () => {};
+
+  const star = (id: number) =>
+    `<svg viewBox="0 0 24 24" width="100%" height="100%" aria-hidden="true"><defs><linearGradient id="spk${id}" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#4C8DF6"/><stop offset=".55" stop-color="#9B72F2"/><stop offset="1" stop-color="#F26D90"/></linearGradient></defs><path fill="url(#spk${id})" d="M12 0c.6 6.6 4.8 10.8 12 12-7.2 1.2-11.4 5.4-12 12-.6-6.6-4.8-10.8-12-12C7.2 10.8 11.4 6.6 12 0z"/></svg>`;
+  // size (4px grid), offset from the pointer, follow lag (s), twinkle period (s)
+  const cfg = [
+    { s: 24, x: 0, y: 0, lag: 0.12, t: 1.4 },
+    { s: 16, x: 20, y: -16, lag: 0.28, t: 1.1 },
+    { s: 12, x: -20, y: 16, lag: 0.42, t: 1.7 },
+    { s: 12, x: 24, y: 20, lag: 0.58, t: 1.3 },
+    { s: 8, x: -16, y: -20, lag: 0.74, t: 0.9 },
+  ];
+  const wrap = document.createElement('div');
+  wrap.className = 'sparks';
+  wrap.setAttribute('aria-hidden', 'true');
+  const els = cfg.map((c, i) => {
+    const el = document.createElement('span');
+    el.className = 'spark';
+    el.style.width = el.style.height = `${c.s}px`;
+    el.style.margin = `${-c.s / 2 + c.y}px 0 0 ${-c.s / 2 + c.x}px`;
+    el.innerHTML = star(i);
+    wrap.append(el);
+    return el;
+  });
+  document.body.append(wrap);
+
+  const to = els.map((el, i) => ({
+    x: gsap.quickTo(el, 'x', { duration: cfg[i].lag + 0.3, ease: ease.out }),
+    y: gsap.quickTo(el, 'y', { duration: cfg[i].lag + 0.3, ease: ease.out }),
+  }));
+  const twinkles = els.map((el, i) =>
+    gsap.to(el, { rotation: 90, duration: cfg[i].t * 2, ease: 'none', repeat: -1, paused: true }),
+  );
+  const pulses = els.map((el, i) =>
+    gsap.fromTo(el, { scale: 0.6 }, { scale: 1.1, duration: cfg[i].t, ease: 'sine.inOut', yoyo: true, repeat: -1, paused: true }),
+  );
+
+  let inside = false;
+  const move = (e: PointerEvent) => {
+    if (!inside) {
+      // first frame inside: snap to the pointer so the trail doesn't fly in from the corner
+      els.forEach((el) => gsap.set(el, { x: e.clientX, y: e.clientY }));
+      inside = true;
+      item.classList.add('is-spark');
+      els.forEach((el, i) => {
+        twinkles[i].play();
+        pulses[i].play();
+        gsap.to(el, { opacity: 1, duration: dur.base, ease: ease.out, delay: i * stagger.item, overwrite: 'auto' });
+      });
+    }
+    to.forEach((t) => (t.x(e.clientX), t.y(e.clientY)));
+  };
+  const leave = () => {
+    if (!inside) return;
+    inside = false;
+    item.classList.remove('is-spark');
+    els.forEach((el, i) => {
+      gsap.to(el, {
+        opacity: 0, duration: dur.micro, ease: ease.ui, delay: i * 0.02, overwrite: 'auto',
+        onComplete: () => (twinkles[i].pause(), pulses[i].pause()),
+      });
+    });
+  };
+  item.addEventListener('pointermove', move);
+  item.addEventListener('pointerleave', leave);
+
+  return () => {
+    item.removeEventListener('pointermove', move);
+    item.removeEventListener('pointerleave', leave);
+    twinkles.forEach((t) => t.kill());
+    pulses.forEach((t) => t.kill());
+    gsap.killTweensOf(els);
+    wrap.remove();
   };
 }
 

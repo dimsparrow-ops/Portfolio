@@ -10,7 +10,7 @@ import { site, timeline, socials } from '../data/site';
         <h1 class="sr-only">{site.name}</h1>
         <ol class="timeline">
           {timeline.map((t) => (
-            <li class="tl-item" data-reveal>
+            <li class="tl-item" data-reveal data-ai={t.ai ? "" : undefined}>
               <span class="tl-when mono">{t.when}</span>
               <p>{t.text}</p>
             </li>
