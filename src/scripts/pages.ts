@@ -10,22 +10,20 @@ export function initServices(root: HTMLElement, entering: boolean): Destroy {
   const list = root.querySelector<HTMLElement>('[data-svc-list]')!;
   const desc = root.querySelector<HTMLElement>('[data-svc-desc]')!;
   const typed = desc.querySelector<HTMLElement>('[data-svc-typed]')!;
-  const rest = desc.querySelector<HTMLElement>('[data-svc-rest]')!;
   const type = { n: 0 };
-  // typed live on hover; the untyped rest stays invisible so the box never changes size
+  // typed live on hover; the box grows line by line with the text
   const write = (full: string) => {
     gsap.killTweensOf(type);
     const text = full.replace(/\.$/, '');
     const put = () => {
       const n = Math.round(type.n);
       typed.textContent = text.slice(0, n);
-      rest.textContent = text.slice(n);
     };
     type.n = reduced ? text.length : 0;
     put();
     if (reduced) return;
-    // ~110 chars/s, far quicker than reading speed, capped so long texts stay snappy
-    gsap.to(type, { n: text.length, duration: Math.min(text.length / 110, 1.6), ease: 'none', delay: 0.12, onUpdate: put });
+    // ~170 chars/s, far quicker than reading speed, capped so long texts stay snappy
+    gsap.to(type, { n: text.length, duration: Math.min(text.length / 170, 1.1), ease: 'none', delay: 0.12, onUpdate: put });
   };
   const items = Array.from(list.querySelectorAll<HTMLElement>('.svc-item'));
 
