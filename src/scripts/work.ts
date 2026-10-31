@@ -194,7 +194,7 @@ export function initWork(
       return { w, h: w * RATIO, gap: 0 };
     }
     if (v === 'slider') {
-      const w = mobile ? vw * 0.86 : Math.min(vw * 0.325 * SCALE, (vh * 0.66) / RATIO, 500 * SCALE);
+      const w = mobile ? vw * 0.86 : sizes('showcase').w; // same card size as the showcase
       return { w, h: w * RATIO, gap: cardGap() };
     }
     // grid
