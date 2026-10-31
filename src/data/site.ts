@@ -51,15 +51,15 @@ export const serviceDetails = [
   'Career goals & growth',
 ];
 
-/** About timeline, newest first. `when` is the mono caps label, `text` renders lowercase. */
+/** About timeline, newest first. Regular sentence case; `when` is the mono label. */
 export const timeline = [
-  { when: 'Today · 2026 · Lisbon, Portugal', text: "i'm Dim. i live in Lisbon and design the kind of software nobody posts on dribbble but everybody depends on: the systems behind schools, hospitals, banks and hr teams. my favourite moment is when something hopelessly complicated suddenly feels obvious." },
-  { ai: true, when: 'AI · Ongoing · Everywhere', text: 'the day ai tools showed up, my curiosity went into overdrive. i poke at every new model, plug them into how i design, and build odd little experiments and real products with them. half playground, half power tool.' },
-  { when: 'Qubstudio · 2023 — Now · Lead Product Designer', text: "seven products walk into one login. i'm merging a us life-safety ecosystem used in thousands of schools and hospitals into a single platform, and onboarding shrank from 3–5 months to about six weeks. on the side: design systems for two fintechs, an hr-tech redesign that lifted conversion by 18%, and ai products. check the main page." },
-  { when: 'Qubstudio · 2021 — 2025 · Design Manager', text: 'ten designers, countless 1:1s, and a competency matrix that turned “how do i grow?” into a map. somewhere along the way i realized a team is just another system worth designing.' },
-  { when: 'Qubstudio · 2020 — 2023 · Product Designer', text: 'the deep-end years: dashboards, saas platforms and mobile apps for fintech, healthcare and safety clients. research, flows, pixels, handoff, repeat.' },
-  { when: 'PettersonApps · 2017 — 2020 · UX Designer', text: "wireframes, prototypes and usability tests where real people bravely tried my designs. that's where the fundamentals stuck." },
-  { when: 'Thinkmobiles · 2016 — 2017 · Web Designer', text: 'first design job. first icons, first layouts, and a lot of watching senior designers work their magic.' },
+  { when: 'Today · 2026 · Lisbon, Portugal', text: "I'm Dim. I live in Lisbon and design the kind of software nobody posts on Dribbble but everybody depends on: the systems behind schools, hospitals, banks and HR teams. My favourite moment is when something hopelessly complicated suddenly feels obvious." },
+  { ai: true, when: 'AI · Ongoing · Everywhere', text: 'The day AI tools showed up, my curiosity went into overdrive. I poke at every new model, plug them into how I design, and build odd little experiments and real products with them. Half playground, half power tool.' },
+  { when: 'Qubstudio · 2023 — Now · Lead Product Designer', text: "Seven products walk into one login. I'm merging a US life-safety ecosystem used in thousands of schools and hospitals into a single platform, and onboarding shrank from 3–5 months to about six weeks. On the side: design systems for two fintechs, an HR-tech redesign that lifted conversion by 18%, and AI products. Check the main page." },
+  { when: 'Qubstudio · 2021 — 2025 · Design Manager', text: 'Ten designers, countless 1:1s, and a competency matrix that turned “How do I grow?” into a map. Somewhere along the way I realized a team is just another system worth designing.' },
+  { when: 'Qubstudio · 2020 — 2023 · Product Designer', text: 'The deep-end years: dashboards, SaaS platforms and mobile apps for fintech, healthcare and safety clients. Research, flows, pixels, handoff, repeat.' },
+  { when: 'PettersonApps · 2017 — 2020 · UX Designer', text: "Wireframes, prototypes and usability tests where real people bravely tried my designs. That's where the fundamentals stuck." },
+  { when: 'Thinkmobiles · 2016 — 2017 · Web Designer', text: 'First design job. First icons, first layouts, and a lot of watching senior designers work their magic.' },
 ];
 
 /** Design Lab items. h = placeholder height ratio for the masonry. */
