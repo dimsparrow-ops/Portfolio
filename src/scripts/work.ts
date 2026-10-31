@@ -204,8 +204,8 @@ export function initWork(
       // The empty cell next to each card holds its hover title / client line; overflow scrolls sideways.
       const gap = cardGap();
       const gapY = 16;
-      // leave ~190px above the top row for a 4-line title and ~120px below for the client line + nav
-      const availH = vh - 320;
+      // leave ~175px above the top row for a 4-line title and ~120px below for the client line + nav
+      const availH = vh - 300;
       const h = Math.min(Math.max((availH - gapY) / 2, 112), 500 * SCALE * RATIO);
       return { w: h / RATIO, h, gap, gapY, strip: true };
     }
@@ -265,7 +265,7 @@ export function initWork(
       const span = (n - 1) * pitch + sz.w;
       const room = vw - 120;
       const x = span <= room ? (idx - (n - 1) / 2) * pitch : idx * pitch + sz.w / 2 - room / 2 - offset * pitch;
-      const y = (idx % 2 ? 1 : -1) * (sz.h + sz.gapY!) / 2 + 40;
+      const y = (idx % 2 ? 1 : -1) * (sz.h + sz.gapY!) / 2 + 32;
       return { x, y, z: 0, ry: 0, s: 1, w: sz.w, h: sz.h, o: 1 };
     }
     const cols = sz.cols!;
