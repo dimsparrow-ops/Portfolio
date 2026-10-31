@@ -197,20 +197,23 @@ export function initWork(
       const w = mobile ? vw * 0.86 : sizes('showcase').w; // same card size as the showcase
       return { w, h: w * RATIO, gap: cardGap() };
     }
-    // grid
+    // grid: rows are spaced to leave room for the hover title above and the client line below,
+    // and every other column drops a little so titles don't sit right under a neighbour's card
     const n = Math.max(1, visible().length);
     const cols = mobile ? 2 : n <= 3 ? n : n === 4 ? 2 : 3;
     const rows = Math.ceil(n / cols);
     const gap = cardGap(); // same rhythm as the slider
+    const gapY = mobile ? gap : 168;
+    const drop = mobile || cols < 2 ? 0 : 48;
     const availW = vw - (mobile ? 32 : 120);
-    const availH = vh - (mobile ? 220 : 240);
+    const availH = vh - (mobile ? 220 : 240) - drop;
     let w = (availW - gap * (cols - 1)) / cols;
     let h = w * RATIO;
-    if (h * rows + gap * (rows - 1) > availH) {
-      h = (availH - gap * (rows - 1)) / rows;
+    if (h * rows + gapY * (rows - 1) > availH) {
+      h = (availH - gapY * (rows - 1)) / rows;
       w = h / RATIO;
     }
-    return { w: Math.min(w, 500 * SCALE), h: Math.min(h, 500 * SCALE * RATIO), gap, cols, rows };
+    return { w: Math.min(w, 500 * SCALE), h: Math.min(h, 500 * SCALE * RATIO), gap, gapY, drop, cols, rows };
   }
 
   // everything poseFor needs that is the same for all cards, computed once per frame
@@ -256,7 +259,7 @@ export function initWork(
     const row = Math.floor(idx / cols);
     const inRow = row === rows - 1 ? n - row * cols : cols; // centre a short last row
     const x = (col - (inRow - 1) / 2) * (sz.w + sz.gap);
-    const y = (row - (rows - 1) / 2) * (sz.h + sz.gap) + 10;
+    const y = (row - (rows - 1) / 2) * (sz.h + sz.gapY!) + (col % 2 ? sz.drop! / 2 : -sz.drop! / 2) + 10;
     return { x, y, z: 0, ry: 0, s: 1, w: sz.w, h: sz.h, o: 1 };
   }
 
