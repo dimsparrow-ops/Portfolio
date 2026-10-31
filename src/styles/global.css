@@ -423,7 +423,7 @@ html.is-loaded .loader { display: none; }
 .sparks { position: fixed; left: 0; top: 0; z-index: 90; pointer-events: none; }
 .spark { position: absolute; left: 0; top: 0; display: block; opacity: 0; will-change: transform; }
 
-.tl-item p { margin: 0; color: var(--ink); text-transform: lowercase; text-wrap: pretty; }
+.tl-item p { margin: 0; color: var(--ink); text-wrap: pretty; }
 .btn {
   position: relative; overflow: hidden; isolation: isolate;
   display: inline-flex; align-items: center; gap: var(--s-2); height: var(--control-h); padding: 0 var(--s-4); border-radius: var(--r-pill);
