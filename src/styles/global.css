@@ -197,7 +197,7 @@ img, video { display: block; max-width: 100%; }
   position: relative; z-index: 1; -webkit-tap-highlight-color: transparent;
   height: var(--control-h); padding: 0 var(--s-4);
   display: inline-flex; align-items: center;
-  font-size: var(--fs-s); color: var(--on-dark-2);
+  font-size: 14px; color: var(--on-dark-2);
   border-radius: var(--r-pill);
   transition: color 0.3s var(--ease-ui);
   white-space: nowrap;
