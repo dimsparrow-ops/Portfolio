@@ -243,6 +243,7 @@ body:not(.is-work) .ctrl { opacity: 0; transform: translateY(var(--s-4)); pointe
 /* ---------- pages + router ---------- */
 #pages { position: relative; }
 .page { position: relative; min-height: 100vh; min-height: 100dvh; background: var(--bg); }
+.page--services { overflow: hidden; }
 .page:focus { outline: none; } /* focus is moved here after a route change */
 .page.is-transit {
   position: fixed; inset: 0; overflow: hidden;
@@ -395,7 +396,7 @@ html.is-loaded .loader { display: none; }
 }
 
 /* ---------- services (leoleo.studio) ---------- */
-.services { padding: var(--s-32) var(--gutter) var(--s-40); min-height: 100vh; min-height: 100dvh; display: grid; place-items: center; text-align: center; }
+.services { box-sizing: border-box; padding: var(--s-16) var(--gutter); height: 100vh; height: 100dvh; overflow: hidden; display: grid; place-items: center; text-align: center; }
 .svc-list { list-style: none; margin: 0; padding: 0; }
 .svc-item { padding-block: 0.04em; } /* items clip (overflow hidden for the reveal): keep room for descenders */
 .svc-item a { display: block; font-size: var(--fs-xl); line-height: 1.2; letter-spacing: var(--ls-display); font-weight: 400; transition: opacity 0.4s var(--ease-ui); }
@@ -426,7 +427,7 @@ html.is-loaded .loader { display: none; }
   border-radius: var(--r-pill); background: var(--key); color: var(--on-dark); font-size: 16px; white-space: nowrap;
 }
 
-@media (max-width: 767px) { .services { padding-top: var(--s-24); } .svc-desc { display: none; } }
+@media (max-width: 767px) { .svc-desc { display: none; } }
 
 /* ---------- about (laurent.fyi + joshpuckett.me) ---------- */
 .about { position: relative; }
