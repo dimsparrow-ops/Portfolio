@@ -400,11 +400,13 @@ html.is-loaded .loader { display: none; }
 .svc-item a { display: block; font-size: var(--fs-xl); line-height: 1.2; letter-spacing: var(--ls-display); font-weight: 400; transition: opacity 0.4s var(--ease-ui); }
 .svc-item a span { display: inline-block; will-change: transform; }
 .svc-list.is-hovering .svc-item:not(.is-hover) a { opacity: 0.22; }
-/* hover description: sits under the list, text swaps in place */
+/* hover description rides the pointer like the old preview card: tilt, scale in/out */
 .svc-desc {
-  position: fixed; left: 0; right: 0; z-index: 20; margin: 0 auto; pointer-events: none;
-  width: min(720px, calc(100vw - 2 * var(--gutter))); text-align: center; text-wrap: balance;
-  color: var(--ink-body); opacity: 0;
+  position: fixed; left: 0; top: 0; z-index: 20; margin: 0; pointer-events: none;
+  width: 520px; max-width: calc(100vw - 2 * var(--gutter)); padding: var(--s-4); border-radius: var(--r-m);
+  font-size: 14px; line-height: var(--lh-body); text-align: left; text-wrap: pretty;
+  color: var(--ink); background: var(--bg); box-shadow: var(--shadow-l);
+  opacity: 0; transform: scale(0.6);
 }
 @media (max-width: 767px) { .services { padding-top: var(--s-24); } .svc-desc { display: none; } }
 

@@ -11,29 +11,41 @@ export function initServices(root: HTMLElement, entering: boolean): Destroy {
   const desc = root.querySelector<HTMLElement>('[data-svc-desc]')!;
   const items = Array.from(list.querySelectorAll<HTMLElement>('.svc-item'));
 
+  const xTo = gsap.quickTo(desc, 'x', { duration: dur.base, ease: ease.out });
+  const yTo = gsap.quickTo(desc, 'y', { duration: dur.base, ease: ease.out });
+  const rTo = gsap.quickTo(desc, 'rotation', { duration: 0.8, ease: ease.out });
+  let lastX = 0;
+
   items.forEach((it) => (it.style.overflow = 'hidden'));
   const spans = items.map((it) => it.querySelector<HTMLElement>('span')!);
   if (entering) {
     gsap.from(spans, { yPercent: 110, duration: 0.8, ease: ease.out, stagger: stagger.item, delay: 0.15 });
   }
 
+  const onMove = (e: PointerEvent) => {
+    // follows the pointer, kept inside the viewport
+    const w = desc.offsetWidth;
+    const h = desc.offsetHeight;
+    xTo(gsap.utils.clamp(16, window.innerWidth - w - 16, e.clientX + 24));
+    yTo(gsap.utils.clamp(16, window.innerHeight - h - 96, e.clientY - 90));
+    rTo(reduced ? 0 : gsap.utils.clamp(-10, 10, (e.clientX - lastX) * 0.6));
+    lastX = e.clientX;
+  };
   if (!finePointer()) return () => gsap.killTweensOf(spans);
   const offs = items.map((it, i) => {
     const span = spans[i];
     const enter = () => {
       list.classList.add('is-hovering');
       it.classList.add('is-hover');
-      // description sits 32px under the list; the text swaps while the block stays put
-      desc.style.top = `${list.getBoundingClientRect().bottom + 32}px`;
       desc.textContent = it.dataset.text ?? '';
       gsap.to(span, { x: 28, duration: dur.base, ease: ease.out });
-      gsap.fromTo(desc, { opacity: 0, y: 8 }, { opacity: 1, y: 0, duration: dur.base, ease: ease.out, overwrite: true });
+      gsap.to(desc, { opacity: 1, scale: 1, duration: 0.45, ease: ease.out });
     };
     const leave = () => {
       it.classList.remove('is-hover');
       list.classList.remove('is-hovering');
       gsap.to(span, { x: 0, duration: dur.base, ease: ease.out });
-      gsap.to(desc, { opacity: 0, duration: dur.micro, ease: ease.ui, overwrite: true });
+      gsap.to(desc, { opacity: 0, scale: 0.6, duration: 0.3, ease: ease.ui });
     };
     it.addEventListener('pointerenter', enter);
     it.addEventListener('pointerleave', leave);
@@ -42,7 +54,9 @@ export function initServices(root: HTMLElement, entering: boolean): Destroy {
       it.removeEventListener('pointerleave', leave);
     };
   });
+  window.addEventListener('pointermove', onMove);
   return () => {
+    window.removeEventListener('pointermove', onMove);
     offs.forEach((f) => f());
     gsap.killTweensOf([desc, ...spans]);
   };
