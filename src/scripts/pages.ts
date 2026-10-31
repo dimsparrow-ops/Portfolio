@@ -10,7 +10,19 @@ export function initServices(root: HTMLElement, entering: boolean): Destroy {
   const list = root.querySelector<HTMLElement>('[data-svc-list]')!;
   const desc = root.querySelector<HTMLElement>('[data-svc-desc]')!;
   const typed = desc.querySelector<HTMLElement>('[data-svc-typed]')!;
+  const para = typed.parentElement!;
   const type = { n: 0 };
+  let target = 0;
+  // the paragraph height is tweened so a new line eases the box open instead of snapping
+  const fit = () => {
+    const cur = para.offsetHeight;
+    para.style.height = 'auto';
+    const h = para.offsetHeight;
+    para.style.height = `${cur}px`;
+    if (h === target) return;
+    target = h;
+    gsap.to(para, { height: h, duration: 0.4, ease: ease.out, overwrite: true });
+  };
   // typed live on hover; the box grows line by line with the text
   const write = (full: string) => {
     gsap.killTweensOf(type);
@@ -18,8 +30,12 @@ export function initServices(root: HTMLElement, entering: boolean): Destroy {
     const put = () => {
       const n = Math.round(type.n);
       typed.textContent = text.slice(0, n);
+      fit();
     };
     type.n = reduced ? text.length : 0;
+    gsap.killTweensOf(para);
+    para.style.height = 'auto';
+    target = 0;
     put();
     if (reduced) return;
     // ~170 chars/s, far quicker than reading speed, capped so long texts stay snappy
@@ -74,7 +90,7 @@ export function initServices(root: HTMLElement, entering: boolean): Destroy {
   return () => {
     window.removeEventListener('pointermove', onMove);
     offs.forEach((f) => f());
-    gsap.killTweensOf([desc, type, ...spans]);
+    gsap.killTweensOf([desc, type, para, ...spans]);
   };
 }
 

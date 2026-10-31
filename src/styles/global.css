@@ -414,7 +414,7 @@ html.is-loaded .loader { display: none; }
   -webkit-backdrop-filter: var(--glass);
   opacity: 0; transform: scale(0.6);
 }
-.svc-desc-text { margin: 0; font-size: 16px; line-height: var(--lh-body); text-wrap: pretty; }
+.svc-desc-text { margin: 0; overflow: hidden; font-size: 16px; line-height: var(--lh-body); text-wrap: pretty; }
 .svc-caret { position: relative; display: inline-block; width: 0; height: 1em; vertical-align: text-bottom; }
 .svc-caret::after {
   content: ''; position: absolute; left: 1px; top: 2px; width: 2px; height: calc(100% - 4px); background: var(--key);
