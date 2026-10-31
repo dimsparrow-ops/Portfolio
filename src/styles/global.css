@@ -178,6 +178,7 @@ img, video { display: block; max-width: 100%; }
 }
 .sayhi-btn:hover { --depth: 2px; }
 .sayhi-btn:active, .sayhi-btn.is-pressed { --depth: 0px; }
+.sayhi-btn .sayhi-label { display: inline-block; }
 .sayhi-btn .arrow { font-size: var(--fs-s); transform: translateY(-1px); }
 
 /* Bottom navigation pill (leoleo.studio) with blurred glass (Brand Appart) */

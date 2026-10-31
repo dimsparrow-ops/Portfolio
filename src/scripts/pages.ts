@@ -134,8 +134,59 @@ export function initAbout(root: HTMLElement): Destroy {
 
   const stopSparks = initSparks(root);
 
+  // only while SUMMON ME is uncovered, the nav's Say hi key becomes "email me" (mailto)
+  const key = document.querySelector<HTMLAnchorElement>('.nav .sayhi-btn');
+  const label = key?.querySelector<HTMLElement>('.sayhi-label');
+  const mail = root.querySelector<HTMLAnchorElement>('.hi-links a[href^="mailto:"]')?.href;
+  const sayHi = { text: 'Say hi', href: '/about/#say-hi' };
+  const setKey = (email: boolean) => {
+    if (!key || !label || !mail) return;
+    const text = email ? 'email me' : sayHi.text;
+    if ((key.dataset.mode ?? 'hi') === (email ? 'email' : 'hi')) return;
+    key.dataset.mode = email ? 'email' : 'hi';
+    if (email) {
+      key.href = mail;
+      key.removeAttribute('data-route');
+      key.title = 'Email me (Enter)';
+    } else {
+      key.setAttribute('href', sayHi.href);
+      key.setAttribute('data-route', '');
+      key.title = 'Say hi (Enter)';
+    }
+    if (reduced) {
+      label.textContent = text;
+      return;
+    }
+    gsap.killTweensOf(label);
+    gsap.to(label, {
+      opacity: 0, y: -6, duration: 0.15, ease: ease.in,
+      onComplete: () => {
+        label.textContent = text;
+        gsap.fromTo(label, { opacity: 0, y: 6 }, { opacity: 1, y: 0, duration: 0.3, ease: ease.out });
+      },
+    });
+  };
+  const content = root.querySelector<HTMLElement>('.about-content');
+  const onScroll = () => {
+    if (content) setKey(content.getBoundingClientRect().bottom < window.innerHeight * 0.6);
+  };
+  window.addEventListener('scroll', onScroll, { passive: true });
+  onScroll();
+
   return () => {
     stopSparks();
+    window.removeEventListener('scroll', onScroll);
+    if (label) gsap.killTweensOf(label);
+    if (key && label && key.dataset.mode === 'email') {
+      key.dataset.mode = 'hi';
+      // leaving About while it reads "email me": put Say hi back at once
+      label.textContent = sayHi.text;
+      label.style.opacity = '';
+      label.style.transform = '';
+      key.setAttribute('href', sayHi.href);
+      key.setAttribute('data-route', '');
+      key.title = 'Say hi (Enter)';
+    }
     triggers.forEach((t) => t.kill());
     hi.removeEventListener('pointermove', onMove);
     hi.removeEventListener('pointerleave', onLeave);

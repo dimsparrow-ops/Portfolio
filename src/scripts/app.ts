@@ -372,7 +372,8 @@ export function boot() {
     key.classList.add('is-pressed');
     setTimeout(() => {
       key.classList.remove('is-pressed');
-      go(key.href);
+      if (key.href.startsWith('mailto:')) location.href = key.href; // on SUMMON ME the key is "email me"
+      else go(key.href);
     }, 140);
   });
 }
