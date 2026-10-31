@@ -405,7 +405,11 @@ html.is-loaded .loader { display: none; }
   position: fixed; left: 0; top: 0; z-index: 20; margin: 0; pointer-events: none;
   width: 520px; max-width: calc(100vw - 2 * var(--gutter)); padding: var(--s-4); border-radius: var(--r-m);
   font-size: 14px; line-height: var(--lh-body); text-align: left; text-wrap: pretty;
-  color: var(--ink); background: var(--bg); box-shadow: var(--shadow-l);
+  color: var(--ink); background: rgba(255, 255, 255, 0.4); box-shadow: var(--shadow-l);
+  /* via a variable: the CSS minifier otherwise drops the unprefixed property */
+  --glass: blur(24px) saturate(1.4);
+  backdrop-filter: var(--glass);
+  -webkit-backdrop-filter: var(--glass);
   opacity: 0; transform: scale(0.6);
 }
 @media (max-width: 767px) { .services { padding-top: var(--s-24); } .svc-desc { display: none; } }
