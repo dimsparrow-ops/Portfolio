@@ -88,11 +88,26 @@ export function initServices(root: HTMLElement, entering: boolean): Destroy {
       gsap.to(span, { x: 0, duration: dur.base, ease: ease.out });
       gsap.to(desc, { opacity: 0, scale: 0.6, duration: 0.3, ease: ease.ui });
     };
+    // keyboard: focusing a line shows the same preview, parked next to it (no pointer to follow)
+    const link = it.querySelector<HTMLElement>('a')!;
+    const onFocus = () => {
+      if (!link.matches(':focus-visible')) return;
+      const r = span.getBoundingClientRect();
+      const w = desc.offsetWidth;
+      const h = desc.offsetHeight;
+      xTo(gsap.utils.clamp(16, window.innerWidth - w - 16, r.right + 24));
+      yTo(gsap.utils.clamp(16, window.innerHeight - h - 96, r.top - 24));
+      enter();
+    };
     it.addEventListener('pointerenter', enter);
     it.addEventListener('pointerleave', leave);
+    link.addEventListener('focus', onFocus);
+    link.addEventListener('blur', leave);
     return () => {
       it.removeEventListener('pointerenter', enter);
       it.removeEventListener('pointerleave', leave);
+      link.removeEventListener('focus', onFocus);
+      link.removeEventListener('blur', leave);
     };
   });
   window.addEventListener('pointermove', onMove);

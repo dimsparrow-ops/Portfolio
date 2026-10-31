@@ -53,6 +53,7 @@ gl_FragColor=vec4(texture2D(t,vec2(uv.x,1.-uv.y)).rgb,1.);}`;
 interface CoverGL {
   draw(a: number, u: number, v: number): void;
   hide(): void;
+  dispose(): void;
 }
 
 // one small WebGL canvas per card, created on first hover, sits over the cover <img>
@@ -117,6 +118,11 @@ function createCoverGL(img: HTMLImageElement): CoverGL | null {
     },
     hide() {
       if (canvas.style.opacity !== '0') canvas.style.opacity = '0';
+    },
+    // browsers cap live WebGL contexts (~16): free ours when the Work page is torn down
+    dispose() {
+      gl.getExtension('WEBGL_lose_context')?.loseContext();
+      canvas.remove();
     },
   };
 }
@@ -610,7 +616,10 @@ export function initWork(
     },
     destroy() {
       gsap.ticker.remove(render);
-      cards.forEach((c) => gsap.killTweensOf(c.blend));
+      cards.forEach((c) => {
+        gsap.killTweensOf(c.blend);
+        c.gl?.dispose();
+      });
       enters.forEach((off) => off());
       stage.removeEventListener('wheel', onWheel);
       window.removeEventListener('pointermove', onPointer);

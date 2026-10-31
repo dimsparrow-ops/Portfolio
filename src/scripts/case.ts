@@ -114,7 +114,7 @@ export function openCase(opts: { html?: string; animate?: boolean; onClose: () =
   L.setAttribute('aria-hidden', 'false');
   scroller.scrollTop = 0;
 
-  lenis = new Lenis({ wrapper: scroller, content: slot, lerp: 0.1 });
+  lenis = new Lenis({ wrapper: scroller, content: slot, lerp: 0.1, smoothWheel: !reduced });
   const raf = (t: number) => lenis?.raf(t * 1000);
   gsap.ticker.add(raf);
   lenis.on('scroll', ScrollTrigger.update);
