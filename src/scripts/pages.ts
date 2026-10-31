@@ -68,17 +68,9 @@ export function initAbout(root: HTMLElement): Destroy {
   const word = root.querySelector<HTMLElement>('[data-hi]')!;
   const letters = Array.from(word.querySelectorAll<HTMLElement>('span:not(.sp)'));
 
-  root.querySelectorAll<HTMLElement>('[data-reveal]').forEach((el) => {
-    gsap.set(el, { y: 36, opacity: 0 });
-    triggers.push(
-      ScrollTrigger.create({
-        trigger: el,
-        start: 'top 90%',
-        once: true,
-        onEnter: () => gsap.to(el, { y: 0, opacity: 1, duration: 0.7, ease: ease.out }),
-      }),
-    );
-  });
+  // the whole timeline reveals on load (not on scroll), top to bottom
+  const items = Array.from(root.querySelectorAll<HTMLElement>('[data-reveal]'));
+  gsap.fromTo(items, { y: 36, opacity: 0 }, { y: 0, opacity: 1, duration: 0.7, ease: ease.out, stagger: stagger.item * 2, delay: 0.1 });
 
   // fit the word to the viewport width (soscalemedia.se)
   let fitRaf = 0;
@@ -149,6 +141,7 @@ export function initAbout(root: HTMLElement): Destroy {
     cancelAnimationFrame(fitRaf);
     window.removeEventListener('resize', onResize);
     gsap.killTweensOf(letters);
+    gsap.killTweensOf(items);
   };
 }
 
