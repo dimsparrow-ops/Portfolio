@@ -23,6 +23,14 @@ export function initServices(root: HTMLElement, entering: boolean): Destroy {
     target = h;
     gsap.to(para, { height: h, duration: 0.4, ease: ease.out, overwrite: true });
   };
+  // once typing ends, hand the height back to the content so nothing can stay clipped
+  const settle = () => {
+    const cur = para.offsetHeight;
+    gsap.killTweensOf(para);
+    para.style.height = 'auto';
+    const h = para.offsetHeight;
+    gsap.fromTo(para, { height: cur }, { height: h, duration: 0.3, ease: ease.out, onComplete: () => { para.style.height = 'auto'; } });
+  };
   // typed live on hover; the box grows line by line with the text
   const write = (full: string) => {
     gsap.killTweensOf(type);
@@ -39,7 +47,7 @@ export function initServices(root: HTMLElement, entering: boolean): Destroy {
     put();
     if (reduced) return;
     // ~170 chars/s, far quicker than reading speed, capped so long texts stay snappy
-    gsap.to(type, { n: text.length, duration: Math.min(text.length / 170, 1.1), ease: 'none', delay: 0.12, onUpdate: put });
+    gsap.to(type, { n: text.length, duration: Math.min(text.length / 170, 1.1), ease: 'none', delay: 0.12, onUpdate: put, onComplete: settle });
   };
   const items = Array.from(list.querySelectorAll<HTMLElement>('.svc-item'));
 
@@ -67,6 +75,7 @@ export function initServices(root: HTMLElement, entering: boolean): Destroy {
   const offs = items.map((it, i) => {
     const span = spans[i];
     const enter = () => {
+      if (it.classList.contains('is-hover')) return;
       list.classList.add('is-hovering');
       it.classList.add('is-hover');
       write(it.dataset.text ?? '');
