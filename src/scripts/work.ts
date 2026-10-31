@@ -203,9 +203,9 @@ export function initWork(
       // desktop: chessboard strip, even cards on the top row and odd ones on the bottom row.
       // The empty cell next to each card holds its hover title / client line; overflow scrolls sideways.
       const gap = cardGap();
-      const gapY = 48;
-      // leave ~190px above the top row for a 4-line title and ~120px below for the client line + nav
-      const availH = vh - 380;
+      const gapY = 16;
+      // leave ~175px above the top row for a 4-line title and ~120px below for the client line + nav
+      const availH = vh - 300;
       const h = Math.min(Math.max((availH - gapY) / 2, 112), 500 * SCALE * RATIO);
       return { w: h / RATIO, h, gap, gapY, strip: true };
     }
