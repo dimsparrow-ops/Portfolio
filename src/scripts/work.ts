@@ -158,7 +158,7 @@ export function initWork(
   const WORLD_TILT = { x: 4, y: 6 }; // deg, whole section
 
   const RATIO = 1.1; // card shape, near-square portrait (cappen.com/works)
-  const SCALE = 1; // was 1.25; cards 20% smaller
+  const SCALE = 0.85; // was 1.25, then 1; now another 15% smaller
   const zero: Pose = { x: 0, y: 60, z: -1800, ry: 0, s: 0.35, w: 280, h: 210, o: 0 };
   const cards: Card[] = Array.from(world.querySelectorAll<HTMLAnchorElement>('.card')).map((el, i) => ({
     el,
