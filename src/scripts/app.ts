@@ -200,7 +200,7 @@ async function navigate(href: string, push: boolean, mode?: 'ascend') {
     if (caseIsOpen()) {
       if (push) history.pushState({}, '', '/');
       await closeCase();
-      document.title = 'Dim — Lead Product Designer';
+      document.title = 'Dim';
       work?.pause(false);
       lenis.start();
     }

@@ -4,7 +4,7 @@ import { pages, site, type PageId } from '../data/site';
 
 interface Props { page: PageId; title?: string; description?: string; }
 const { page, title, description = `${site.name} — ${site.role}. Selected work, services and experiments.` } = Astro.props;
-const fullTitle = title ? `${title} — ${site.name}` : `${site.name} — ${site.role}`;
+const fullTitle = title ? `${title} — Dim` : 'Dim';
 ---
 <!doctype html>
 <html lang="en">
