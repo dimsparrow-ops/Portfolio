@@ -24,7 +24,7 @@
    Mirrored in the UI kit (tokens.json). */
 :root {
   /* colour */
-  --bg: #ffffff;
+  --bg: #F8F8F8;
   --surface: #f4f4f3;                 /* case sheet */
   --fill: rgba(0, 0, 0, 0.06);        /* quote, close button */
   --ink: #1c1c1e;
