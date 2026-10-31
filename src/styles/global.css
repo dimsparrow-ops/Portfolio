@@ -422,12 +422,10 @@ html.is-loaded .loader { display: none; }
   border-radius: var(--r-pill); background: #e9eef9; color: #3b66c9; font-size: 12px;
 }
 .svc-send {
-  display: inline-flex; align-items: center; gap: var(--s-2); height: 32px; padding: 0 var(--s-3) 0 var(--s-4); margin-left: auto;
-  font: 400 var(--fs-xs)/1 var(--font-mono); letter-spacing: var(--ls-caps); text-transform: uppercase; white-space: nowrap;
-  color: var(--on-dark); border-radius: var(--r-pill);
-  background: var(--key);
+  display: inline-flex; align-items: center; gap: var(--s-2); height: 40px; padding: 0 var(--s-4) 0 var(--s-5); margin-left: auto;
+  border-radius: var(--r-pill); background: var(--key); color: var(--on-dark); font-size: 16px; white-space: nowrap;
 }
-.svc-send svg { width: 16px; height: 16px; }
+
 @media (max-width: 767px) { .services { padding-top: var(--s-24); } .svc-desc { display: none; } }
 
 /* ---------- about (laurent.fyi + joshpuckett.me) ---------- */
