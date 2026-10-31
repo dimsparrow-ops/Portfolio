@@ -450,7 +450,7 @@ html.is-loaded .loader { display: none; }
   overflow: hidden;
 }
 .hi-links { position: relative; z-index: 2; display: flex; justify-content: center; gap: var(--s-6); color: var(--on-dark-2); }
-.hi-links a { transition: color var(--dur-micro) var(--ease-ui); }
+.hi-links a { font: 16px/var(--lh-ui) var(--font-mono); letter-spacing: 0; text-transform: lowercase; transition: color var(--dur-micro) var(--ease-ui); }
 .hi-links a:hover { color: var(--on-dark); }
 .hi-word {
   display: flex; justify-content: center; align-items: flex-end;
