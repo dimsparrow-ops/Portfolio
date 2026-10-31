@@ -197,23 +197,29 @@ export function initWork(
       const w = mobile ? vw * 0.86 : sizes('showcase').w; // same card size as the showcase
       return { w, h: w * RATIO, gap: cardGap() };
     }
-    // grid: rows are spaced to leave room for the hover title above and the client line below,
-    // and every other column drops a little so titles don't sit right under a neighbour's card
+    // grid
     const n = Math.max(1, visible().length);
-    const cols = mobile ? 2 : n <= 3 ? n : n === 4 ? 2 : 3;
+    if (!mobile) {
+      // desktop: chessboard strip, even cards on the top row and odd ones on the bottom row.
+      // The empty cell next to each card holds its hover title / client line; overflow scrolls sideways.
+      const gap = cardGap();
+      const gapY = 48;
+      const availH = vh - 200;
+      const h = Math.min((availH - gapY) / 2, 500 * SCALE * RATIO);
+      return { w: h / RATIO, h, gap, gapY, strip: true };
+    }
+    const cols = 2;
     const rows = Math.ceil(n / cols);
-    const gap = cardGap(); // same rhythm as the slider
-    const gapY = mobile ? gap : 168;
-    const drop = mobile || cols < 2 ? 0 : 48;
-    const availW = vw - (mobile ? 32 : 120);
-    const availH = vh - (mobile ? 220 : 240) - drop;
+    const gap = cardGap();
+    const availW = vw - 32;
+    const availH = vh - 220;
     let w = (availW - gap * (cols - 1)) / cols;
     let h = w * RATIO;
-    if (h * rows + gapY * (rows - 1) > availH) {
-      h = (availH - gapY * (rows - 1)) / rows;
+    if (h * rows + gap * (rows - 1) > availH) {
+      h = (availH - gap * (rows - 1)) / rows;
       w = h / RATIO;
     }
-    return { w: Math.min(w, 500 * SCALE), h: Math.min(h, 500 * SCALE * RATIO), gap, gapY, drop, cols, rows };
+    return { w: Math.min(w, 500 * SCALE), h: Math.min(h, 500 * SCALE * RATIO), gap, cols, rows };
   }
 
   // everything poseFor needs that is the same for all cards, computed once per frame
@@ -253,19 +259,37 @@ export function initWork(
       const rel = wraps ? wrap(idx - offset, n) : idx - offset;
       return { x: rel * (sz.w + sz.gap), y: 0, z: 0, ry: 0, s: 1, w: sz.w, h: sz.h, o: 1 };
     }
+    if (sz.strip) {
+      const pitch = sz.w + sz.gap;
+      const span = (n - 1) * pitch + sz.w;
+      const room = vw - 120;
+      const x = span <= room ? (idx - (n - 1) / 2) * pitch : idx * pitch + sz.w / 2 - room / 2 - offset * pitch;
+      const y = (idx % 2 ? 1 : -1) * (sz.h + sz.gapY!) / 2 + 10;
+      return { x, y, z: 0, ry: 0, s: 1, w: sz.w, h: sz.h, o: 1 };
+    }
     const cols = sz.cols!;
     const rows = sz.rows!;
     const col = idx % cols;
     const row = Math.floor(idx / cols);
     const inRow = row === rows - 1 ? n - row * cols : cols; // centre a short last row
     const x = (col - (inRow - 1) / 2) * (sz.w + sz.gap);
-    const y = (row - (rows - 1) / 2) * (sz.h + sz.gapY!) + (col % 2 ? sz.drop! / 2 : -sz.drop! / 2) + 10;
+    const y = (row - (rows - 1) / 2) * (sz.h + sz.gap) + 10;
     return { x, y, z: 0, ry: 0, s: 1, w: sz.w, h: sz.h, o: 1 };
   }
 
   function wrapsFor(n: number, sz: { w: number; gap: number }, vw: number) {
     return n * (sz.w + sz.gap) > vw + sz.w * 1.2;
   }
+  // desktop grid: how far (in cards) the strip can scroll; 0 when it all fits
+  function gridMax() {
+    const { vw, mobile } = dims();
+    if (mobile) return 0;
+    const sz = sizes('grid');
+    const pitch = sz.w + sz.gap;
+    const span = (visible().length - 1) * pitch + sz.w;
+    return Math.max(0, (span - (vw - 120)) / pitch);
+  }
+  const gridScrolls = () => view === 'grid' && gridMax() > 0;
   function sliderWraps() {
     return wrapsFor(visible().length, sizes('slider'), dims().vw);
   }
@@ -336,8 +360,9 @@ export function initWork(
     const canAuto = !reduced && introDone && !hovered && !dragging && now > autoHold;
     if (canAuto && view === 'showcase') target += AUTO.showcase * dt;
     if (canAuto && view === 'slider' && frame.wraps) target += AUTO.slider * dt;
-    if (view !== 'grid') {
+    if (view !== 'grid' || gridScrolls()) {
       const n = visible().length;
+      if (view === 'grid') target = clamp(target, 0, gridMax());
       if (view === 'slider' && !frame.wraps) target = clamp(target, 0, Math.max(0, n - 1));
       offset += (target - offset) * k(dragging ? follow.lerpDrag : follow.lerp);
       if (Math.abs(target - offset) < 1e-4) offset = target;
@@ -449,23 +474,24 @@ export function initWork(
 
   const spacing = () => {
     const sz = sizes(view);
-    return view === 'slider' ? sz.w + sz.gap : sz.w * 0.95;
+    return view === 'slider' || view === 'grid' ? sz.w + sz.gap : sz.w * 0.95;
   };
   const snap = (ms = 140) => {
     clearTimeout(idle);
+    if (view === 'grid') return; // the strip scrolls freely
     idle = window.setTimeout(() => (target = Math.round(target)), ms);
   };
 
   const onWheel = (e: WheelEvent) => {
-    if (paused || view === 'grid') return;
+    if (paused || (view === 'grid' && !gridScrolls())) return;
     e.preventDefault();
     const delta = Math.abs(e.deltaX) > Math.abs(e.deltaY) ? e.deltaX : e.deltaY;
-    target += delta * 0.0016;
+    target += view === 'grid' ? delta / spacing() : delta * 0.0016;
     autoHold = performance.now() + 2500;
     snap();
   };
   const onDown = (e: PointerEvent) => {
-    if (paused || view === 'grid' || e.button !== 0) return;
+    if (paused || (view === 'grid' && !gridScrolls()) || e.button !== 0) return;
     dragging = true;
     dragged = false;
     startX = e.clientX;
@@ -485,7 +511,7 @@ export function initWork(
     dragging = false;
     autoHold = performance.now() + 2500;
     stage.classList.remove('is-dragging');
-    target = Math.round(target - vel * 6);
+    target = view === 'grid' ? target - vel * 6 : Math.round(target - vel * 6);
   };
   const onClick = (e: MouseEvent) => {
     const a = (e.target as HTMLElement).closest<HTMLAnchorElement>('.card');
