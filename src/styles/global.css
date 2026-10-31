@@ -64,6 +64,7 @@
   --s-2: 8px;
   --s-3: 12px;
   --s-4: 16px;
+  --s-5: 20px;
   --s-6: 24px;
   --s-8: 32px;
   --s-12: 48px;
@@ -303,12 +304,12 @@ html.is-loaded .loader { display: none; }
   transition: opacity 0.3s var(--ease-ui), transform 0.45s var(--ease-out);
 }
 .card-task {
-  left: 0; right: -16%; bottom: calc(100% + var(--s-3));
-  font-size: 24px; line-height: var(--lh-ui); letter-spacing: var(--ls-text); color: var(--ink);
+  left: 0; right: -16%; bottom: calc(100% + var(--s-5));
+  font-size: 28px; line-height: var(--lh-ui); letter-spacing: var(--ls-text); color: var(--ink);
   display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 4; overflow: hidden;
 }
 .stage.is-grid .card-task { -webkit-line-clamp: 3; }
-.card-meta { left: 0; top: calc(100% + var(--s-3)); font: 14px/var(--lh-ui) var(--font-mono); text-transform: lowercase; color: var(--ink-2); white-space: nowrap; } /* same face as the About labels */
+.card-meta { left: 0; top: calc(100% + var(--s-5)); font: 16px/var(--lh-ui) var(--font-mono); text-transform: lowercase; color: var(--ink-2); white-space: nowrap; } /* same face as the About labels */
 .card.is-hover .card-task, .card.is-hover .card-meta { opacity: 1; transform: none; }
 .card.is-hover .card-meta { transition-delay: 0.05s; }
 
