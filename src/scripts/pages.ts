@@ -212,16 +212,18 @@ export function initAbout(root: HTMLElement): Destroy {
   }
 
   const stopSparks = initSparks(root);
-  const stopDeck = initDeck(root);
+  const deck = initDeck(root);
 
   // one reveal language for the whole page (lorenzodossi.com): words rise out of their own masks.
   // Runs after initDeck, which rewrites the track text and would wipe the masks.
   if (!reduced) {
+    // one timing for everything that appears here: intro, Listening to (divider, text, record), timeline
+    const RISE = { dur: 1.1, ease: ease.words, span: 0.6 };
     const intro = root.querySelector<HTMLElement>('[data-words]')!;
     const iw = splitWords(intro);
-    gsap.fromTo(iw, { yPercent: 110 }, { yPercent: 0, duration: 1.6, ease: ease.words, stagger: stagger.word, delay: 0.1 });
+    gsap.fromTo(iw, { yPercent: 110 }, { yPercent: 0, duration: RISE.dur, ease: RISE.ease, stagger: Math.min(stagger.word, 1.2 / iw.length), delay: 0.1 });
     // blocks below start as they scroll in; long paragraphs get a tighter stagger so they never drag
-    const rise = (els: HTMLElement[], at: gsap.TweenTarget, delay = 0) => {
+    const rise = (els: HTMLElement[], at: gsap.TweenTarget) => {
       const words = els.flatMap(splitWords);
       gsap.set(words, { yPercent: 110 });
       triggers.push(
@@ -230,21 +232,44 @@ export function initAbout(root: HTMLElement): Destroy {
           start: 'top 92%',
           once: true,
           onEnter: () =>
-            gsap.to(words, { yPercent: 0, duration: 1.2, ease: ease.words, stagger: Math.min(stagger.word, 0.7 / words.length), delay }),
+            gsap.to(words, { yPercent: 0, duration: RISE.dur, ease: RISE.ease, stagger: Math.min(stagger.word, RISE.span / words.length) }),
         }),
       );
     };
     const now = root.querySelector<HTMLElement>('.now');
     if (now) {
-      rise(Array.from(now.querySelectorAll<HTMLElement>('.now-label, .track p')), now, 0.9);
-      const deckEl = now.querySelector('.deck');
-      gsap.fromTo(deckEl, { y: 24, opacity: 0 }, { y: 0, opacity: 1, duration: 1.2, ease: ease.words, delay: 0.9 });
+      // divider draws left to right, the sleeve is set down, then the record slides out of it already spinning
+      const words = Array.from(now.querySelectorAll<HTMLElement>('.now-label, .track p')).flatMap(splitWords);
+      const line = now.querySelector<HTMLElement>('.now-line')!;
+      const deckEl = now.querySelector<HTMLElement>('.deck')!;
+      const vinyl = now.querySelector<HTMLElement>('.vinyl')!;
+      const slot = parseFloat(getComputedStyle(deckEl).getPropertyValue('--slot')) || 48;
+      gsap.set(words, { yPercent: 110 });
+      gsap.set(line, { scaleX: 0 });
+      gsap.set(deckEl, { opacity: 0, y: 32, rotate: -5, transformOrigin: '0% 100%' });
+      gsap.set(vinyl, { opacity: 0, x: -slot, rotate: -240 });
+      triggers.push(
+        ScrollTrigger.create({
+          trigger: now,
+          start: 'top 92%',
+          once: true,
+          onEnter: () => {
+            const tl = gsap.timeline({ defaults: { ease: RISE.ease } });
+            tl.to(line, { scaleX: 1, duration: RISE.dur }, 0)
+              .to(words, { yPercent: 0, duration: RISE.dur, stagger: Math.min(stagger.word, RISE.span / words.length) }, 0.1)
+              .to(deckEl, { opacity: 1, y: 0, rotate: 0, duration: RISE.dur }, 0.1)
+              .set(vinyl, { opacity: 1 }, 0.5) // still hidden under the sleeve here
+              .to(vinyl, { x: 0, rotate: 0, duration: RISE.dur + 0.3 }, 0.5)
+              .add(deck.burst, 0.5)
+              .add(() => gsap.set([deckEl, vinyl], { clearProps: 'transform,opacity' })); // hover/pulled transforms are CSS
+          },
+        }),
+      );
     }
     root.querySelectorAll<HTMLElement>('.tl-item').forEach((li) => {
       rise(Array.from(li.querySelectorAll<HTMLElement>('.tl-when, .tl-company, .tl-role, p')), li);
     });
   }
-
 
   // only while SUMMON ME is uncovered, the nav's Say hi key becomes "email me" (mailto)
   const key = document.querySelector<HTMLAnchorElement>('.nav .sayhi-btn');
@@ -287,7 +312,7 @@ export function initAbout(root: HTMLElement): Destroy {
 
   return () => {
     stopSparks();
-    stopDeck();
+    deck.stop();
     window.removeEventListener('scroll', onScroll);
     if (label) gsap.killTweensOf(label);
     if (key && label && key.dataset.mode === 'email') {
@@ -311,10 +336,10 @@ export function initAbout(root: HTMLElement): Destroy {
 }
 
 /** "Listening to" deck (chrisandrews.xyz): the record turns slowly, faster on hover, faster still once the sleeve is pulled (click). */
-function initDeck(root: HTMLElement): Destroy {
+function initDeck(root: HTMLElement): { stop: Destroy; burst: () => void } {
   const deck = root.querySelector<HTMLButtonElement>('[data-deck]');
   const disc = root.querySelector<HTMLElement>('[data-vinyl]');
-  if (!deck || !disc) return () => {};
+  if (!deck || !disc) return { stop: () => {}, burst: () => {} };
 
   // a random record per visit, never the same one twice in a row
   const now = deck.closest<HTMLElement>('.now')!;
@@ -341,8 +366,15 @@ function initDeck(root: HTMLElement): Destroy {
   // one 9s turn at rate 1; the rate is eased, so changing speed never jumps the angle
   const spin = reduced ? null : disc.animate([{ transform: 'rotate(0deg)' }, { transform: 'rotate(360deg)' }], { duration: 9000, iterations: Infinity });
   const state = { rate: 1 };
-  const setRate = () =>
-    spin && gsap.to(state, { rate: pulled ? 4.7 : hovered ? 2.8 : 1, duration: 0.8, ease: ease.out, overwrite: true, onUpdate: () => (spin.playbackRate = state.rate) });
+  const setRate = (d = 0.8) =>
+    spin && gsap.to(state, { rate: pulled ? 4.7 : hovered ? 2.8 : 1, duration: d, ease: ease.out, overwrite: true, onUpdate: () => (spin.playbackRate = state.rate) });
+  // the record leaves the sleeve already spinning fast, then settles
+  const burst = () => {
+    if (!spin) return;
+    state.rate = 6;
+    spin.playbackRate = 6;
+    setRate(2.4);
+  };
 
   const onClick = () => {
     pulled = !pulled;
@@ -357,7 +389,7 @@ function initDeck(root: HTMLElement): Destroy {
     deck.addEventListener('pointerenter', onEnter);
     deck.addEventListener('pointerleave', onLeave);
   }
-  return () => {
+  const stop = () => {
     gsap.killTweensOf(state);
     spin?.cancel();
     deck.removeEventListener('click', onClick);
@@ -366,6 +398,7 @@ function initDeck(root: HTMLElement): Destroy {
       deck.removeEventListener('pointerleave', onLeave);
     }
   };
+  return { stop, burst };
 }
 
 /** AI timeline item: the cursor turns into a trail of 4-point sparkles, each following with its own lag. */

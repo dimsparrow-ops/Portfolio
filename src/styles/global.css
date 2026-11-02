@@ -457,7 +457,8 @@ html.is-loaded .loader { display: none; }
 .tl-role { font-size: var(--fs-s); line-height: 28px; color: var(--about-sub); }
 /* "Listening to" record deck (chrisandrews.xyz): hover slides the sleeve back, click pulls the record out, it spins faster each step */
 .now:not([data-ready]) { visibility: hidden; } /* the record is picked in initDeck, before the reveal */
-.now { display: grid; grid-template-columns: 160px minmax(0, 1fr); padding-top: var(--s-8); border-top: 1px solid var(--line); transition: opacity 0.45s var(--ease-ui); }
+.now { display: grid; grid-template-columns: 160px minmax(0, 1fr); position: relative; padding-top: var(--s-8); transition: opacity 0.45s var(--ease-ui); }
+.now-line { position: absolute; top: 0; left: 0; right: 0; height: 1px; background: var(--line); transform-origin: left center; } /* the divider draws itself on reveal */
 .now-label { margin: 0; font-size: var(--fs-s); line-height: 24px; color: var(--about-sub); transition: opacity 0.3s var(--ease-ui); }
 .now:has([aria-pressed='true']) .now-label { opacity: 0; } /* the pulled sleeve lands on the label column */
 .now-body { display: flex; align-items: center; gap: var(--s-8); min-width: 0; }

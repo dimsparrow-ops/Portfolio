@@ -9,6 +9,7 @@ import { site, intro, nowPlaying, records, timeline, socials } from '../data/sit
         <h1 class="sr-only">{site.name}</h1>
         <p class="intro" data-words>{intro.lead}<span class="dim">{intro.accent}</span>{intro.text}</p>
         <section class="now" aria-label={nowPlaying.label} data-records={JSON.stringify(records)}>
+          <span class="now-line" aria-hidden="true"></span>
           <p class="now-label">{nowPlaying.label}</p>
           <div class="now-body">
             <button class="deck" type="button" data-deck aria-pressed="false" aria-label="Pull the record out of the sleeve">
