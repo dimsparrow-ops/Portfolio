@@ -157,7 +157,7 @@ export function initWork(
   let time = 0;
   let autoHold = 0;
   const AUTO = { showcase: 0.12, slider: 0.16 }; // cards per second
-  const GRID_TITLE_ROOM = 160; // px between grid rows: the 4-line hover title (~130px) plus air
+  const GRID_TITLE_ROOM = 160; // px between grid rows: the 3-line hover title (~100px) plus air
   const GRID_TOP_ROOM = 184; // px above the top row, so its hover title stays on the canvas
   const GRID_STAGE_BIAS = 30; // the stage centre sits ~30px above the viewport centre
   const GRID_BOTTOM_ROOM = 120; // px below the last row for the client line + nav
