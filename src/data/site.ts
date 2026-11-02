@@ -48,6 +48,16 @@ export const intro = {
   text: '. I live in Lisbon and design the kind of software nobody posts on Dribbble but everybody depends on: the systems behind schools, hospitals, banks and HR teams.',
 };
 
+/** About "Listening to" record deck. Swap the two images in public/player/ to change the record. */
+export const nowPlaying = {
+  label: 'Listening to',
+  artist: 'MF DOOM',
+  album: 'Mm..Food',
+  meta: 'Hip hop · 2004',
+  sleeve: '/player/mm-food-sleeve.jpg',
+  vinyl: '/player/mm-food-vinyl.jpg',
+};
+
 /** About timeline, newest first. The AI entry has a free label; the rest are company · years · role. */
 export const timeline: { ai?: boolean; label?: string; company?: string; years?: string; role?: string; text: string }[] = [
   { ai: true, label: 'AI · Ongoing · Everywhere', text: 'The day AI tools showed up, my curiosity went into overdrive. I poke at every new model, plug them into how I design, and build odd little experiments and real products with them. Half playground, half power tool.' },

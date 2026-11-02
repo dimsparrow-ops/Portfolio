@@ -189,6 +189,7 @@ export function initAbout(root: HTMLElement): Destroy {
   }
 
   const stopSparks = initSparks(root);
+  const stopDeck = initDeck(root);
 
   // only while SUMMON ME is uncovered, the nav's Say hi key becomes "email me" (mailto)
   const key = document.querySelector<HTMLAnchorElement>('.nav .sayhi-btn');
@@ -231,6 +232,7 @@ export function initAbout(root: HTMLElement): Destroy {
 
   return () => {
     stopSparks();
+    stopDeck();
     window.removeEventListener('scroll', onScroll);
     if (label) gsap.killTweensOf(label);
     if (key && label && key.dataset.mode === 'email') {
@@ -250,6 +252,44 @@ export function initAbout(root: HTMLElement): Destroy {
     window.removeEventListener('resize', onResize);
     gsap.killTweensOf(letters);
     gsap.killTweensOf(items);
+  };
+}
+
+/** "Listening to" deck (chrisandrews.xyz): the record turns slowly, faster on hover, faster still once the sleeve is pulled (click). */
+function initDeck(root: HTMLElement): Destroy {
+  const deck = root.querySelector<HTMLButtonElement>('[data-deck]');
+  const disc = root.querySelector<HTMLElement>('[data-vinyl]');
+  if (!deck || !disc) return () => {};
+
+  let pulled = false;
+  let hovered = false;
+  // one 9s turn at rate 1; the rate is eased, so changing speed never jumps the angle
+  const spin = reduced ? null : disc.animate([{ transform: 'rotate(0deg)' }, { transform: 'rotate(360deg)' }], { duration: 9000, iterations: Infinity });
+  const state = { rate: 1 };
+  const setRate = () =>
+    spin && gsap.to(state, { rate: pulled ? 4.7 : hovered ? 2.8 : 1, duration: 0.8, ease: ease.out, overwrite: true, onUpdate: () => (spin.playbackRate = state.rate) });
+
+  const onClick = () => {
+    pulled = !pulled;
+    deck.setAttribute('aria-pressed', String(pulled));
+    setRate();
+  };
+  const onEnter = () => ((hovered = true), setRate());
+  const onLeave = () => ((hovered = false), setRate());
+  deck.addEventListener('click', onClick);
+  const hover = finePointer();
+  if (hover) {
+    deck.addEventListener('pointerenter', onEnter);
+    deck.addEventListener('pointerleave', onLeave);
+  }
+  return () => {
+    gsap.killTweensOf(state);
+    spin?.cancel();
+    deck.removeEventListener('click', onClick);
+    if (hover) {
+      deck.removeEventListener('pointerenter', onEnter);
+      deck.removeEventListener('pointerleave', onLeave);
+    }
   };
 }
 

@@ -452,9 +452,37 @@ html.is-loaded .loader { display: none; }
 .tl-head { display: flex; align-items: baseline; flex-wrap: wrap; column-gap: var(--s-3); }
 .tl-company { font-size: var(--fs-m); line-height: 28px; font-weight: 500; letter-spacing: var(--ls-text); color: var(--ink); }
 .tl-role { font-size: var(--fs-s); line-height: 28px; color: var(--about-sub); }
+/* "Listening to" record deck (chrisandrews.xyz): hover slides the sleeve back, click pulls the record out, it spins faster each step */
+.now { display: grid; grid-template-columns: 160px minmax(0, 1fr); padding-top: var(--s-8); border-top: 1px solid var(--line); transition: opacity 0.45s var(--ease-ui); }
+.now-label { margin: 0; font-size: var(--fs-s); line-height: 24px; color: var(--about-sub); transition: opacity 0.3s var(--ease-ui); }
+.now:has([aria-pressed='true']) .now-label { opacity: 0; } /* the pulled sleeve lands on the label column */
+.now-body { display: flex; align-items: center; gap: var(--s-8); min-width: 0; }
+.deck {
+  --size: 160px; --slot: 48px; /* slot = the strip of record that peeks out of the sleeve */
+  position: relative; flex: none; width: calc(var(--size) + var(--slot)); height: var(--size);
+  padding: 0; border: 0; background: none; color: inherit; font: inherit; cursor: pointer; -webkit-tap-highlight-color: transparent;
+}
+.vinyl { position: absolute; top: 0; left: var(--slot); width: var(--size); height: var(--size); border-radius: 50%; overflow: hidden; background: #2a1730; }
+.vinyl-disc { position: absolute; inset: 0; border-radius: 50%; background-size: cover; background-position: center; }
+.vinyl-disc::before { content: ''; position: absolute; inset: 0; border-radius: 50%; background: repeating-radial-gradient(circle, transparent 0 2px, rgba(0, 0, 0, 0.07) 2px 3px); } /* grooves */
+.vinyl-disc::after { content: ''; position: absolute; left: 50%; top: 50%; width: 56px; height: 56px; transform: translate(-50%, -50%); border-radius: 50%; background: radial-gradient(circle, var(--lab) 0 4px, #3b0f2a 4px); box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.2); } /* label + spindle */
+.vinyl-sheen { position: absolute; inset: 0; border-radius: 50%; pointer-events: none; background: conic-gradient(from 30deg, transparent 0 8%, rgba(255, 255, 255, 0.28) 12%, transparent 18% 55%, rgba(255, 255, 255, 0.2) 60%, transparent 66%); } /* light stays put while the disc turns */
+.sleeve { position: absolute; left: 0; top: 0; width: var(--size); height: var(--size); border-radius: var(--r-s); overflow: hidden; box-shadow: var(--shadow-m); transition: transform 0.45s var(--ease-ui); }
+.sleeve img { display: block; width: 100%; height: 100%; object-fit: cover; }
+@media (hover: hover) and (pointer: fine) { .deck:hover .sleeve { transform: translateX(calc(var(--slot) * -1)); } }
+.deck[aria-pressed='true'] .sleeve, .deck[aria-pressed='true']:hover .sleeve { transform: translateX(-100%) rotate(-3deg); }
+.track { display: grid; gap: var(--s-1); min-width: 0; }
+.track p { margin: 0; }
+.track .track-meta { margin-top: var(--s-2); }
+.track-artist { font-size: var(--fs-l); line-height: var(--lh-ui); font-weight: 500; letter-spacing: var(--ls-display); color: var(--ink); }
+.track-album { font-size: var(--fs-m); line-height: 28px; color: var(--about-body); }
+.track-meta { font: 400 var(--fs-xs)/16px var(--font-mono); letter-spacing: 0.08em; text-transform: uppercase; color: var(--about-sub); }
 @media (max-width: 767px) {
   .about-content { padding-top: var(--s-32); }
   .intro { font-size: var(--fs-l); line-height: 40px; }
+  .now { grid-template-columns: 1fr; row-gap: var(--s-3); }
+  .now-body { gap: var(--s-5); }
+  .deck { --size: 128px; --slot: 40px; }
 }
 /* AI section: native cursor is swapped for a sparkle trail (see initAbout) */
 @media (hover: hover) and (pointer: fine) { .tl-item.is-spark, .tl-item.is-spark * { cursor: none; } }

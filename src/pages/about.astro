@@ -1,6 +1,6 @@
 ---
 import Base from '../layouts/Base.astro';
-import { site, intro, timeline, socials } from '../data/site';
+import { site, intro, nowPlaying, timeline, socials } from '../data/site';
 ---
 <Base page="about" title="About">
   <main class="page page--about about" data-page="about">
@@ -8,6 +8,23 @@ import { site, intro, timeline, socials } from '../data/site';
       <div class="about-col">
         <h1 class="sr-only">{site.name}</h1>
         <p class="intro" data-reveal>{intro.lead}<span class="dim">{intro.accent}</span>{intro.text}</p>
+        <section class="now" data-reveal aria-label={nowPlaying.label}>
+          <p class="now-label">{nowPlaying.label}</p>
+          <div class="now-body">
+            <button class="deck" type="button" data-deck aria-pressed="false" aria-label="Pull the record out of the sleeve">
+              <span class="vinyl" aria-hidden="true">
+                <span class="vinyl-disc" data-vinyl style={`background-image: url(${nowPlaying.vinyl})`}></span>
+                <span class="vinyl-sheen"></span>
+              </span>
+              <span class="sleeve" aria-hidden="true"><img src={nowPlaying.sleeve} alt="" width="160" height="160" loading="lazy" decoding="async" /></span>
+            </button>
+            <div class="track">
+              <p class="track-artist">{nowPlaying.artist}</p>
+              <p class="track-album">{nowPlaying.album}</p>
+              <p class="track-meta">{nowPlaying.meta}</p>
+            </div>
+          </div>
+        </section>
         <ol class="timeline">
           {timeline.map((t) => (
             <li class="tl-item" data-reveal data-ai={t.ai ? "" : undefined}>
