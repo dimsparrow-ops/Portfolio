@@ -5,6 +5,33 @@ const finePointer = () => window.matchMedia('(hover: hover) and (pointer: fine)'
 
 type Destroy = () => void;
 
+/** Wrap every word of `el` (keeping inline children like the grey name) in a clipped mask + inner span. */
+function splitWords(el: HTMLElement): HTMLElement[] {
+  const inner: HTMLElement[] = [];
+  const walk = (node: Node) => {
+    Array.from(node.childNodes).forEach((n) => {
+      if (n.nodeType === Node.ELEMENT_NODE) return walk(n);
+      if (n.nodeType !== Node.TEXT_NODE || !n.textContent) return;
+      const frag = document.createDocumentFragment();
+      n.textContent.split(/(\s+)/).forEach((part) => {
+        if (!part) return;
+        if (/^\s+$/.test(part)) return frag.append(part);
+        const mask = document.createElement('span');
+        const word = document.createElement('span');
+        mask.className = 'w';
+        word.className = 'wi';
+        word.textContent = part;
+        mask.append(word);
+        frag.append(mask);
+        inner.push(word);
+      });
+      n.replaceWith(frag);
+    });
+  };
+  walk(el);
+  return inner;
+}
+
 /** Services (leoleo.studio): big list, hovered line shifts, preview follows cursor. */
 export function initServices(root: HTMLElement, entering: boolean): Destroy {
   const list = root.querySelector<HTMLElement>('[data-svc-list]')!;
@@ -126,8 +153,16 @@ export function initAbout(root: HTMLElement): Destroy {
   const letters = Array.from(word.querySelectorAll<HTMLElement>('span:not(.sp)'));
 
   // the whole timeline reveals on load (not on scroll), top to bottom
+  // the intro comes first: each word rises out of its own mask (lorenzodossi.com), the rest follows
+  const intro = root.querySelector<HTMLElement>('[data-words]');
   const items = Array.from(root.querySelectorAll<HTMLElement>('[data-reveal]'));
-  gsap.fromTo(items, { y: 36, opacity: 0 }, { y: 0, opacity: 1, duration: 0.7, ease: ease.out, stagger: stagger.item * 2, delay: 0.1 });
+  let wait = 0.1;
+  if (intro && !reduced) {
+    const words = splitWords(intro);
+    gsap.fromTo(words, { yPercent: 110 }, { yPercent: 0, duration: 1.6, ease: ease.words, stagger: stagger.word, delay: 0.1 });
+    wait = 0.9;
+  }
+  gsap.fromTo(items, { y: 36, opacity: 0 }, { y: 0, opacity: 1, duration: 0.7, ease: ease.out, stagger: stagger.item * 2, delay: wait });
 
   // fit the word to the viewport width (soscalemedia.se)
   let fitRaf = 0;

@@ -7,7 +7,7 @@ import { site, intro, nowPlaying, records, timeline, socials } from '../data/sit
     <div class="about-content">
       <div class="about-col">
         <h1 class="sr-only">{site.name}</h1>
-        <p class="intro" data-reveal>{intro.lead}<span class="dim">{intro.accent}</span>{intro.text}</p>
+        <p class="intro" data-words>{intro.lead}<span class="dim">{intro.accent}</span>{intro.text}</p>
         <section class="now" data-reveal aria-label={nowPlaying.label} data-records={JSON.stringify(records)}>
           <p class="now-label">{nowPlaying.label}</p>
           <div class="now-body">

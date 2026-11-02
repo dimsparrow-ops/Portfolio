@@ -13,6 +13,7 @@ export const ease = {
   inOut: CustomEase.create('m-inout', '0.45,0,0.15,1'), // layout + page switches (avea)
   in: CustomEase.create('m-in', '0.7,0,0.84,0'), // exits
   ui: CustomEase.create('m-ui', '0.215,0.61,0.355,1'), // accordion, hovers (thegradient)
+  words: CustomEase.create('m-words', '0.73,0,0,1'), // masked word reveal (lorenzodossi.com)
   spring: 'back.out(1.6)', // nav indicator, taps (laurent spring 480/30 approximated)
 };
 
@@ -26,7 +27,7 @@ export const dur = {
   intro: 1.0,
 };
 
-export const stagger = { char: 0.012, item: 0.04, card: 0.03 };
+export const stagger = { char: 0.012, item: 0.04, card: 0.03, word: 0.05 };
 
 /** Smoothing for things that follow input (avea / laurent). */
 export const follow = { lerp: 0.11, lerpDrag: 0.16 };
