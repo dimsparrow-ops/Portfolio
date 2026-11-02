@@ -167,7 +167,8 @@ let labReturn = '/';
 async function go(href: string, push = true, mode?: 'ascend') {
   try {
     await navigate(href, push, mode);
-  } catch {
+  } catch (err) {
+    console.error('[router] navigation failed, falling back to a full load', err);
     busy = false;
     location.href = href;
   }

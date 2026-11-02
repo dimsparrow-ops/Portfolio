@@ -338,7 +338,7 @@ export function initAbout(root: HTMLElement): Destroy {
     cancelAnimationFrame(fitRaf);
     window.removeEventListener('resize', onResize);
     gsap.killTweensOf(letters);
-    gsap.killTweensOf(items);
+    gsap.killTweensOf(root.querySelectorAll('.wi, .now-line, .deck, .vinyl')); // reveal tweens (words, divider, record)
   };
 }
 
