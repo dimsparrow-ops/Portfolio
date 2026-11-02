@@ -37,7 +37,7 @@
   --on-dark-body: rgba(255, 255, 255, 0.8);
   --on-dark-2: rgba(255, 255, 255, 0.5);
   --scrim: rgba(0, 0, 0, 0.5);        /* nav glass, case backdrop, chips on media */
-  --nav-bg: rgba(224, 224, 224, 0.8); /* nav pill, greyer than the white page; ≈ #E9E9E9 on top of the page */
+  --nav-bg: rgba(232, 232, 232, 0.8); /* nav pill, greyer than the white page; ≈ #E9E9E9 on top of the page */
   --nav-ink: #a3a2a3;                 /* inactive nav tabs (design choice, ~2:1 on --nav-bg) */
   --key: #f26d90;                     /* say hi pink */
   --key-edge: #c4456a;
