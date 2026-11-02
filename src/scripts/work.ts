@@ -157,6 +157,10 @@ export function initWork(
   let time = 0;
   let autoHold = 0;
   const AUTO = { showcase: 0.12, slider: 0.16 }; // cards per second
+  const GRID_TITLE_ROOM = 176; // px between grid rows: the 4-line hover title (~130px) plus air
+  const GRID_TOP_ROOM = 184; // px above the top row, so its hover title stays on the canvas
+  const GRID_STAGE_BIAS = 30; // the stage centre sits ~30px above the viewport centre
+  const GRID_BOTTOM_ROOM = 120; // px below the last row for the client line + nav
   const NO_TILT_BOTTOM = 120; // px: controls + nav strip, no section tilt there
   // one gap between neighbouring cards, shared by showcase and slider
   const cardGap = () => (dims().mobile ? 24 : 64);
@@ -203,30 +207,22 @@ export function initWork(
       const w = mobile ? vw * 0.86 : sizes('showcase').w; // same card size as the showcase
       return { w, h: w * RATIO, gap: cardGap() };
     }
-    // grid
+    // grid: 2-3 columns on desktop. Row gap leaves room for the hover title (up to 4 lines) between
+    // rows, and the block sits GRID_TOP_ROOM below the top edge so the top row's title stays on the canvas
     const n = Math.max(1, visible().length);
-    if (!mobile) {
-      // desktop: chessboard strip, even cards on the top row and odd ones on the bottom row.
-      // The empty cell next to each card holds its hover title / client line; overflow scrolls sideways.
-      const gap = cardGap();
-      const gapY = 16;
-      // leave ~175px above the top row for a 4-line title and ~120px below for the client line + nav
-      const availH = vh - 300;
-      const h = Math.min(Math.max((availH - gapY) / 2, 112), 500 * SCALE * RATIO);
-      return { w: h / RATIO, h, gap, gapY, strip: true };
-    }
-    const cols = 2;
+    const cols = mobile ? 2 : n <= 3 ? n : n === 4 ? 2 : 3;
     const rows = Math.ceil(n / cols);
-    const gap = cardGap();
-    const availW = vw - 32;
-    const availH = vh - 220;
+    const gap = cardGap(); // same rhythm as the slider
+    const gapY = mobile ? gap : GRID_TITLE_ROOM;
+    const availW = vw - (mobile ? 32 : 120);
+    const availH = vh - (mobile ? 220 : GRID_TOP_ROOM + GRID_BOTTOM_ROOM);
     let w = (availW - gap * (cols - 1)) / cols;
     let h = w * RATIO;
-    if (h * rows + gap * (rows - 1) > availH) {
-      h = (availH - gap * (rows - 1)) / rows;
+    if (h * rows + gapY * (rows - 1) > availH) {
+      h = (availH - gapY * (rows - 1)) / rows;
       w = h / RATIO;
     }
-    return { w: Math.min(w, 500 * SCALE), h: Math.min(h, 500 * SCALE * RATIO), gap, cols, rows };
+    return { w: Math.min(w, 500 * SCALE), h: Math.min(h, 500 * SCALE * RATIO), gap, gapY, cols, rows };
   }
 
   // everything poseFor needs that is the same for all cards, computed once per frame
@@ -266,37 +262,19 @@ export function initWork(
       const rel = wraps ? wrap(idx - offset, n) : idx - offset;
       return { x: rel * (sz.w + sz.gap), y: 0, z: 0, ry: 0, s: 1, w: sz.w, h: sz.h, o: 1 };
     }
-    if (sz.strip) {
-      const pitch = sz.w + sz.gap;
-      const span = (n - 1) * pitch + sz.w;
-      const room = vw - 120;
-      const x = span <= room ? (idx - (n - 1) / 2) * pitch : idx * pitch + sz.w / 2 - room / 2 - offset * pitch;
-      const y = (idx % 2 ? 1 : -1) * (sz.h + sz.gapY!) / 2 + 32;
-      return { x, y, z: 0, ry: 0, s: 1, w: sz.w, h: sz.h, o: 1 };
-    }
     const cols = sz.cols!;
     const rows = sz.rows!;
     const col = idx % cols;
     const row = Math.floor(idx / cols);
     const inRow = row === rows - 1 ? n - row * cols : cols; // centre a short last row
     const x = (col - (inRow - 1) / 2) * (sz.w + sz.gap);
-    const y = (row - (rows - 1) / 2) * (sz.h + sz.gap) + 10;
+    const y = (row - (rows - 1) / 2) * (sz.h + sz.gapY!) + (mobile ? 10 : (GRID_TOP_ROOM - GRID_BOTTOM_ROOM) / 2 + GRID_STAGE_BIAS);
     return { x, y, z: 0, ry: 0, s: 1, w: sz.w, h: sz.h, o: 1 };
   }
 
   function wrapsFor(n: number, sz: { w: number; gap: number }, vw: number) {
     return n * (sz.w + sz.gap) > vw + sz.w * 1.2;
   }
-  // desktop grid: how far (in cards) the strip can scroll; 0 when it all fits
-  function gridMax() {
-    const { vw, mobile } = dims();
-    if (mobile) return 0;
-    const sz = sizes('grid');
-    const pitch = sz.w + sz.gap;
-    const span = (visible().length - 1) * pitch + sz.w;
-    return Math.max(0, (span - (vw - 120)) / pitch);
-  }
-  const gridScrolls = () => view === 'grid' && gridMax() > 0;
   function sliderWraps() {
     return wrapsFor(visible().length, sizes('slider'), dims().vw);
   }
@@ -367,9 +345,8 @@ export function initWork(
     const canAuto = !reduced && introDone && !hovered && !dragging && now > autoHold;
     if (canAuto && view === 'showcase') target += AUTO.showcase * dt;
     if (canAuto && view === 'slider' && frame.wraps) target += AUTO.slider * dt;
-    if (view !== 'grid' || gridScrolls()) {
+    if (view !== 'grid') {
       const n = visible().length;
-      if (view === 'grid') target = clamp(target, 0, gridMax());
       if (view === 'slider' && !frame.wraps) target = clamp(target, 0, Math.max(0, n - 1));
       offset += (target - offset) * k(dragging ? follow.lerpDrag : follow.lerp);
       if (Math.abs(target - offset) < 1e-4) offset = target;
@@ -485,20 +462,20 @@ export function initWork(
   };
   const snap = (ms = 140) => {
     clearTimeout(idle);
-    if (view === 'grid') return; // the strip scrolls freely
+    if (view === 'grid') return;
     idle = window.setTimeout(() => (target = Math.round(target)), ms);
   };
 
   const onWheel = (e: WheelEvent) => {
-    if (paused || (view === 'grid' && !gridScrolls())) return;
+    if (paused || view === 'grid') return;
     e.preventDefault();
     const delta = Math.abs(e.deltaX) > Math.abs(e.deltaY) ? e.deltaX : e.deltaY;
-    target += view === 'grid' ? delta / spacing() : delta * 0.0016;
+    target += delta * 0.0016;
     autoHold = performance.now() + 2500;
     snap();
   };
   const onDown = (e: PointerEvent) => {
-    if (paused || (view === 'grid' && !gridScrolls()) || e.button !== 0) return;
+    if (paused || view === 'grid' || e.button !== 0) return;
     dragging = true;
     dragged = false;
     startX = e.clientX;
