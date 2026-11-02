@@ -1,39 +1,9 @@
-import { gsap, ScrollTrigger, ease, dur, stagger, reduced } from './motion';
+import { gsap, ScrollTrigger, ease, dur, stagger, reduced, RISE, splitWords } from './motion';
 
 // hover-driven effects only make sense with a real pointer (taps fire pointerenter too)
 const finePointer = () => window.matchMedia('(hover: hover) and (pointer: fine)').matches;
 
 type Destroy = () => void;
-
-/** One reveal language (lorenzodossi.com): words rise out of their own masks. Same timing on About and Services. */
-const RISE = { dur: 1.1, ease: ease.words, span: 0.6 };
-
-/** Wrap every word of `el` (keeping inline children like the grey name) in a clipped mask + inner span. */
-function splitWords(el: HTMLElement): HTMLElement[] {
-  const inner: HTMLElement[] = [];
-  const walk = (node: Node) => {
-    Array.from(node.childNodes).forEach((n) => {
-      if (n.nodeType === Node.ELEMENT_NODE) return walk(n);
-      if (n.nodeType !== Node.TEXT_NODE || !n.textContent) return;
-      const frag = document.createDocumentFragment();
-      n.textContent.split(/(\s+)/).forEach((part) => {
-        if (!part) return;
-        if (/^\s+$/.test(part)) return frag.append(part);
-        const mask = document.createElement('span');
-        const word = document.createElement('span');
-        mask.className = 'w';
-        word.className = 'wi';
-        word.textContent = part;
-        mask.append(word);
-        frag.append(mask);
-        inner.push(word);
-      });
-      n.replaceWith(frag);
-    });
-  };
-  walk(el);
-  return inner;
-}
 
 /** Services (leoleo.studio): big list, hovered line shifts, preview follows cursor. */
 export function initServices(root: HTMLElement, entering: boolean): Destroy {

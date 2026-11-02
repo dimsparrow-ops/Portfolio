@@ -37,6 +37,36 @@ export const reduced =
 
 if (reduced) gsap.globalTimeline.timeScale(6);
 
+/** One reveal language (lorenzodossi.com): words rise out of their own masks. Same timing on About, Services and cases. */
+export const RISE = { dur: 1.1, ease: ease.words, span: 0.6 };
+
+/** Wrap every word of `el` (keeping inline children like the grey name) in a clipped mask + inner span. */
+export function splitWords(el: HTMLElement): HTMLElement[] {
+  const inner: HTMLElement[] = [];
+  const walk = (node: Node) => {
+    Array.from(node.childNodes).forEach((n) => {
+      if (n.nodeType === Node.ELEMENT_NODE) return walk(n);
+      if (n.nodeType !== Node.TEXT_NODE || !n.textContent) return;
+      const frag = document.createDocumentFragment();
+      n.textContent.split(/(\s+)/).forEach((part) => {
+        if (!part) return;
+        if (/^\s+$/.test(part)) return frag.append(part);
+        const mask = document.createElement('span');
+        const word = document.createElement('span');
+        mask.className = 'w';
+        word.className = 'wi';
+        word.textContent = part;
+        mask.append(word);
+        frag.append(mask);
+        inner.push(word);
+      });
+      n.replaceWith(frag);
+    });
+  };
+  walk(el);
+  return inner;
+}
+
 /** Split an element's text into per-character spans for reveals. */
 export function splitChars(el: HTMLElement): HTMLElement[] {
   if (el.dataset.splitDone) return Array.from(el.querySelectorAll<HTMLElement>('.ch'));

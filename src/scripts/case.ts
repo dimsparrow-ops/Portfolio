@@ -1,5 +1,5 @@
 import Lenis from 'lenis';
-import { gsap, ScrollTrigger, ease, dur, stagger, splitChars, reduced } from './motion';
+import { gsap, ScrollTrigger, ease, dur, stagger, reduced, RISE, splitWords } from './motion';
 
 /**
  * Case overlay (leoleo.studio): the panel rises over Work, keeps its own URL.
@@ -71,7 +71,7 @@ function wire(article: HTMLElement, scroller: HTMLElement) {
         scroller,
         start: 'top 92%',
         once: true,
-        onEnter: () => gsap.to(m, { y: 0, opacity: 1, duration: 0.7, ease: ease.out }),
+        onEnter: () => gsap.to(m, { y: 0, opacity: 1, duration: RISE.dur, ease: RISE.ease }),
       }),
     );
   });
@@ -95,6 +95,21 @@ function wireVideos(slot: HTMLElement, scroller: HTMLElement) {
   );
   videos.forEach((v) => io.observe(v));
   cleanup.push(() => io.disconnect());
+}
+
+/** Same masked word rise as About: head words ride the sheet in, metrics and the story column rise as they scroll into view. */
+function wireText(article: HTMLElement, scroller: HTMLElement) {
+  const per = (words: HTMLElement[]) => ({ yPercent: 0, duration: RISE.dur, ease: RISE.ease, stagger: Math.min(stagger.word, RISE.span / words.length) });
+  const onScroll = (els: HTMLElement[], at: Element) => {
+    const words = els.flatMap(splitWords);
+    if (!words.length) return;
+    gsap.set(words, { yPercent: 110 });
+    triggers.push(ScrollTrigger.create({ trigger: at, scroller, start: 'top 92%', once: true, onEnter: () => gsap.to(words, per(words)) }));
+  };
+  const metrics = article.querySelector<HTMLElement>('.metrics');
+  if (metrics) onScroll(Array.from(metrics.querySelectorAll<HTMLElement>('.metric b, .metric span')), metrics);
+  const acc = article.querySelector<HTMLElement>('.acc');
+  if (acc) onScroll(Array.from(acc.querySelectorAll<HTMLElement>('.acc-btn .mono, .acc-item.is-open .acc-panel p')), acc);
 }
 
 export function openCase(opts: { html?: string; animate?: boolean; onClose: () => void }) {
@@ -130,19 +145,25 @@ export function openCase(opts: { html?: string; animate?: boolean; onClose: () =
     window.removeEventListener('keydown', onKey);
   });
 
-  const title = article.querySelector<HTMLElement>('[data-split]');
-  const chars = title ? splitChars(title) : [];
-  const rest = article.querySelectorAll<HTMLElement>('.case-meta, .case-link, .metric');
-
   const tl = gsap.timeline({ onComplete: () => ScrollTrigger.refresh() });
   if (opts.animate === false) {
     gsap.set(backdrop, { opacity: 1 });
     gsap.set(scroller, { y: 0 });
   } else {
     tl.fromTo(backdrop, { opacity: 0 }, { opacity: 1, duration: dur.base, ease: ease.ui }, 0)
-      .fromTo(scroller, { y: '105%' }, { y: 0, duration: dur.overlayIn, ease: ease.out }, 0)
-      .from(chars, { yPercent: 105, duration: 0.65, ease: ease.out, stagger: stagger.char }, 0.2)
-      .from(rest, { y: 18, opacity: 0, duration: 0.6, ease: ease.out, stagger: stagger.item }, 0.3);
+      .fromTo(scroller, { y: '105%' }, { y: 0, duration: dur.overlayIn, ease: ease.out }, 0);
+    if (!reduced) {
+      const meta = article.querySelector<HTMLElement>('.case-meta');
+      const titleWords = splitWords(article.querySelector<HTMLElement>('.case-title')!);
+      const headWords = Array.from(article.querySelectorAll<HTMLElement>('.case-meta, .case-link')).flatMap(splitWords);
+      gsap.set([...titleWords, ...headWords], { yPercent: 110 });
+      if (meta) gsap.set(meta, { opacity: 0 }); // its "·" separators are pseudo-elements, so the row fades in with the words
+      const per = (words: HTMLElement[]) => ({ yPercent: 0, duration: RISE.dur, ease: RISE.ease, stagger: Math.min(stagger.word, RISE.span / words.length) });
+      tl.to(titleWords, per(titleWords), 0.25)
+        .to(headWords, per(headWords), 0.35)
+        .to(meta ?? [], { opacity: 1, duration: dur.base, ease: ease.ui }, 0.35);
+      wireText(article, scroller);
+    }
   }
   wire(article, scroller);
   wireVideos(slot, scroller);

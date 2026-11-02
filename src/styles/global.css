@@ -357,8 +357,10 @@ html.is-loaded .loader { display: none; }
 .case-head { display: grid; gap: var(--s-6); margin-bottom: var(--s-16); }
 .case-title { font-size: var(--fs-2xl); line-height: var(--lh-display); letter-spacing: var(--ls-display); font-weight: 500; margin: 0; }
 .case-title .client { color: var(--ink-3); }
+/* line-height 1 display type: the mask needs room below the baseline for descenders */
+.case .case-title .w, .case .metric b .w { padding-bottom: 0.2em; margin-bottom: -0.2em; }
 .case-meta { display: flex; flex-wrap: wrap; gap: var(--s-2) var(--s-4); color: var(--ink-2); }
-.case-meta span + span::before { content: '·'; margin-right: var(--s-4); }
+.case-meta > span + span::before { content: '·'; margin-right: var(--s-4); }
 .case-link {
   justify-self: start; display: inline-flex; align-items: center; gap: var(--s-2);
   height: var(--control-h); padding: 0 var(--s-4); border-radius: var(--r-pill); border: 1px solid var(--ink);
@@ -367,7 +369,7 @@ html.is-loaded .loader { display: none; }
 .case-link:hover { background: var(--ink); color: var(--bg); }
 .metrics { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: var(--s-6); padding: var(--s-8) 0; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); margin-bottom: var(--s-16); }
 .metric b { display: block; font-size: var(--fs-xl); font-weight: 500; letter-spacing: var(--ls-display); line-height: var(--lh-display); }
-.metric span { color: var(--ink-2); }
+.metric > span { color: var(--ink-2); }
 .case-body { display: grid; grid-template-columns: minmax(0, 1fr) minmax(280px, 400px); gap: clamp(var(--s-6), 3vw, var(--s-12)); align-items: start; }
 .case-media { display: grid; gap: var(--s-4); }
 .case-media .ph { aspect-ratio: 16 / 10; border-radius: var(--r-m); }
@@ -446,8 +448,8 @@ html.is-loaded .loader { display: none; }
 .intro { margin: 0; font-size: 40px; line-height: 48px; font-weight: 500; letter-spacing: -0.03em; color: var(--ink); text-wrap: pretty; } /* 40 = intro size, off the type scale on purpose */
 .intro .dim { color: var(--about-sub); }
 /* word masks for the reveal; the padding keeps descenders unclipped */
-[data-words] .w, .now .w, .tl-item .w, .svc-item .w { display: inline-block; overflow: clip; vertical-align: top; padding-bottom: 4px; margin-bottom: -4px; }
-[data-words] .wi, .now .wi, .tl-item .wi, .svc-item .wi { display: inline-block; }
+[data-words] .w, .now .w, .tl-item .w, .svc-item .w, .case .w { display: inline-block; overflow: clip; vertical-align: top; padding-bottom: 4px; margin-bottom: -4px; }
+[data-words] .wi, .now .wi, .tl-item .wi, .svc-item .wi, .case .wi { display: inline-block; }
 /* the list is a narrower column centred under the intro */
 .timeline { list-style: none; width: 100%; max-width: 560px; margin: 0 auto; padding: 0; display: grid; gap: var(--s-16); }
 .tl-item { display: grid; gap: var(--s-3); }
