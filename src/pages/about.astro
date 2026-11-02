@@ -1,16 +1,23 @@
 ---
 import Base from '../layouts/Base.astro';
-import { site, timeline, socials } from '../data/site';
+import { site, intro, timeline, socials } from '../data/site';
 ---
 <Base page="about" title="About">
   <main class="page page--about about" data-page="about">
     <div class="about-content">
       <div class="about-col">
         <h1 class="sr-only">{site.name}</h1>
+        <p class="intro" data-reveal>{intro.lead}<span class="dim">{intro.accent}</span>{intro.text}</p>
         <ol class="timeline">
           {timeline.map((t) => (
             <li class="tl-item" data-reveal data-ai={t.ai ? "" : undefined}>
-              <span class="tl-when mono">{t.when}</span>
+              <span class="tl-when">{t.ai ? t.label : t.years}</span>
+              {t.company && (
+                <div class="tl-head">
+                  <span class="tl-company">{t.company}</span>
+                  <span class="tl-role">{t.role}</span>
+                </div>
+              )}
               <p>{t.text}</p>
             </li>
           ))}

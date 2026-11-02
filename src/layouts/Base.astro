@@ -1,6 +1,7 @@
 ---
 import '../styles/global.css';
 import { pages, site, type PageId } from '../data/site';
+import geistUrl from '@fontsource-variable/geist/files/geist-latin-wght-normal.woff2?url';
 
 interface Props { page: PageId; title?: string; description?: string; }
 const { page, title, description = `${site.name} — ${site.role}. Selected work, services and experiments.` } = Astro.props;
@@ -14,7 +15,7 @@ const fullTitle = title ? `${title} — Dim` : 'Dim';
     <title>{fullTitle}</title>
     <meta name="description" content={description} />
     <meta name="theme-color" content="#ffffff" />
-    <link rel="preload" href="/fonts/GoogleSansFlex.woff2" as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href={geistUrl} as="font" type="font/woff2" crossorigin />
     <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%231c1c1e'/%3E%3C/svg%3E" />
     <script is:inline>
       // Loader shows once per browser session; later visits land directly.
