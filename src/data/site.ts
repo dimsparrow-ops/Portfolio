@@ -52,8 +52,8 @@ export const intro = {
 export const nowPlaying = {
   label: 'Listening to',
   artist: 'MF DOOM',
-  album: 'Mm..Food',
-  meta: 'Hip hop · 2004',
+  track: 'Rapp Snitch Knishes feat. Mr. Fantastik',
+  meta: 'Mm..Food · 2004',
   sleeve: '/player/mm-food-sleeve.jpg',
   vinyl: '/player/mm-food-vinyl.jpg',
 };

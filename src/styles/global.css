@@ -475,7 +475,7 @@ html.is-loaded .loader { display: none; }
 .track p { margin: 0; }
 .track .track-meta { margin-top: var(--s-2); }
 .track-artist { font-size: var(--fs-l); line-height: var(--lh-ui); font-weight: 500; letter-spacing: var(--ls-display); color: var(--ink); }
-.track-album { font-size: var(--fs-m); line-height: 28px; color: var(--about-body); }
+.track-name { font-size: var(--fs-m); line-height: 28px; color: var(--about-body); }
 .track-meta { font: 400 var(--fs-xs)/16px var(--font-mono); letter-spacing: 0.08em; text-transform: uppercase; color: var(--about-sub); }
 @media (max-width: 767px) {
   .about-content { padding-top: var(--s-32); }
