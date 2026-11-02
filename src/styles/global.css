@@ -283,19 +283,37 @@ html.is-loaded .loader { display: none; }
 .card-gl { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; pointer-events: none; z-index: 1; }
 
 /* hover copy rides on the card, so it follows the tilt (cappen.com + Figma note) */
-.card-task, .card-meta {
-  position: absolute; pointer-events: none;
+.card-task, .chip {
   opacity: 0; transform: translateY(var(--s-2));
   transition: opacity 0.3s var(--ease-ui), transform 0.45s var(--ease-out);
 }
 .card-task {
+  position: absolute; pointer-events: none;
   left: 0; right: -16%; bottom: calc(100% + var(--s-5));
-  font-size: 28px; line-height: var(--lh-ui); letter-spacing: var(--ls-text); color: var(--ink);
+  font-size: 32px; line-height: var(--lh-ui); letter-spacing: var(--ls-display); font-weight: 500; color: var(--ink);
   display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 3; overflow: hidden;
 }
-.card-meta { left: 0; top: calc(100% + var(--s-5)); font: 16px/var(--lh-ui) var(--font-mono); text-transform: lowercase; color: var(--ink-2); white-space: nowrap; } /* same face as the About labels */
-.card.is-hover .card-task, .card.is-hover .card-meta { opacity: 1; transform: none; }
-.card.is-hover .card-meta { transition-delay: 0.05s; }
+.card-task .rest { color: var(--ink-2); } /* two-tone: hook in ink, the rest in grey (same move as the About intro) */
+/* glass chips on the cover (discipline · platform · year); blur only while hovered, it is heavy on moving cards */
+.card-chips {
+  position: absolute; left: var(--s-4); right: var(--s-4); bottom: var(--s-4); z-index: 1;
+  display: flex; gap: var(--s-2); pointer-events: none;
+}
+.chip {
+  padding: var(--s-2) var(--s-3); border-radius: var(--r-pill);
+  font: 400 var(--fs-xs)/1 var(--font-mono); letter-spacing: var(--ls-caps); text-transform: uppercase; white-space: nowrap;
+  color: var(--on-dark);
+  background: rgba(0, 0, 0, 0.28); box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.32); /* darker glass: covers are often light */
+}
+.card.is-hover .chip { --glass: blur(24px); backdrop-filter: var(--glass); -webkit-backdrop-filter: var(--glass); }
+.card-face::after { /* soft scrim under the chips */
+  content: ''; position: absolute; inset: auto 0 0 0; height: 48%;
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.45), transparent);
+  opacity: 0; transition: opacity 0.3s var(--ease-ui); pointer-events: none;
+}
+.card.is-hover .card-face::after { opacity: 1; }
+.card.is-hover .card-task, .card.is-hover .chip { opacity: 1; transform: none; }
+.card.is-hover .chip { transition-delay: calc(0.05s + var(--i) * 0.04s); }
 
 /* case cursor: white disc with an arrow follows the pointer over a card (leoleo.studio about block) */
 @media (hover: hover) and (pointer: fine) {

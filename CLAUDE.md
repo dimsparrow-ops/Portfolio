@@ -45,8 +45,9 @@ Brief: impress by look and motion first, cases second. Simple structure, easy ca
 - Radius: `--r-s` 4, `--r-m` 12, `--r-card` 8, `--r-l` 32 (white page → dark space corners), `--r-pill`. Shadows: s / m / l.
 - Nav: bottom pill, dark glass (blur 80px), 4px inset on every side, white active pill (spring), items `work · about · services`, lowercase.
 - Work controls: `showcase · grid · slider` bottom-left; `cases · design lab` bottom-right (design lab = link to the Lab).
-- Cards: 10:11 near-square portrait (RATIO 1.1, like cappen.com/works), radius 8, sizes ×1.25, cover image only (no text on the card). Hover: tilt, slight brighten, task text above,
-  "client • country, year" below, white 64px disc cursor with a ↗ arrow. No glare, no tags.
+- Cards: 10:11 near-square portrait (RATIO 1.1, like cappen.com/works), radius 8, sizes ×1.25, cover image only at rest. Hover: tilt, slight brighten, two-tone task headline above (32px, first sentence or first 3 words
+  in ink, the rest in `--ink-2`), glass chips on the cover (discipline · platform · year, dark glass + scrim, blur only while hovered),
+  white 64px disc cursor with a ↗ arrow. No glare. Chosen from the Figma variations (V3c); card proportion still open.
 - Buttons: outline pill; hover = dark disc grows from bottom-centre (karim-saab.com).
 - Motion: ease-out (0.16,1,0.3,1) reveals; ease-inout (0.45,0,0.15,1) layout/page; ease-ui (0.215,0.61,0.355,1) hovers/accordion;
   durations 0.2 / 0.45 / 0.75 / 0.85-in 0.5-out. Respect `prefers-reduced-motion`. Mobile = simplified effects.
