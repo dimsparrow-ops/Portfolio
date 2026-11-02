@@ -41,7 +41,7 @@ Brief: impress by look and motion first, cases second. Simple structure, easy ca
   `--scrim` for nav glass/backdrops; `--key` #F26D90 + `--key-edge` #C4456A = Say hi keycap only (white label).
 - Type: Geist (UI + text) and Geist Mono (captions, labels), both OFL via `@fontsource-variable`; Archivo wdth 62% / 900 only for SUMMON ME.
   Scale 12 / 16 / 20 / 32 / 80 / 120 (big ones via clamp); About intro is 40 (set apart on purpose). Line heights 1 / 1.2 / 1.5.
-- About: two-tone intro (name in grey `#6b6b70`), then a 640px timeline indented 80px inside the 800px intro; local greys `--about-sub` / `--about-body`.
+- About: two-tone intro (name in grey `#6b6b70`), then a 560px timeline centred under the 800px intro; local greys `--about-sub` / `--about-body`.
 - Radius: `--r-s` 4, `--r-m` 12, `--r-card` 8, `--r-l` 32 (white page → dark space corners), `--r-pill`. Shadows: s / m / l.
 - Nav: bottom pill, dark glass (blur 80px), 4px inset on every side, white active pill (spring), items `work · about · services`, lowercase.
 - Work controls: `showcase · grid · slider` bottom-left; `cases · design lab` bottom-right (design lab = link to the Lab).

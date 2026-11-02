@@ -427,8 +427,8 @@ html.is-loaded .loader { display: none; }
 /* two-tone intro: the name drops to grey */
 .intro { margin: 0; font-size: 40px; line-height: 48px; font-weight: 500; letter-spacing: -0.03em; color: var(--ink); text-wrap: pretty; } /* 40 = intro size, off the type scale on purpose */
 .intro .dim { color: var(--about-sub); }
-/* the list sits 80px in from the intro's edge */
-.timeline { list-style: none; width: 100%; max-width: 640px; margin: 0 auto; padding: 0; display: grid; gap: var(--s-16); }
+/* the list is a narrower column centred under the intro */
+.timeline { list-style: none; width: 100%; max-width: 560px; margin: 0 auto; padding: 0; display: grid; gap: var(--s-16); }
 .tl-item { display: grid; gap: var(--s-3); }
 .tl-when { font: 400 var(--fs-xs)/16px var(--font-mono); letter-spacing: 0.08em; text-transform: uppercase; color: var(--about-sub); }
 .tl-head { display: flex; align-items: baseline; flex-wrap: wrap; column-gap: var(--s-3); }
