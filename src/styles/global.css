@@ -403,7 +403,7 @@ html.is-loaded .loader { display: none; }
 .svc-list { list-style: none; margin: 0; padding: 0; }
 /* items clip (overflow hidden for the reveal): keep room for descenders and for the 28px hover shift */
 .svc-item { padding-block: 0.04em; padding-inline: var(--s-8); }
-.svc-item a { display: block; font-size: var(--fs-xl); line-height: 1.2; letter-spacing: var(--ls-display); font-weight: 400; transition: opacity 0.4s var(--ease-ui); }
+.svc-item a { display: block; font-size: clamp(36px, 4.76vw, 68px); /* --fs-xl − 15% (5.6vw → 4.76vw, 80 → 68), min snapped to the 4px grid */ line-height: 1.2; letter-spacing: var(--ls-display); font-weight: 400; transition: opacity 0.4s var(--ease-ui); }
 .svc-item a span { display: inline-block; will-change: transform; }
 .svc-list.is-hovering .svc-item:not(.is-hover) a { opacity: 0.22; }
 /* hover description rides the pointer like the old preview card: tilt, scale in/out */
