@@ -5,6 +5,9 @@ const finePointer = () => window.matchMedia('(hover: hover) and (pointer: fine)'
 
 type Destroy = () => void;
 
+/** One reveal language (lorenzodossi.com): words rise out of their own masks. Same timing on About and Services. */
+const RISE = { dur: 1.1, ease: ease.words, span: 0.6 };
+
 /** Wrap every word of `el` (keeping inline children like the grey name) in a clipped mask + inner span. */
 function splitWords(el: HTMLElement): HTMLElement[] {
   const inner: HTMLElement[] = [];
@@ -83,10 +86,15 @@ export function initServices(root: HTMLElement, entering: boolean): Destroy {
   const rTo = gsap.quickTo(desc, 'rotation', { duration: 0.8, ease: ease.out });
   let lastX = 0;
 
-  items.forEach((it) => (it.style.overflow = 'hidden'));
   const spans = items.map((it) => it.querySelector<HTMLElement>('span')!);
-  if (entering) {
-    gsap.from(spans, { yPercent: 110, duration: 0.8, ease: ease.out, stagger: stagger.item, delay: 0.15 });
+  // same masked word rise as About: line by line, words inside each line
+  const words = items.map((it, i) => splitWords(spans[i]));
+  if (!reduced) {
+    gsap.set(words.flat(), { yPercent: 110 });
+    const tl = gsap.timeline({ defaults: { ease: RISE.ease }, delay: 0.1 });
+    words.forEach((line, i) =>
+      tl.to(line, { yPercent: 0, duration: RISE.dur, stagger: Math.min(stagger.word, 0.3 / line.length) }, i * 0.09),
+    );
   }
 
   const onMove = (e: PointerEvent) => {
@@ -98,7 +106,7 @@ export function initServices(root: HTMLElement, entering: boolean): Destroy {
     rTo(reduced ? 0 : gsap.utils.clamp(-10, 10, (e.clientX - lastX) * 0.6));
     lastX = e.clientX;
   };
-  if (!finePointer()) return () => gsap.killTweensOf(spans);
+  if (!finePointer()) return () => gsap.killTweensOf([spans, ...words]);
   const offs = items.map((it, i) => {
     const span = spans[i];
     const enter = () => {
@@ -141,7 +149,7 @@ export function initServices(root: HTMLElement, entering: boolean): Destroy {
   return () => {
     window.removeEventListener('pointermove', onMove);
     offs.forEach((f) => f());
-    gsap.killTweensOf([desc, type, para, ...spans]);
+    gsap.killTweensOf([desc, type, para, ...spans, ...words]);
   };
 }
 
@@ -217,8 +225,7 @@ export function initAbout(root: HTMLElement): Destroy {
   // one reveal language for the whole page (lorenzodossi.com): words rise out of their own masks.
   // Runs after initDeck, which rewrites the track text and would wipe the masks.
   if (!reduced) {
-    // one timing for everything that appears here: intro, Listening to (divider, text, record), timeline
-    const RISE = { dur: 1.1, ease: ease.words, span: 0.6 };
+    // one timing for everything that appears here: intro, Listening to (divider, text, record), timeline (RISE, shared with Services)
     const intro = root.querySelector<HTMLElement>('[data-words]')!;
     const iw = splitWords(intro);
     gsap.fromTo(iw, { yPercent: 110 }, { yPercent: 0, duration: RISE.dur, ease: RISE.ease, stagger: Math.min(stagger.word, 1.2 / iw.length), delay: 0.1 });
