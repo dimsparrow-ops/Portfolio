@@ -157,7 +157,7 @@ export function initWork(
   let time = 0;
   let autoHold = 0;
   const AUTO = { showcase: 0.12, slider: 0.16 }; // cards per second
-  const GRID_TITLE_ROOM = 176; // px between grid rows: the 4-line hover title (~130px) plus air
+  const GRID_TITLE_ROOM = 160; // px between grid rows: the 4-line hover title (~130px) plus air
   const GRID_TOP_ROOM = 184; // px above the top row, so its hover title stays on the canvas
   const GRID_STAGE_BIAS = 30; // the stage centre sits ~30px above the viewport centre
   const GRID_BOTTOM_ROOM = 120; // px below the last row for the client line + nav
@@ -207,22 +207,25 @@ export function initWork(
       const w = mobile ? vw * 0.86 : sizes('showcase').w; // same card size as the showcase
       return { w, h: w * RATIO, gap: cardGap() };
     }
-    // grid: 2-3 columns on desktop. Row gap leaves room for the hover title (up to 4 lines) between
-    // rows, and the block sits GRID_TOP_ROOM below the top edge so the top row's title stays on the canvas
+    // grid: desktop scrolls vertically (see gridMax); mobile fits everything on one screen
     const n = Math.max(1, visible().length);
-    const cols = mobile ? 2 : n <= 3 ? n : n === 4 ? 2 : 3;
+    if (!mobile) {
+      // desktop: two columns of near-showcase-sized cards that scroll vertically; the row gap holds the hover title
+      const w = sizes('showcase').w * 0.8;
+      return { w, h: w * RATIO, gap: cardGap(), gapY: GRID_TITLE_ROOM, cols: Math.min(2, n), rows: Math.ceil(n / 2) };
+    }
+    const cols = 2;
     const rows = Math.ceil(n / cols);
-    const gap = cardGap(); // same rhythm as the slider
-    const gapY = mobile ? gap : GRID_TITLE_ROOM;
-    const availW = vw - (mobile ? 32 : 120);
-    const availH = vh - (mobile ? 220 : GRID_TOP_ROOM + GRID_BOTTOM_ROOM);
+    const gap = cardGap();
+    const availW = vw - 32;
+    const availH = vh - 220;
     let w = (availW - gap * (cols - 1)) / cols;
     let h = w * RATIO;
-    if (h * rows + gapY * (rows - 1) > availH) {
-      h = (availH - gapY * (rows - 1)) / rows;
+    if (h * rows + gap * (rows - 1) > availH) {
+      h = (availH - gap * (rows - 1)) / rows;
       w = h / RATIO;
     }
-    return { w: Math.min(w, 500 * SCALE), h: Math.min(h, 500 * SCALE * RATIO), gap, gapY, cols, rows };
+    return { w: Math.min(w, 500 * SCALE), h: Math.min(h, 500 * SCALE * RATIO), gap, gapY: gap, cols, rows };
   }
 
   // everything poseFor needs that is the same for all cards, computed once per frame
@@ -268,12 +271,21 @@ export function initWork(
     const row = Math.floor(idx / cols);
     const inRow = row === rows - 1 ? n - row * cols : cols; // centre a short last row
     const x = (col - (inRow - 1) / 2) * (sz.w + sz.gap);
-    const y = (row - (rows - 1) / 2) * (sz.h + sz.gapY!) + (mobile ? 10 : (GRID_TOP_ROOM - GRID_BOTTOM_ROOM) / 2 + GRID_STAGE_BIAS);
+    const y = mobile
+      ? (row - (rows - 1) / 2) * (sz.h + sz.gapY!) + 10
+      : GRID_TOP_ROOM - dims().vh / 2 + GRID_STAGE_BIAS + sz.h / 2 + row * (sz.h + sz.gapY!) - offset;
     return { x, y, z: 0, ry: 0, s: 1, w: sz.w, h: sz.h, o: 1 };
   }
 
   function wrapsFor(n: number, sz: { w: number; gap: number }, vw: number) {
     return n * (sz.w + sz.gap) > vw + sz.w * 1.2;
+  }
+  // desktop grid: how far (px) the page can scroll; 0 when it all fits
+  function gridMax() {
+    const { vh, mobile } = dims();
+    if (mobile) return 0;
+    const sz = sizes('grid');
+    return Math.max(0, GRID_TOP_ROOM + sz.rows! * sz.h + (sz.rows! - 1) * sz.gapY! + GRID_BOTTOM_ROOM - vh);
   }
   function sliderWraps() {
     return wrapsFor(visible().length, sizes('slider'), dims().vw);
@@ -345,8 +357,9 @@ export function initWork(
     const canAuto = !reduced && introDone && !hovered && !dragging && now > autoHold;
     if (canAuto && view === 'showcase') target += AUTO.showcase * dt;
     if (canAuto && view === 'slider' && frame.wraps) target += AUTO.slider * dt;
-    if (view !== 'grid') {
+    {
       const n = visible().length;
+      if (view === 'grid') target = clamp(target, 0, gridMax());
       if (view === 'slider' && !frame.wraps) target = clamp(target, 0, Math.max(0, n - 1));
       offset += (target - offset) * k(dragging ? follow.lerpDrag : follow.lerp);
       if (Math.abs(target - offset) < 1e-4) offset = target;
@@ -453,12 +466,13 @@ export function initWork(
   let dragging = false;
   let dragged = false;
   let startX = 0;
+  let startY = 0;
   let startTarget = 0;
   let idle: number | undefined;
 
   const spacing = () => {
     const sz = sizes(view);
-    return view === 'slider' || view === 'grid' ? sz.w + sz.gap : sz.w * 0.95;
+    return view === 'slider' ? sz.w + sz.gap : sz.w * 0.95;
   };
   const snap = (ms = 140) => {
     clearTimeout(idle);
@@ -467,35 +481,36 @@ export function initWork(
   };
 
   const onWheel = (e: WheelEvent) => {
-    if (paused || view === 'grid') return;
+    if (paused || (view === 'grid' && !gridMax())) return;
     e.preventDefault();
     const delta = Math.abs(e.deltaX) > Math.abs(e.deltaY) ? e.deltaX : e.deltaY;
-    target += delta * 0.0016;
+    target += view === 'grid' ? delta : delta * 0.0016;
     autoHold = performance.now() + 2500;
     snap();
   };
   const onDown = (e: PointerEvent) => {
-    if (paused || view === 'grid' || e.button !== 0) return;
+    if (paused || (view === 'grid' && !gridMax()) || e.button !== 0) return;
     dragging = true;
     dragged = false;
     startX = e.clientX;
+    startY = e.clientY;
     startTarget = target;
   };
   const onMove = (e: PointerEvent) => {
     if (!dragging) return;
-    const dx = e.clientX - startX;
+    const dx = view === 'grid' ? e.clientY - startY : e.clientX - startX;
     if (Math.abs(dx) > 6 && !dragged) {
       dragged = true;
       stage.classList.add('is-dragging');
     }
-    if (dragged) target = startTarget - dx / spacing();
+    if (dragged) target = startTarget - (view === 'grid' ? dx : dx / spacing());
   };
   const onUp = () => {
     if (!dragging) return;
     dragging = false;
     autoHold = performance.now() + 2500;
     stage.classList.remove('is-dragging');
-    target = view === 'grid' ? target - vel * 6 : Math.round(target - vel * 6);
+    target = view === 'grid' ? target - vel * 6 : Math.round(target - vel * 6); // grid: px, free
   };
   const onClick = (e: MouseEvent) => {
     const a = (e.target as HTMLElement).closest<HTMLAnchorElement>('.card');
