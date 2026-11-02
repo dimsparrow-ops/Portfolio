@@ -37,7 +37,8 @@
   --on-dark-body: rgba(255, 255, 255, 0.8);
   --on-dark-2: rgba(255, 255, 255, 0.5);
   --scrim: rgba(0, 0, 0, 0.5);        /* nav glass, case backdrop, chips on media */
-  --glass-light: rgba(255, 255, 255, 0.1);
+  --nav-bg: #e9e9e9;                  /* nav pill */
+  --nav-ink: #666566;                 /* inactive nav tabs: 4.7:1 on --nav-bg (A3A2A3 is only 2.1:1) */
   --key: #f26d90;                     /* say hi pink */
   --key-edge: #c4456a;
   --blue: #2979ff;                    /* focus ring */
@@ -187,23 +188,19 @@ img, video { display: block; max-width: 100%; }
   display: flex; align-items: center; gap: var(--s-1);
   padding: var(--s-1);
   border-radius: var(--r-pill);
-  background: var(--scrim);
-  /* via a variable: the CSS minifier otherwise drops the unprefixed property */
-  --glass: blur(80px) saturate(1.4);
-  backdrop-filter: var(--glass);
-  -webkit-backdrop-filter: var(--glass);
-  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.06), var(--shadow-m);
+  background: var(--nav-bg);
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.04), var(--shadow-m);
 }
 .nav a {
   position: relative; z-index: 1; -webkit-tap-highlight-color: transparent;
   height: var(--control-h); padding: 0 var(--s-4);
   display: inline-flex; align-items: center;
-  font-size: 14px; color: var(--on-dark-2);
+  font-size: 14px; color: var(--nav-ink);
   border-radius: var(--r-pill);
   transition: color 0.3s var(--ease-ui);
   white-space: nowrap;
 }
-.nav a:hover { color: var(--on-dark); }
+.nav a:hover { color: var(--ink); }
 .nav a[aria-current='page'], .nav a[aria-current='page']:hover { color: var(--ink); }
 .nav a.sayhi-btn, .nav a.sayhi-btn:hover { color: var(--on-dark); font-size: var(--fs-xs); }
 /* keycap face (36px) + its 4px edge = the 40px row every tab sits in, so all insets stay 4px */
@@ -233,7 +230,7 @@ body:not(.is-work) .ctrl { opacity: 0; transform: translateY(var(--s-4)); pointe
 
 @media (max-width: 767px) {
   .nav { bottom: calc(var(--s-3) + env(safe-area-inset-bottom, 0px)); width: calc(100% - var(--s-6)); justify-content: space-between; }
-  .nav { gap: 0; --glass: blur(24px) saturate(1.4); } /* 80px blur re-rasterises every frame over the moving cards: too heavy on phones */
+  .nav { gap: 0; }
   .nav a { padding: 0 var(--s-1); flex: 1 1 auto; justify-content: center; }
   .ctrl { bottom: calc(80px + env(safe-area-inset-bottom, 0px)); gap: var(--s-3); }
   .nav a.sayhi-btn { padding: 0 var(--s-3); margin-left: var(--s-1); flex: none; gap: var(--s-1); }
@@ -506,7 +503,6 @@ html.is-loaded .loader { display: none; }
 .lab-item { break-inside: avoid; margin: 0 0 var(--s-4); border-radius: var(--r-m); overflow: hidden; position: relative; }
 .lab-item .ph { width: 100%; }
 .lab-chip { position: absolute; left: var(--s-3); top: var(--s-3); z-index: 1; padding: var(--s-1) var(--s-2); border-radius: var(--r-pill); background: var(--scrim); color: var(--on-dark); font-size: var(--fs-xs); line-height: var(--lh-ui); --chip-glass: blur(8px); backdrop-filter: var(--chip-glass); -webkit-backdrop-filter: var(--chip-glass); }
-body.is-lab .nav { background: var(--glass-light); }
 
 /* touch: 44px-ish hit areas for the small text controls */
 @media (pointer: coarse) {
