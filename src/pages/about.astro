@@ -1,6 +1,6 @@
 ---
 import Base from '../layouts/Base.astro';
-import { site, intro, nowPlaying, timeline, socials } from '../data/site';
+import { site, intro, nowPlaying, records, timeline, socials } from '../data/site';
 ---
 <Base page="about" title="About">
   <main class="page page--about about" data-page="about">
@@ -8,20 +8,20 @@ import { site, intro, nowPlaying, timeline, socials } from '../data/site';
       <div class="about-col">
         <h1 class="sr-only">{site.name}</h1>
         <p class="intro" data-reveal>{intro.lead}<span class="dim">{intro.accent}</span>{intro.text}</p>
-        <section class="now" data-reveal aria-label={nowPlaying.label}>
+        <section class="now" data-reveal aria-label={nowPlaying.label} data-records={JSON.stringify(records)}>
           <p class="now-label">{nowPlaying.label}</p>
           <div class="now-body">
             <button class="deck" type="button" data-deck aria-pressed="false" aria-label="Pull the record out of the sleeve">
               <span class="vinyl" aria-hidden="true">
-                <span class="vinyl-disc" data-vinyl style={`background-image: url(${nowPlaying.vinyl})`}></span>
+                <span class="vinyl-disc" data-vinyl></span>
                 <span class="vinyl-sheen"></span>
               </span>
-              <span class="sleeve" aria-hidden="true"><img src={nowPlaying.sleeve} alt="" width="160" height="160" loading="lazy" decoding="async" /></span>
+              <span class="sleeve" aria-hidden="true"><img data-np="sleeve" src={records[0].sleeve} alt="" width="160" height="160" decoding="async" /></span>
             </button>
             <div class="track">
-              <p class="track-artist">{nowPlaying.artist}</p>
-              <p class="track-name">{nowPlaying.track}</p>
-              <p class="track-meta">{nowPlaying.meta}</p>
+              <p class="track-artist" data-np="artist">{records[0].artist}</p>
+              <p class="track-name" data-np="track">{records[0].track}</p>
+              <p class="track-meta" data-np="meta">{records[0].meta}</p>
             </div>
           </div>
         </section>

@@ -261,6 +261,26 @@ function initDeck(root: HTMLElement): Destroy {
   const disc = root.querySelector<HTMLElement>('[data-vinyl]');
   if (!deck || !disc) return () => {};
 
+  // a random record per visit, never the same one twice in a row
+  const now = deck.closest<HTMLElement>('.now')!;
+  try {
+    const records: { artist: string; track: string; meta: string; sleeve: string; vinyl?: string; disc?: string; label?: string }[] = JSON.parse(now.dataset.records || '[]');
+    if (records.length) {
+      let last = -1;
+      try { last = Number(sessionStorage.getItem('np-last') ?? -1); } catch {}
+      const pool = records.map((_, i) => i).filter((i) => i !== last);
+      const i = (pool.length ? pool : [0])[Math.floor(Math.random() * (pool.length || 1))];
+      try { sessionStorage.setItem('np-last', String(i)); } catch {}
+      const r = records[i];
+      for (const k of ['artist', 'track', 'meta'] as const) now.querySelector(`[data-np="${k}"]`)!.textContent = r[k];
+      now.querySelector<HTMLImageElement>('[data-np="sleeve"]')!.src = r.sleeve;
+      disc.style.backgroundImage = r.vinyl ? `url(${r.vinyl})` : 'none';
+      deck.style.setProperty('--disc', r.disc ?? '#121212');
+      deck.style.setProperty('--label', r.label ?? '#3b0f2a');
+    }
+  } catch {}
+  now.dataset.ready = '';
+
   let pulled = false;
   let hovered = false;
   // one 9s turn at rate 1; the rate is eased, so changing speed never jumps the angle

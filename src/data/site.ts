@@ -48,15 +48,15 @@ export const intro = {
   text: '. I live in Lisbon and design the kind of software nobody posts on Dribbble but everybody depends on: the systems behind schools, hospitals, banks and HR teams.',
 };
 
-/** About "Listening to" record deck. Swap the two images in public/player/ to change the record. */
-export const nowPlaying = {
-  label: 'Listening to',
-  artist: 'MF DOOM',
-  track: 'Rapp Snitch Knishes feat. Mr. Fantastik',
-  meta: 'Mm..Food · 2004',
-  sleeve: '/player/mm-food-sleeve.jpg',
-  vinyl: '/player/mm-food-vinyl.jpg',
-};
+/** About "Listening to" record deck. One record is picked at random on every visit — add yours to the list.
+ *  sleeve: image in public/player/. Disc: `vinyl` = texture image (coloured/marbled pressing), otherwise `disc` = flat colour (black by default).
+ *  label = colour of the centre label. */
+export type Record = { artist: string; track: string; meta: string; sleeve: string; vinyl?: string; disc?: string; label?: string };
+export const nowPlaying = { label: 'Listening to' };
+export const records: Record[] = [
+  { artist: 'MF DOOM', track: 'Rapp Snitch Knishes feat. Mr. Fantastik', meta: 'Mm..Food · 2004', sleeve: '/player/mm-food-sleeve.jpg', vinyl: '/player/mm-food-vinyl.jpg', label: '#3b0f2a' },
+  { artist: 'Black Sabbath', track: 'Planet Caravan', meta: 'Paranoid · 1970', sleeve: '/player/paranoid-sleeve.jpg', disc: '#121212', label: '#8c1d2f' },
+];
 
 /** About timeline, newest first. The AI entry has a free label; the rest are company · years · role. */
 export const timeline: { ai?: boolean; label?: string; company?: string; years?: string; role?: string; text: string }[] = [

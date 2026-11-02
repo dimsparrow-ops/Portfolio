@@ -34,6 +34,8 @@ Brief: impress by look and motion first, cases second. Simple structure, easy ca
 - Images in `public/work/<case>/` (cover.webp, m1…m6.webp). Current 5 cases were imported from the old Framer site
   (dimsi.framer.website) at 1600px WebP — swap in originals later. Copy still needs a rewrite (shorter, decision-focused).
 - Add a case = add an `.md` + its images. No layout work needed.
+- About "Listening to" deck: list `records` in `src/data/site.ts` (artist, track, meta, sleeve in `public/player/`, optional `vinyl` texture or `disc` colour, `label` colour).
+  One is picked at random per visit (never the same twice in a row), see `initDeck` in `pages.ts`. Add a record = add an entry + its sleeve image.
 
 ## Design system (tokens live in `src/styles/global.css` `:root`)
 - **4px grid** for every size; only exceptions are 1px hairlines and the 2px focus ring. Don't add in-between values.

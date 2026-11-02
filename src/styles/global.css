@@ -453,6 +453,7 @@ html.is-loaded .loader { display: none; }
 .tl-company { font-size: var(--fs-m); line-height: 28px; font-weight: 500; letter-spacing: var(--ls-text); color: var(--ink); }
 .tl-role { font-size: var(--fs-s); line-height: 28px; color: var(--about-sub); }
 /* "Listening to" record deck (chrisandrews.xyz): hover slides the sleeve back, click pulls the record out, it spins faster each step */
+.now:not([data-ready]) { visibility: hidden; } /* the record is picked in initDeck, before the reveal */
 .now { display: grid; grid-template-columns: 160px minmax(0, 1fr); padding-top: var(--s-8); border-top: 1px solid var(--line); transition: opacity 0.45s var(--ease-ui); }
 .now-label { margin: 0; font-size: var(--fs-s); line-height: 24px; color: var(--about-sub); transition: opacity 0.3s var(--ease-ui); }
 .now:has([aria-pressed='true']) .now-label { opacity: 0; } /* the pulled sleeve lands on the label column */
@@ -462,10 +463,10 @@ html.is-loaded .loader { display: none; }
   position: relative; flex: none; width: calc(var(--size) + var(--slot)); height: var(--size);
   padding: 0; border: 0; background: none; color: inherit; font: inherit; cursor: pointer; -webkit-tap-highlight-color: transparent;
 }
-.vinyl { position: absolute; top: 0; left: var(--slot); width: var(--size); height: var(--size); border-radius: 50%; overflow: hidden; background: #2a1730; }
+.vinyl { position: absolute; top: 0; left: var(--slot); width: var(--size); height: var(--size); border-radius: 50%; overflow: hidden; background: var(--disc, #121212); }
 .vinyl-disc { position: absolute; inset: 0; border-radius: 50%; background-size: cover; background-position: center; }
-.vinyl-disc::before { content: ''; position: absolute; inset: 0; border-radius: 50%; background: repeating-radial-gradient(circle, transparent 0 2px, rgba(0, 0, 0, 0.07) 2px 3px); } /* grooves */
-.vinyl-disc::after { content: ''; position: absolute; left: 50%; top: 50%; width: 56px; height: 56px; transform: translate(-50%, -50%); border-radius: 50%; background: radial-gradient(circle, var(--lab) 0 4px, #3b0f2a 4px); box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.2); } /* label + spindle */
+.vinyl-disc::before { content: ''; position: absolute; inset: 0; border-radius: 50%; background: repeating-radial-gradient(circle, transparent 0 2px, rgba(0, 0, 0, 0.07) 2px 3px), conic-gradient(transparent 0 20%, rgba(255, 255, 255, 0.07) 25%, transparent 30% 70%, rgba(255, 255, 255, 0.07) 75%, transparent 80%); } /* grooves + a faint turning glint, so a black disc still reads as spinning */
+.vinyl-disc::after { content: ''; position: absolute; left: 50%; top: 50%; width: 56px; height: 56px; transform: translate(-50%, -50%); border-radius: 50%; background: radial-gradient(circle, var(--lab) 0 4px, var(--label, #3b0f2a) 4px); box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.2); } /* label + spindle */
 .vinyl-sheen { position: absolute; inset: 0; border-radius: 50%; pointer-events: none; background: conic-gradient(from 30deg, transparent 0 8%, rgba(255, 255, 255, 0.28) 12%, transparent 18% 55%, rgba(255, 255, 255, 0.2) 60%, transparent 66%); } /* light stays put while the disc turns */
 .sleeve { position: absolute; left: 0; top: 0; width: var(--size); height: var(--size); border-radius: var(--r-s); overflow: hidden; box-shadow: var(--shadow-m); transition: transform 0.45s var(--ease-ui); }
 .sleeve img { display: block; width: 100%; height: 100%; object-fit: cover; }
