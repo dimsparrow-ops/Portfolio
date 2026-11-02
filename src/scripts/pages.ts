@@ -152,18 +152,6 @@ export function initAbout(root: HTMLElement): Destroy {
   const word = root.querySelector<HTMLElement>('[data-hi]')!;
   const letters = Array.from(word.querySelectorAll<HTMLElement>('span:not(.sp)'));
 
-  // the whole timeline reveals on load (not on scroll), top to bottom
-  // the intro comes first: each word rises out of its own mask (lorenzodossi.com), the rest follows
-  const intro = root.querySelector<HTMLElement>('[data-words]');
-  const items = Array.from(root.querySelectorAll<HTMLElement>('[data-reveal]'));
-  let wait = 0.1;
-  if (intro && !reduced) {
-    const words = splitWords(intro);
-    gsap.fromTo(words, { yPercent: 110 }, { yPercent: 0, duration: 1.6, ease: ease.words, stagger: stagger.word, delay: 0.1 });
-    wait = 0.9;
-  }
-  gsap.fromTo(items, { y: 36, opacity: 0 }, { y: 0, opacity: 1, duration: 0.7, ease: ease.out, stagger: stagger.item * 2, delay: wait });
-
   // fit the word to the viewport width (soscalemedia.se)
   let fitRaf = 0;
   const fit = () => {
@@ -225,6 +213,38 @@ export function initAbout(root: HTMLElement): Destroy {
 
   const stopSparks = initSparks(root);
   const stopDeck = initDeck(root);
+
+  // one reveal language for the whole page (lorenzodossi.com): words rise out of their own masks.
+  // Runs after initDeck, which rewrites the track text and would wipe the masks.
+  if (!reduced) {
+    const intro = root.querySelector<HTMLElement>('[data-words]')!;
+    const iw = splitWords(intro);
+    gsap.fromTo(iw, { yPercent: 110 }, { yPercent: 0, duration: 1.6, ease: ease.words, stagger: stagger.word, delay: 0.1 });
+    // blocks below start as they scroll in; long paragraphs get a tighter stagger so they never drag
+    const rise = (els: HTMLElement[], at: gsap.TweenTarget, delay = 0) => {
+      const words = els.flatMap(splitWords);
+      gsap.set(words, { yPercent: 110 });
+      triggers.push(
+        ScrollTrigger.create({
+          trigger: at as Element,
+          start: 'top 92%',
+          once: true,
+          onEnter: () =>
+            gsap.to(words, { yPercent: 0, duration: 1.2, ease: ease.words, stagger: Math.min(stagger.word, 0.7 / words.length), delay }),
+        }),
+      );
+    };
+    const now = root.querySelector<HTMLElement>('.now');
+    if (now) {
+      rise(Array.from(now.querySelectorAll<HTMLElement>('.now-label, .track p')), now, 0.9);
+      const deckEl = now.querySelector('.deck');
+      gsap.fromTo(deckEl, { y: 24, opacity: 0 }, { y: 0, opacity: 1, duration: 1.2, ease: ease.words, delay: 0.9 });
+    }
+    root.querySelectorAll<HTMLElement>('.tl-item').forEach((li) => {
+      rise(Array.from(li.querySelectorAll<HTMLElement>('.tl-when, .tl-company, .tl-role, p')), li);
+    });
+  }
+
 
   // only while SUMMON ME is uncovered, the nav's Say hi key becomes "email me" (mailto)
   const key = document.querySelector<HTMLAnchorElement>('.nav .sayhi-btn');

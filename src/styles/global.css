@@ -446,8 +446,8 @@ html.is-loaded .loader { display: none; }
 .intro { margin: 0; font-size: 40px; line-height: 48px; font-weight: 500; letter-spacing: -0.03em; color: var(--ink); text-wrap: pretty; } /* 40 = intro size, off the type scale on purpose */
 .intro .dim { color: var(--about-sub); }
 /* word masks for the reveal; the padding keeps descenders unclipped */
-.intro .w { display: inline-block; overflow: clip; vertical-align: top; padding-bottom: 4px; margin-bottom: -4px; }
-.intro .wi { display: inline-block; }
+[data-words] .w, .now .w, .tl-item .w { display: inline-block; overflow: clip; vertical-align: top; padding-bottom: 4px; margin-bottom: -4px; }
+[data-words] .wi, .now .wi, .tl-item .wi { display: inline-block; }
 /* the list is a narrower column centred under the intro */
 .timeline { list-style: none; width: 100%; max-width: 560px; margin: 0 auto; padding: 0; display: grid; gap: var(--s-16); }
 .tl-item { display: grid; gap: var(--s-3); }
