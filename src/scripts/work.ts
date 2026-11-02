@@ -158,6 +158,7 @@ export function initWork(
   let autoHold = 0;
   const AUTO = { showcase: 0.12, slider: 0.16 }; // cards per second
   const GRID_TITLE_ROOM = 160; // px between grid rows: the 3-line hover title (~100px) plus air
+  const GRID_GAP_X = 96; // px between grid columns
   const GRID_TOP_ROOM = 184; // px above the top row, so its hover title stays on the canvas
   const GRID_STAGE_BIAS = 30; // the stage centre sits ~30px above the viewport centre
   const GRID_BOTTOM_ROOM = 120; // px below the last row for the client line + nav
@@ -211,8 +212,10 @@ export function initWork(
     const n = Math.max(1, visible().length);
     if (!mobile) {
       // desktop: three columns of near-showcase-sized cards that scroll vertically; the row gap holds the hover title
-      const w = sizes('showcase').w * 0.8;
-      return { w, h: w * RATIO, gap: cardGap(), gapY: GRID_TITLE_ROOM, cols: Math.min(3, n), rows: Math.ceil(n / 3) };
+      const cols = Math.min(3, n);
+      const gap = GRID_GAP_X;
+      const w = Math.min(sizes('showcase').w * 0.8, (vw - 120 - gap * (cols - 1)) / cols);
+      return { w, h: w * RATIO, gap, gapY: GRID_TITLE_ROOM, cols, rows: Math.ceil(n / 3) };
     }
     const cols = 2;
     const rows = Math.ceil(n / cols);
