@@ -210,9 +210,9 @@ export function initWork(
     // grid: desktop scrolls vertically (see gridMax); mobile fits everything on one screen
     const n = Math.max(1, visible().length);
     if (!mobile) {
-      // desktop: two columns of near-showcase-sized cards that scroll vertically; the row gap holds the hover title
+      // desktop: three columns of near-showcase-sized cards that scroll vertically; the row gap holds the hover title
       const w = sizes('showcase').w * 0.8;
-      return { w, h: w * RATIO, gap: cardGap(), gapY: GRID_TITLE_ROOM, cols: Math.min(2, n), rows: Math.ceil(n / 2) };
+      return { w, h: w * RATIO, gap: cardGap(), gapY: GRID_TITLE_ROOM, cols: Math.min(3, n), rows: Math.ceil(n / 3) };
     }
     const cols = 2;
     const rows = Math.ceil(n / cols);
