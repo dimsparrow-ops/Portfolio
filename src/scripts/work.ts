@@ -255,7 +255,7 @@ export function initWork(
     if (v === 'showcase') {
       const step = 360 / Math.max(n, 3);
       // wide, airy ring (back cards stay visible); slider uses cardGap()
-      const R = mobile ? sz.w * 1.25 : Math.max(sz.w * 1.8, vw * 0.6);
+      const R = mobile ? sz.w * 1.0 : Math.max(sz.w * 1.4, vw * 0.45);
       const rel = wrap(idx - offset, n);
       const a = rel * step;
       const rad = (a * Math.PI) / 180;
