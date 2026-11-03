@@ -33,7 +33,7 @@ function setAcc(item: HTMLElement, open: boolean, instant = false) {
     return;
   }
   gsap.to(panel, { height: open ? 'auto' : 0, duration: dur.base, ease: ease.ui });
-  const ps = panel.querySelectorAll('p');
+  const ps = panel.querySelectorAll('p, .metric'); // the Outcomes panel also carries the metric rows
   if (open && ps.length) gsap.fromTo(ps, { y: 10, opacity: 0 }, { y: 0, opacity: 1, duration: dur.base, ease: ease.out, delay: 0.08, stagger: 0.04 });
 }
 
@@ -49,18 +49,38 @@ function wire(article: HTMLElement, scroller: HTMLElement) {
     cleanup.push(() => btn.removeEventListener('click', on));
   });
 
-  article.querySelectorAll<HTMLElement>('.media-group').forEach((g) => {
-    triggers.push(
-      ScrollTrigger.create({
-        trigger: g,
-        scroller,
-        start: 'top 62%',
-        end: 'bottom 62%',
-        onEnter: () => openOnly(g.dataset.section!),
-        onEnterBack: () => openOnly(g.dataset.section!),
-      }),
-    );
-  });
+  // one deterministic rule instead of enter/leave events per group: the open item is the last group whose top has
+  // crossed the reading line. Top of the case = Input; the very bottom = the last group (it may be too short to ever reach the line).
+  const groups = Array.from(article.querySelectorAll<HTMLElement>('.media-group')).filter((g) => g.dataset.section);
+  let current = groups[0]?.dataset.section ?? 'input';
+  const sync = () => {
+    if (!groups.length) return;
+    const visible = groups.filter((g) => g.offsetHeight > 0);
+    if (!visible.length) return;
+    const top = scroller.getBoundingClientRect().top;
+    const line = top + scroller.clientHeight * 0.62;
+    let key = visible[0].dataset.section!;
+    if (scroller.scrollTop >= 8) {
+      for (const g of visible) if (g.getBoundingClientRect().top <= line) key = g.dataset.section!;
+      if (scroller.scrollTop + scroller.clientHeight >= scroller.scrollHeight - 4) key = visible[visible.length - 1].dataset.section!;
+    }
+    if (key === current) return;
+    current = key;
+    openOnly(key);
+  };
+  triggers.push(ScrollTrigger.create({ scroller, start: 0, end: 'max', onUpdate: sync, onRefresh: sync }));
+
+  // lazy images change the group heights as they load: re-measure so the open item always matches the zone on screen
+  let measure = 0;
+  const remeasure = () => {
+    clearTimeout(measure);
+    measure = window.setTimeout(() => {
+      ScrollTrigger.refresh();
+      sync();
+    }, 60);
+  };
+  article.querySelectorAll<HTMLImageElement>('img').forEach((img) => !img.complete && img.addEventListener('load', remeasure, { once: true }));
+  cleanup.push(() => clearTimeout(measure));
 
   // media fade-up as it enters
   article.querySelectorAll<HTMLElement>('.media-group > *').forEach((m) => {
@@ -97,7 +117,7 @@ function wireVideos(slot: HTMLElement, scroller: HTMLElement) {
   cleanup.push(() => io.disconnect());
 }
 
-/** Same masked word rise as About: head words ride the sheet in, metrics and the story column rise as they scroll into view. */
+/** Same masked word rise as About: head words ride the sheet in, the story column rises as it scrolls into view. */
 function wireText(article: HTMLElement, scroller: HTMLElement) {
   const per = (words: HTMLElement[]) => ({ yPercent: 0, duration: RISE.dur, ease: RISE.ease, stagger: Math.min(stagger.word, RISE.span / words.length) });
   const onScroll = (els: HTMLElement[], at: Element) => {
@@ -106,8 +126,6 @@ function wireText(article: HTMLElement, scroller: HTMLElement) {
     gsap.set(words, { yPercent: 110 });
     triggers.push(ScrollTrigger.create({ trigger: at, scroller, start: 'top 92%', once: true, onEnter: () => gsap.to(words, per(words)) }));
   };
-  const metrics = article.querySelector<HTMLElement>('.metrics');
-  if (metrics) onScroll(Array.from(metrics.querySelectorAll<HTMLElement>('.metric b, .metric span')), metrics);
   const acc = article.querySelector<HTMLElement>('.acc');
   if (acc) onScroll(Array.from(acc.querySelectorAll<HTMLElement>('.acc-btn .mono, .acc-item.is-open .acc-panel p')), acc);
 }

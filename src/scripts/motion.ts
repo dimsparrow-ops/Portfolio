@@ -32,10 +32,19 @@ export const stagger = { char: 0.012, item: 0.04, card: 0.03, word: 0.05 };
 /** Smoothing for things that follow input (avea / laurent). */
 export const follow = { lerp: 0.11, lerpDrag: 0.16 };
 
-export const reduced =
-  typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+// live binding: importers see the value change if the setting is toggled while the site is open
+export let reduced = false;
 
-if (reduced) gsap.globalTimeline.timeScale(6);
+if (typeof window !== 'undefined') {
+  const mq = window.matchMedia('(prefers-reduced-motion: reduce)');
+  const apply = () => {
+    reduced = mq.matches;
+    // reduced motion = no visible movement: every tween finishes within a frame or two (callbacks and order still run)
+    gsap.globalTimeline.timeScale(reduced ? 100 : 1);
+  };
+  apply();
+  mq.addEventListener('change', apply);
+}
 
 /** One reveal language (lorenzodossi.com): words rise out of their own masks. Same timing on About, Services and cases. */
 export const RISE = { dur: 1.1, ease: ease.words, span: 0.6 };

@@ -462,7 +462,6 @@ export function initLab(root: HTMLElement, entering: boolean, onAscend: () => vo
   const triggers: ScrollTrigger[] = [];
   const ceiling = root.querySelector<HTMLElement>('[data-ceiling]')!;
   const inner = root.querySelector<HTMLElement>('[data-ceiling-inner]')!;
-  const shade = root.querySelector<HTMLElement>('[data-ceiling-shade]')!;
 
   triggers.push(
     ScrollTrigger.create({
@@ -473,7 +472,8 @@ export function initLab(root: HTMLElement, entering: boolean, onAscend: () => vo
       animation: gsap
         .timeline()
         .fromTo(inner, { yPercent: 0, scale: 1 }, { yPercent: -35, scale: 0.94, ease: 'none' }, 0)
-        .fromTo(shade, { opacity: 0.4 }, { opacity: 1, ease: 'none' }, 0),
+        // corners round off the further you descend (32 = the SUMMON ME corner, up to 96)
+        .fromTo(ceiling, { borderBottomLeftRadius: 32, borderBottomRightRadius: 32 }, { borderBottomLeftRadius: 96, borderBottomRightRadius: 96, ease: 'none' }, 0),
     }),
   );
 
@@ -490,7 +490,7 @@ export function initLab(root: HTMLElement, entering: boolean, onAscend: () => vo
   if (entering) gsap.from(head, { y: 30, opacity: 0, duration: 0.7, ease: ease.out, stagger: stagger.item, delay: 0.3 });
 
   // pull up at the very top to climb back to the page you came from
-  const PULL = 260;
+  const PULL = 140;
   let pull = 0;
   let done = false;
   let idle: number | undefined;
@@ -512,17 +512,20 @@ export function initLab(root: HTMLElement, entering: boolean, onAscend: () => vo
       onAscend();
       return;
     }
-    idle = window.setTimeout(release, 220);
+    idle = window.setTimeout(release, 320);
   };
-  const atTop = () => window.scrollY <= 2;
-  // armed only after a pause at the top, so momentum from scrolling up doesn't eject you
+  const atTop = () => window.scrollY <= 4;
+  // armed at the top after a short pause, or at once by a fresh pull (deltas growing) —
+  // momentum from scrolling up only decays, so it never arms and can't eject you
   let armed = atTop();
   let lastWheel = 0;
+  let lastDelta = 0;
   const onWheel = (e: WheelEvent) => {
     const now = performance.now();
     if (!atTop()) armed = false;
-    else if (!armed && now - lastWheel > 280) armed = true;
+    else if (!armed && (now - lastWheel > 120 || (e.deltaY < 0 && e.deltaY < lastDelta - 2))) armed = true;
     lastWheel = now;
+    lastDelta = e.deltaY;
     if (e.deltaY < 0 && armed) add(-e.deltaY);
     else if (e.deltaY > 0 && pull > 0) release();
   };

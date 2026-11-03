@@ -69,7 +69,10 @@ function mount(id: PageId, el: HTMLElement, entering: boolean) {
     };
   } else if (id === 'services') destroy = initServices(el, entering);
   else if (id === 'about') destroy = initAbout(el);
-  else if (id === 'lab') destroy = initLab(el, entering, () => go(labReturn, true, 'ascend'));
+  else if (id === 'lab') {
+    load(labReturn); // warm the page we climb back to so the ascent starts with no fetch delay
+    destroy = initLab(el, entering, () => go(labReturn, true, 'ascend'));
+  }
   current = { id, el, destroy };
   document.body.dataset.page = id;
   ORDER.forEach((p) => document.body.classList.toggle(`is-${p}`, p === id));
@@ -119,16 +122,22 @@ function ascend(labEl: HTMLElement, newEl: HTMLElement) {
   labEl.style.zIndex = '1';
   newEl.classList.add('is-transit');
   newEl.style.zIndex = '2';
+  newEl.style.overflow = 'hidden';
   document.getElementById('pages')!.appendChild(newEl);
   lenis.scrollTo(0, { immediate: true, force: true });
+  // pick up from the pulled-down ceiling so the incoming page starts exactly where it hangs (no jump)
+  const ceiling = labEl.querySelector<HTMLElement>('[data-ceiling]');
+  const pulled = ceiling ? Number(gsap.getProperty(ceiling, 'y')) || 0 : 0;
+  if (ceiling) gsap.killTweensOf(ceiling);
   return gsap
     .timeline()
-    .fromTo(newEl, { yPercent: -50 }, { yPercent: 0, duration: dur.page, ease: ease.inOut }, 0)
+    .fromTo(newEl, { yPercent: -50, y: pulled }, { yPercent: 0, y: 0, duration: dur.page, ease: ease.inOut }, 0)
+    .fromTo(newEl, { borderBottomLeftRadius: 32, borderBottomRightRadius: 32 }, { borderBottomLeftRadius: 0, borderBottomRightRadius: 0, duration: dur.page, ease: ease.inOut }, 0)
     .to(labEl, { yPercent: 30, duration: dur.page, ease: ease.inOut }, 0)
     .add(() => {
       labEl.remove();
       newEl.classList.remove('is-transit');
-      gsap.set(newEl, { clearProps: 'transform,zIndex' });
+      gsap.set(newEl, { clearProps: 'transform,zIndex,overflow,borderBottomLeftRadius,borderBottomRightRadius' });
     });
 }
 
@@ -137,6 +146,8 @@ function descend(oldEl: HTMLElement, labEl: HTMLElement) {
   oldEl.classList.add('is-transit');
   oldEl.scrollTop = y;
   oldEl.style.zIndex = '2';
+  oldEl.style.overflow = 'hidden';
+  gsap.set(oldEl, { borderBottomLeftRadius: 32, borderBottomRightRadius: 32 });
   labEl.classList.add('is-transit');
   labEl.style.zIndex = '1';
   document.getElementById('pages')!.appendChild(labEl);
@@ -150,7 +161,7 @@ function descend(oldEl: HTMLElement, labEl: HTMLElement) {
     .add(() => {
       // the old page becomes the ceiling (its lower half stays visible above the lab)
       oldEl.classList.remove('is-transit');
-      gsap.set(oldEl, { clearProps: 'transform,zIndex' });
+      gsap.set(oldEl, { clearProps: 'transform,zIndex,overflow,borderBottomLeftRadius,borderBottomRightRadius' });
       oldEl.classList.add('is-ceiling');
       inner.innerHTML = '';
       oldEl.inert = true; // a frozen copy: no tab stops, no screen-reader noise

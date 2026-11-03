@@ -13,14 +13,7 @@ const label = { input: 'Input', reasoning: 'Reasoning', process: 'Process', outc
     <div class="case-meta mono">
       <span>{d.year}</span><span>{d.country}</span><span>{d.services.join(', ')}</span>
     </div>
-    {d.link && <a class="case-link" href={d.link.url} target="_blank" rel="noopener">{d.link.label} ↗</a>}
   </header>
-
-  {d.metrics && d.metrics.length > 0 && (
-    <section class="metrics" aria-label="Impact">
-      {d.metrics.map((m) => <div class="metric"><b>{m.value}</b><span>{m.label}</span></div>)}
-    </section>
-  )}
 
   <div class="case-body">
     <div class="case-media">
@@ -30,11 +23,13 @@ const label = { input: 'Input', reasoning: 'Reasoning', process: 'Process', outc
             m.kind === 'quote' ? (
               <blockquote class="case-quote"><p>“{m.quote}”</p><cite class="mono">{m.author}</cite></blockquote>
             ) : m.src ? (
-              m.kind === 'video'
-                ? <video src={m.src} autoplay muted loop playsinline></video>
-                : <img src={m.src} alt={m.alt ?? ''} loading="lazy" />
+              <figure class="case-fig" data-label={m.alt ?? ''}>
+                {m.kind === 'video'
+                  ? <video src={m.src} autoplay muted loop playsinline></video>
+                  : <img src={m.src} alt={m.alt ?? ''} loading="lazy" />}
+              </figure>
             ) : (
-              <Ph hue={d.hue + j * 18} label={`${label[k]} · ${m.alt ?? m.kind}`} />
+              <Ph hue={d.hue + j * 18} label={m.alt ?? ''} />
             )
           )}
         </section>
@@ -42,12 +37,20 @@ const label = { input: 'Input', reasoning: 'Reasoning', process: 'Process', outc
     </div>
 
     <aside class="acc" aria-label="Story">
+      {d.link && <a class="case-link" href={d.link.url} target="_blank" rel="noopener"><span class="case-link-clip"><span class="case-link-text">{d.link.label}</span></span><span class="case-link-disc" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17 17 7M9 7h8v8"/></svg></span></a>}
       {order.map((k, i) => (
         <div class:list={['acc-item', { 'is-open': i === 0 }]} data-acc={k}>
           <button class="acc-btn" type="button" aria-expanded={i === 0 ? 'true' : 'false'} aria-controls={`acc-${entry.id}-${k}`}>
             <span class="mono">{label[k]}</span><span class="acc-icon" aria-hidden="true"></span>
           </button>
-          <div class="acc-panel" id={`acc-${entry.id}-${k}`} style={i === 0 ? 'height:auto' : undefined}>{d.sections[k].text.split(/\n\s*\n/).map((t) => <p>{t}</p>)}</div>
+          <div class="acc-panel" id={`acc-${entry.id}-${k}`} style={i === 0 ? 'height:auto' : undefined}>
+            {d.sections[k].text.split(/\n\s*\n/).map((t) => <p>{t}</p>)}
+            {k === 'outcomes' && d.metrics && d.metrics.length > 0 && (
+              <div class="metrics">
+                {d.metrics.map((m) => <div class="metric"><span>{m.label}</span><b>{m.value}</b></div>)}
+              </div>
+            )}
+          </div>
         </div>
       ))}
     </aside>

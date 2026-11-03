@@ -357,7 +357,8 @@ export function initWork(
     const frame = frameFor(view);
     dots?.tick(dt);
     // slow endless drift until a project is hovered (showcase ring / infinite slider)
-    const canAuto = !reduced && introDone && !hovered && !dragging && now > autoHold;
+    // WCAG 2.2.2: the drift stops for anyone navigating by keyboard (focus inside the stage) and under reduced motion
+    const canAuto = !reduced && introDone && !hovered && !dragging && now > autoHold && !stage.contains(document.activeElement);
     if (canAuto && view === 'showcase') target += AUTO.showcase * dt;
     if (canAuto && view === 'slider' && frame.wraps) target += AUTO.slider * dt;
     {
@@ -531,6 +532,7 @@ export function initWork(
   };
   const onKey = (e: KeyboardEvent) => {
     if (paused || view === 'grid') return;
+    if ((e.target as HTMLElement | null)?.closest('input, textarea, select, [contenteditable]')) return;
     if (e.key === 'ArrowRight' || e.key === 'ArrowLeft') autoHold = performance.now() + 2500;
     if (e.key === 'ArrowRight') target = Math.round(target) + 1;
     if (e.key === 'ArrowLeft') target = Math.round(target) - 1;
