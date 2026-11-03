@@ -21,6 +21,8 @@ Brief: impress by look and motion first, cases second. Simple structure, easy ca
 - `src/scripts/work.ts`: one render loop for 3 views — showcase (3D ring, auto-rotates), grid, slider (auto-drifts).
   Levitation, per-card tilt (10°), whole-stage tilt (4–6°, bottom 120px dead zone), hover copy rides the card tilt.
 - `src/scripts/case.ts`: case overlay + Input/Reasoning/Process/Outcomes accordion synced to scroll and clickable.
+  Layout (Figma V0 · B, white sheet): media LEFT, story column RIGHT (solid dark hug-width "Visit" CTA on top, then the accordion;
+  the Outcomes panel carries the short text + metric rows with 48px numbers). No footer, no counter.
 - `src/scripts/pages.ts`: Services hover preview, About SUMMON ME dock effect (quickTo — never `overwrite`), Lab pull-back.
 - `src/scripts/motion.ts`: motion tokens (eases, durations, staggers). `dots.ts`: polka-dot cursor field, currently **off**
   (canvas commented out in `WorkStage.astro`).

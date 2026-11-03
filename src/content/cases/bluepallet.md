@@ -32,4 +32,5 @@ sections:
     text: "A new exchange flow shares private information only on mutual consent, so buyers and sellers can stay anonymous during early negotiations and still network. Daily and monthly active users grew by 151%, and the number of users by 20%."
     media:
       - { kind: image, src: "/work/bluepallet/m6.webp", alt: "Client review" }
+link: { label: "visit Bluepallet", url: "#" }
 ---

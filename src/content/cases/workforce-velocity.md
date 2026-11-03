@@ -31,6 +31,10 @@ sections:
   outcomes:
     text: "Usability went to the next level: simpler UX and UI, new navigation and search to find information fast, better learnability and onboarding, and workflows tuned for each user type. Redesigned flows reached a 94% completion rate, and only two users asked for onboarding after the switch."
     media:
+      - { kind: image, src: "/work/wfv/m8.webp", alt: "Tablet mockup" }
+      - { kind: image, src: "/work/wfv/m7.webp", alt: "Job functions" }
+      - { kind: image, src: "/work/wfv/m9.webp", alt: "Seamless integration" }
       - { kind: image, src: "/work/wfv/m5.webp", alt: "Platform in use" }
       - { kind: image, src: "/work/wfv/m6.webp", alt: "Client review" }
+link: { label: "visit Workforce Velocity", url: "#" }
 ---

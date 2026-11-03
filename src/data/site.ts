@@ -41,11 +41,12 @@ export const services = [
   { title: 'Uncharted problems', hue: 50, text: "We’re building something nobody has built before. No playbook, no precedent, no obvious answer. Are you in?" },
 ];
 
-/** About intro: the name is set apart (rendered grey). */
+/** About intro: the name and the closing phrase (tail) are set apart (rendered grey). */
 export const intro = {
   lead: "I'm ",
   accent: 'Dim',
-  text: '. I live in Lisbon and design the kind of software nobody posts on Dribbble but everybody depends on: the systems behind schools, hospitals, banks and HR teams.',
+  text: '. I live in Lisbon and design the kind of software nobody posts on Dribbble but everybody depends on: ',
+  tail: 'the systems behind schools, hospitals, banks and HR teams.',
 };
 
 /** About "Listening to" record deck. One record is picked at random on every visit — add yours to the list.

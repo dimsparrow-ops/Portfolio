@@ -33,4 +33,5 @@ sections:
     text: "The design system brought unity to the bank's products: a cohesive identity that still adapts to each region, streamlined UI and UX across every platform, and a stronger global brand. The result is one product line that reinforces the client's global presence while serving local markets."
     media:
       - { kind: image, src: "/work/design-system/m6.webp", alt: "Design system guide" }
+link: { label: "visit Design System", url: "#" }
 ---

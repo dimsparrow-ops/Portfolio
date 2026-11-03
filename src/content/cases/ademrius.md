@@ -33,4 +33,5 @@ sections:
     text: "The platform consolidated provider roles and streamlined patient interactions. Booking, telemedicine and monitoring in one place raised patient engagement and satisfaction, reduced the administrative load on providers, and made care management more efficient."
     media:
       - { kind: image, src: "/work/ademrius/m6.webp", alt: "Client testimonial" }
+link: { label: "visit Ademrius", url: "#" }
 ---

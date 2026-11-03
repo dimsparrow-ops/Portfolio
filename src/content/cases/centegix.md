@@ -1,13 +1,14 @@
 ---
-title: "Coming soon"
-task: "A new case is on its way. Placeholder until the real one lands."
-client: "Placeholder"
+title: "Centegix"
+task: "Product design for Centegix. Case details are on their way."
+client: "Centegix"
 order: 6
 year: 2026
 country: "PT"
 services: ["Product design"]
 platform: desktop
-summary: "Placeholder case."
+summary: "Product design for Centegix."
+cover: "/work/centegix/cover.webp"
 hue: 160
 sections:
   input:
@@ -26,4 +27,5 @@ sections:
     text: "Placeholder text. Replace with the results."
     media:
       - { kind: image, alt: "Placeholder" }
+link: { label: "visit Centegix", url: "#" }
 ---

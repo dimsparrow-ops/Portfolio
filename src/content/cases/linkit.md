@@ -32,5 +32,5 @@ sections:
     text: "A simpler information architecture made the platform much easier to navigate. Gradual rollout let it evolve without overwhelming users, which led to higher engagement and satisfaction, and continuous testing removed pain points for a faster, more intuitive experience."
     media:
       - { kind: image, src: "/work/linkit/m6.webp", alt: "Client review" }
-link: { label: "Visit LinkIt", url: "https://www.linkit.com/" }
+link: { label: "visit LinkIt", url: "https://www.linkit.com/" }
 ---
