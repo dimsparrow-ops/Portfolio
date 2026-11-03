@@ -2,7 +2,7 @@
 title: "Centegix"
 task: "Product design for Centegix. Case details are on their way."
 client: "Centegix"
-order: 6
+order: 1
 year: 2026
 country: "PT"
 services: ["Product design"]

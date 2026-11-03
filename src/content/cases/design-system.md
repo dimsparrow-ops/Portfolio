@@ -2,7 +2,7 @@
 title: "Design System"
 task: "Unify 6 banking products across 3 countries into one design system"
 client: "NDA"
-order: 1
+order: 4
 year: 2025
 country: "International"
 services: ["Product design", "UX research", "Design system"]

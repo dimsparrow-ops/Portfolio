@@ -1,7 +1,7 @@
 ---
 title: "LinkIt"
 task: "Redesign an EdTech platform used by millions without breaking their habits"
-order: 5
+order: 6
 year: 2022
 country: "USA"
 services: ["Product design", "UI/UX design", "Product redesign"]

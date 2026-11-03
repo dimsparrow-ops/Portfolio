@@ -2,7 +2,7 @@
 title: "Workforce Velocity"
 task: "Streamlined workforce management through an HRTech platform redesign"
 client: "EDS Solutions"
-order: 3
+order: 2
 year: 2024
 country: "USA"
 services: ["Product design", "UX research", "Business analysis", "Product redesign"]

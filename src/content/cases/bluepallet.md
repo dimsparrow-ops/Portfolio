@@ -1,7 +1,7 @@
 ---
 title: "Bluepallet"
 task: "Elevating chemical e-commerce through innovative product enhancements"
-order: 2
+order: 7
 year: 2025
 country: "USA"
 services: ["Product design", "UX/UI design", "UX research"]
