@@ -19,14 +19,11 @@ sections:
     text: "As Lead Designer I was tasked with building a comprehensive design system for a leading international Islamic financial group. It had to reflect the brand's ethical values and commitment to modernity while keeping the experience seamless across digital platforms.\n\nOver four months I worked closely with the client's team on guidelines for components, colour, typography and behaviour rules, aligned with Islamic banking principles."
     media:
       - { kind: image, src: "/work/design-system/m1.webp", alt: "Audit findings" }
-  reasoning:
-    text: "An audit of the bank's apps across three countries showed a lack of cohesion: six separate web and mobile products, each with its own patterns, and customers confused as they moved between them.\n\nThe brief: audit the existing system, build one design system for every platform, streamline UI and UX for accessibility, and keep the high bar of trust and security the brand stands for."
+  approach:
+    text: "An audit of the bank's apps across three countries showed a lack of cohesion: six separate web and mobile products, each with its own patterns, and customers confused as they moved between them.\n\nThe brief: audit the existing system, build one design system for every platform, streamline UI and UX for accessibility, and keep the high bar of trust and security the brand stands for.\n\nI mapped the inconsistencies between regions, explored several visual concepts for each market's needs and chose the strongest to build on. The system keeps regional nuance but shares one visual language, and it is built on Figma tokens and variables so it scales. Each step was refined with stakeholders until it matched the brand and real user needs."
     media:
       - { kind: image, src: "/work/design-system/m2.webp", alt: "Existing products" }
       - { kind: image, src: "/work/design-system/m3.webp", alt: "Inconsistencies across markets" }
-  process:
-    text: "I mapped the inconsistencies between regions, explored several visual concepts for each market's needs and chose the strongest to build on. The system keeps regional nuance but shares one visual language, and it is built on Figma tokens and variables so it scales. Each step was refined with stakeholders until it matched the brand and real user needs."
-    media:
       - { kind: image, src: "/work/design-system/m4.webp", alt: "Before: no consistency" }
       - { kind: image, src: "/work/design-system/m5.webp", alt: "After: with consistency" }
   outcomes:

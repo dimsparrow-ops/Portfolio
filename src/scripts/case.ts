@@ -1,9 +1,9 @@
 import Lenis from 'lenis';
-import { gsap, ScrollTrigger, ease, dur, stagger, reduced, RISE, splitWords } from './motion';
+import { gsap, ScrollTrigger, ease, dur, reduced, onReducedChange, RISE, rise, splitWords } from './motion';
 
 /**
  * Case overlay (leoleo.studio): the panel rises over Work, keeps its own URL.
- * Story column (thegradient.com): Input / Reasoning / Process / Outcomes open
+ * Story column (thegradient.com): Input / Approach / Outcomes open
  * as their media scrolls into view, and can also be toggled by click.
  */
 const layer = () => document.querySelector<HTMLElement>('.case-layer')!;
@@ -17,6 +17,9 @@ let opener: HTMLElement | null = null; // where keyboard focus returns on close
 const BACKGROUND = ['#pages', '.shell', '.logo'];
 const setBackgroundInert = (on: boolean) =>
   BACKGROUND.forEach((s) => document.querySelector<HTMLElement>(s)?.toggleAttribute('inert', on));
+// the story column sits beside the media from 901px (global.css). Stacked above it, it doesn't follow the scroll: its
+// panels would open and close out of sight and shift the media under the reader
+const sideBySide = typeof window !== 'undefined' ? window.matchMedia('(min-width: 901px)') : null;
 
 export const caseIsOpen = () => isOpen;
 
@@ -54,7 +57,7 @@ function wire(article: HTMLElement, scroller: HTMLElement) {
   const groups = Array.from(article.querySelectorAll<HTMLElement>('.media-group')).filter((g) => g.dataset.section);
   let current = groups[0]?.dataset.section ?? 'input';
   const sync = () => {
-    if (!groups.length) return;
+    if (!groups.length || !sideBySide?.matches) return;
     const visible = groups.filter((g) => g.offsetHeight > 0);
     if (!visible.length) return;
     const top = scroller.getBoundingClientRect().top;
@@ -119,12 +122,11 @@ function wireVideos(slot: HTMLElement, scroller: HTMLElement) {
 
 /** Same masked word rise as About: head words ride the sheet in, the story column rises as it scrolls into view. */
 function wireText(article: HTMLElement, scroller: HTMLElement) {
-  const per = (words: HTMLElement[]) => ({ yPercent: 0, duration: RISE.dur, ease: RISE.ease, stagger: Math.min(stagger.word, RISE.span / words.length) });
   const onScroll = (els: HTMLElement[], at: Element) => {
     const words = els.flatMap(splitWords);
     if (!words.length) return;
     gsap.set(words, { yPercent: 110 });
-    triggers.push(ScrollTrigger.create({ trigger: at, scroller, start: 'top 92%', once: true, onEnter: () => gsap.to(words, per(words)) }));
+    triggers.push(ScrollTrigger.create({ trigger: at, scroller, start: 'top 92%', once: true, onEnter: () => gsap.to(words, rise(words)) }));
   };
   const acc = article.querySelector<HTMLElement>('.acc');
   if (acc) onScroll(Array.from(acc.querySelectorAll<HTMLElement>('.acc-btn .mono, .acc-item.is-open .acc-panel p')), acc);
@@ -151,7 +153,8 @@ export function openCase(opts: { html?: string; animate?: boolean; onClose: () =
   const raf = (t: number) => lenis?.raf(t * 1000);
   gsap.ticker.add(raf);
   lenis.on('scroll', ScrollTrigger.update);
-  cleanup.push(() => gsap.ticker.remove(raf));
+  const unwatch = onReducedChange((r) => lenis && (lenis.options.smoothWheel = !r));
+  cleanup.push(() => gsap.ticker.remove(raf), unwatch);
 
   const closeEls = L.querySelectorAll<HTMLElement>('[data-case-close]');
   const onClose = () => opts.onClose();
@@ -176,9 +179,8 @@ export function openCase(opts: { html?: string; animate?: boolean; onClose: () =
       const headWords = Array.from(article.querySelectorAll<HTMLElement>('.case-meta, .case-link')).flatMap(splitWords);
       gsap.set([...titleWords, ...headWords], { yPercent: 110 });
       if (meta) gsap.set(meta, { opacity: 0 }); // its "·" separators are pseudo-elements, so the row fades in with the words
-      const per = (words: HTMLElement[]) => ({ yPercent: 0, duration: RISE.dur, ease: RISE.ease, stagger: Math.min(stagger.word, RISE.span / words.length) });
-      tl.to(titleWords, per(titleWords), 0.25)
-        .to(headWords, per(headWords), 0.35)
+      tl.to(titleWords, rise(titleWords), 0.25)
+        .to(headWords, rise(headWords), 0.35)
         .to(meta ?? [], { opacity: 1, duration: dur.base, ease: ease.ui }, 0.35);
       wireText(article, scroller);
     }

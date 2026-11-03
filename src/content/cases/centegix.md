@@ -15,13 +15,10 @@ sections:
     text: "Placeholder text. Replace with the brief, the client and the problem."
     media:
       - { kind: image, alt: "Placeholder" }
-  reasoning:
-    text: "Placeholder text. Replace with the key decisions and why they were made."
+  approach:
+    text: "Placeholder text. Replace with the key decisions and why they were made.\n\nPlaceholder text. Replace with how the work was done."
     media:
       - { kind: image, alt: "Placeholder" }
-  process:
-    text: "Placeholder text. Replace with how the work was done."
-    media:
       - { kind: image, alt: "Placeholder" }
   outcomes:
     text: "Placeholder text. Replace with the results."

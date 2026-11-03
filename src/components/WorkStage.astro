@@ -4,44 +4,69 @@ import Ph from './Ph.astro';
 interface Props { cases: CollectionEntry<'cases'>[]; }
 const { cases } = Astro.props;
 
-// Two-tone hover headline: first sentence (or first 3 words when there is no full stop) in ink, the rest in grey.
-const splitTask = (task: string): [string, string] => {
-  const m = task.match(/^(.+?[.!?])\s+(.+)$/);
-  if (m) return [m[1], m[2]];
-  const words = task.split(' ');
-  return [words.slice(0, 3).join(' '), words.slice(3).join(' ')];
-};
+// Spiral filler: the spiral needs a ring of sixteen plates (see work.ts), or its seam shows on screen. FILL 'repeat'
+// runs the real cases round again (the reference does the same with its ten), 'placeholder' puts placeholder projects
+// between them, 'none' shows only the real cases. Only the spiral shows the filler.
+const RING = 16;
+const FILL = 'repeat' as 'none' | 'repeat' | 'placeholder';
+type Slot = { kind: 'case'; c: CollectionEntry<'cases'>; repeat: boolean } | { kind: 'placeholder'; n: number };
+const realAt = new Map(cases.map((c, i) => [Math.round((i * RING) / cases.length), c]));
+let ph = 0;
+const slots: Slot[] = cases.length >= RING || FILL === 'none'
+  ? cases.map((c) => ({ kind: 'case', c, repeat: false }))
+  : FILL === 'repeat'
+    ? Array.from({ length: RING }, (_, k) => ({ kind: 'case', c: cases[k % cases.length], repeat: k >= cases.length }))
+    : Array.from({ length: RING }, (_, k) => {
+        const c = realAt.get(k);
+        return c ? { kind: 'case', c, repeat: false } : { kind: 'placeholder', n: ++ph };
+      });
+
 const platformLabel = { desktop: 'Web', mobile: 'Mobile' } as Record<string, string>;
 const chipsOf = (d: CollectionEntry<'cases'>['data']) =>
-  [d.services[0], platformLabel[d.platform] ?? d.platform, String(d.year)];
+  [d.services[0], d.product ?? platformLabel[d.platform] ?? d.platform, String(d.year)];
 ---
 <main class="page page--work" data-page="work">
   <h1 class="sr-only">Selected work</h1>
   {/* polka-dot field off for now — restore: <canvas class="dots" data-dots aria-hidden="true"></canvas> */}
-  <div class="stage is-showcase" data-stage>
+  <div class="stage is-spiral" data-stage>
     <div class="stage-world" data-world>
-      {cases.map((c, i) => (
+      {slots.map((s) => s.kind === 'case' ? (
         <a
           class="card"
-          href={`/work/${c.id}/`}
-          data-case={c.id}
-          data-title={c.data.title}
-          data-platform={c.data.platform}
-          aria-label={`${c.data.title} — ${c.data.task}`}
+          href={`/work/${s.c.id}/`}
+          data-case={s.c.id}
+          data-task={s.c.data.task}
+          data-platform={s.c.data.platform}
+          data-repeat={s.repeat || undefined}
+          aria-hidden={s.repeat ? 'true' : undefined}
+          tabindex={s.repeat ? -1 : undefined}
+          aria-label={`${s.c.data.title} — ${s.c.data.task}`}
         >
           <span class="card-face">
-            {c.data.cover
-              ? <img src={c.data.cover} alt="" loading="eager" decoding="async" />
-              : <Ph hue={c.data.hue} />}
-          </span>
-          <span class="card-task" aria-hidden="true">
-            <span class="lead">{splitTask(c.data.task)[0]}</span>{' '}<span class="rest">{splitTask(c.data.task)[1]}</span>
+            {s.c.data.cover
+              ? <img src={s.c.data.cover} alt="" loading="eager" decoding="async" />
+              : <Ph hue={s.c.data.hue} />}
           </span>
           <span class="card-chips" aria-hidden="true">
-            {chipsOf(c.data).map((t, i) => <span class="chip" style={`--i:${i}`}>{t}</span>)}
+            {chipsOf(s.c.data).map((t, i) => <span class="chip" style={`--i:${i}`}>{t}</span>)}
           </span>
         </a>
+      ) : (
+        <span class="card" data-placeholder data-platform="desktop" data-task="Placeholder project. Case details are on their way." aria-hidden="true">
+          <span class="card-face">
+            <img src={`/work/placeholders/p${s.n}.svg`} alt="" loading="eager" decoding="async" />
+          </span>
+          <span class="card-chips" aria-hidden="true">
+            {['Placeholder', 'Web', '2026'].map((t, i) => <span class="chip" style={`--i:${i}`}>{t}</span>)}
+          </span>
+        </span>
       ))}
     </div>
+  </div>
+  {/* spiral hover label (pacomepertant.com), dressed like the Services hover block: the cursor's arrow disc, then the
+      case's task (the card's data-task) typed in live; work.ts fills it */}
+  <div class="spiral-tag" data-spiral-tag aria-hidden="true">
+    <span class="spiral-tag-go"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17 17 7M9 7h8v8"/></svg></span>
+    <span class="spiral-tag-text"><span data-tag-typed></span><span class="svc-caret"></span></span>
   </div>
 </main>

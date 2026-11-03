@@ -5,31 +5,34 @@ client: "EDS Solutions"
 order: 2
 year: 2024
 country: "USA"
-services: ["Product design", "UX research", "Business analysis", "Product redesign"]
+services: ["Platform redesign", "UX/UI"]
 platform: desktop
+product: "B2B platform"
+role: "Lead designer"
+team: "1 designer + 1 BA"
+mine: "I led the design process end to end: discovery, client talks, reviews, validation and delivery. Plus a few modules I designed myself."
 summary: "HRTech platform for workforce planning, recruitment, payroll and timekeeping."
 cover: "/work/wfv/cover.webp"
 hue: 130
 metrics:
-  - { value: "94%", label: "Completion rate of redesigned flows" }
-  - { value: "2", label: "Users needed onboarding after the redesign" }
-  - { value: "2 yrs", label: "Partnership" }
+  # directions only until real numbers arrive: swap "↑"/"↓" for the value, add before / when / note
+  - { value: "↑", label: "Platform discoverability" }
+  - { value: "↑", label: "Platform learnability" }
+  - { value: "↓", label: "Error rate" }
+  - { value: "↑", label: "CSAT, NPS, CES" }
 sections:
   input:
-    text: "Workforce Velocity is an HRTech platform covering the full range of HR processes. Its workforce planning powers unique transaction-based scheduling and gross margin calculations that help branches hit their KPIs, alongside recruitment, payroll, timekeeping and labour-cost tools.\n\nOur team revamped the platform so HR teams can manage everything in one integrated solution."
+    text: "Workforce Velocity is an HRTech platform for the whole HR cycle: workforce planning, recruitment, payroll, timekeeping and labour costs. Powerful, and before we showed up, hard to love."
     media:
       - { kind: image, src: "/work/wfv/m1.webp", alt: "Before redesign" }
-  reasoning:
-    text: "Overhaul the entire platform without disrupting existing workflows. The complex ERP needed a better interface, navigation and information architecture, but had to keep its full feature set.\n\nIt also served many types of users, so we had to bring their different needs into one platform, create new roles and give admins an easy way to assign access."
+  approach:
+    text: "The key call: keep every feature and rebuild the structure around people. The ERP needed a better interface, navigation and information architecture, but nobody was going to retrain a whole company overnight. And one login served very different users, so every role needed a place that fits.\n\nDiscovery came first: benchmarking, requirements and user interviews, with a BA next to me. Then the structure: information architecture built around how people think, search and filtering, and a role-based model so admins decide who sees what.\n\nNothing shipped in one go. We rolled changes out gradually and tested every round with real users, fixing what actually hurt instead of what we guessed would."
     media:
       - { kind: image, src: "/work/wfv/m2.webp", alt: "Information architecture" }
-  process:
-    text: "We started with each persona and their pain points, then ran an extensive discovery: business analysis, audience research and user interviews. Scope estimation was hard with so many personas, so we set timelines and goals together with stakeholders and adjusted them as testing revealed more.\n\nWe modelled the information architecture around users' mental models, caught UX issues early, and rolled out UI/UX changes gradually, testing each iteration with real users and tailoring fixes to their pain points."
-    media:
       - { kind: image, src: "/work/wfv/m3.webp", alt: "Dashboard" }
       - { kind: image, src: "/work/wfv/m4.webp", alt: "Platform on laptop" }
   outcomes:
-    text: "Usability went to the next level: simpler UX and UI, new navigation and search to find information fast, better learnability and onboarding, and workflows tuned for each user type. Redesigned flows reached a 94% completion rate, and only two users asked for onboarding after the switch."
+    text: "Usability went up a level. People find things faster, learn the platform faster, reach value sooner and make fewer mistakes. CSAT, NPS and customer effort score all moved the right way."
     media:
       - { kind: image, src: "/work/wfv/m8.webp", alt: "Tablet mockup" }
       - { kind: image, src: "/work/wfv/m7.webp", alt: "Job functions" }

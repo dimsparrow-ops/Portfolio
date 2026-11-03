@@ -19,14 +19,11 @@ sections:
     text: "Ademrius is an international SaaS that helps clinics, healthcare professionals and patients with online booking, telemedicine and electronic medical records. I designed the platform and the marketing website.\n\nWe started from research into market problems and trends to define the biggest problems for providers and patients, then turned the insights into problem-oriented features and product hypotheses."
     media:
       - { kind: image, src: "/work/ademrius/m1.webp", alt: "Unique value proposition" }
-  reasoning:
-    text: "The challenge was to bring every healthcare provider role into one place and mirror their everyday work digitally: 5 roles, 15 features and 23 flows on the provider side.\n\nPatients, meanwhile, postpone visits because booking is hard and clinics feel unwelcoming. We walked through their journey and removed every extra step so health management could be comfortable and remote: 4 roles, 10 features and 14 flows."
+  approach:
+    text: "The challenge was to bring every healthcare provider role into one place and mirror their everyday work digitally: 5 roles, 15 features and 23 flows on the provider side.\n\nPatients, meanwhile, postpone visits because booking is hard and clinics feel unwelcoming. We walked through their journey and removed every extra step so health management could be comfortable and remote: 4 roles, 10 features and 14 flows.\n\nHypotheses were validated through user interviews, focus groups with healthcare professionals and competitor research, which shaped a clear value proposition. We drafted how scheduling, monitoring and telemedicine would work, reviewed it with product managers, doctors and nurses, and adjusted.\n\nThree to four weeks went into testing prototypes with real patients and providers. The final design covered every UI state across devices with a smooth developer handover."
     media:
       - { kind: image, src: "/work/ademrius/m2.webp", alt: "Provider dashboard" }
       - { kind: image, src: "/work/ademrius/m3.webp", alt: "Patient app" }
-  process:
-    text: "Hypotheses were validated through user interviews, focus groups with healthcare professionals and competitor research, which shaped a clear value proposition. We drafted how scheduling, monitoring and telemedicine would work, reviewed it with product managers, doctors and nurses, and adjusted.\n\nThree to four weeks went into testing prototypes with real patients and providers. The final design covered every UI state across devices with a smooth developer handover."
-    media:
       - { kind: image, src: "/work/ademrius/m4.webp", alt: "Branding" }
       - { kind: image, src: "/work/ademrius/m5.webp", alt: "Platform screens" }
   outcomes:

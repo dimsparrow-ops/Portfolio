@@ -17,6 +17,7 @@
   --line: rgba(0, 0, 0, 0.14);
   --lab: #0d0d0e;                     /* Design Lab + SUMMON ME */
   --on-dark: #ffffff;
+  --on-light: #1c1c1e;                /* ink on white chips/discs: stays dark in both themes */
   --on-dark-body: rgba(255, 255, 255, 0.8);
   --on-dark-2: rgba(255, 255, 255, 0.5);
   --scrim: rgba(0, 0, 0, 0.5);        /* nav glass, case backdrop, chips on media */
@@ -25,6 +26,14 @@
   --key: #f26d90;                     /* say hi pink */
   --key-edge: #c4456a;
   --blue: #2979ff;                    /* focus ring */
+  --page: #f8f8f8;                    /* Work and Services: a touch greyer than --bg */
+  --grid-line: rgba(28, 28, 30, 0.06);/* the faint page grid */
+  --nav-pill: #ffffff;                /* nav active pill: white in both themes */
+  --button: #f0f0f0;                  /* case close */
+  --button-hover: #e0e0e0;
+  --glass-light: rgba(255, 255, 255, 0.4); /* hover label, Services description */
+  --theme-thumb: #e8e8e8;
+  --theme-off: #b4b4b8;
 
   /* type */
   --font: 'Geist Variable', system-ui, sans-serif;
@@ -35,7 +44,7 @@
   --fs-m: 20px;                                   /* small headings */
   --fs-l: clamp(24px, 2.2vw, 32px);               /* quote */
   --fs-xl: clamp(40px, 5.6vw, 80px);              /* lab title, metric */
-  --fs-2xl: clamp(48px, 7.6vw, 120px);            /* case title, services */
+  --fs-2xl: clamp(40px, 6vw, 80px);               /* case title */
   --lh-display: 1;
   --lh-ui: 1.2;
   --lh-body: 1.5;
@@ -81,6 +90,30 @@
 @media (max-width: 767px) {
   :root { --gutter: var(--s-4); }
 }
+/* dark theme (the switcher top-right, Base.astro): same tokens, darker values. Design Lab and SUMMON ME stay --lab */
+:root[data-theme='dark'] {
+  color-scheme: dark;
+  --bg: #161618;
+  --surface: #1c1c1e;
+  --fill: rgba(255, 255, 255, 0.08);
+  --ink: #f2f2f3;
+  --ink-body: rgba(255, 255, 255, 0.7);
+  --ink-2: rgba(255, 255, 255, 0.5);
+  --ink-3: rgba(255, 255, 255, 0.32);
+  --line: rgba(255, 255, 255, 0.14);
+  --nav-bg: rgba(44, 44, 46, 0.8);
+  --nav-ink: #7c7c80;
+  --page: #121214;
+  --grid-line: rgba(255, 255, 255, 0.06);
+  --button: #2a2a2c;
+  --button-hover: #3a3a3d;
+  --glass-light: rgba(28, 28, 30, 0.5);
+  --theme-thumb: #3a3a3d;
+  --theme-off: #6e6e72;
+  --shadow-s: 0 2px 8px rgba(0, 0, 0, 0.4);
+}
+/* while the theme switches, colours ease over instead of snapping */
+html.theme-fade, html.theme-fade *, html.theme-fade *::before { transition: background-color 0.4s var(--ease-ui), color 0.4s var(--ease-ui), border-color 0.4s var(--ease-ui), box-shadow 0.4s var(--ease-ui) !important; }
 
 /* ---------- base ---------- */
 *, *::before, *::after { box-sizing: border-box; }
@@ -154,6 +187,27 @@ img, video { display: block; max-width: 100%; }
 }
 .logo:hover { transform: rotate(-8deg) scale(1.06); }
 
+/* theme toggle, top-right: one icon, the theme it switches TO (moon on light, sun on dark); hover lays the grey
+   disc of the old switcher under it and inks the icon. Base.astro sets data-theme */
+.theme-switch {
+  position: fixed; z-index: 55; top: calc(var(--s-6) - 4px); right: var(--gutter); /* centred on the logo's row */
+  width: 40px; height: 40px; border-radius: 50%; display: grid; place-items: center;
+  color: var(--theme-off); transition: color 0.3s var(--ease-ui);
+}
+.theme-switch::before {
+  content: ''; position: absolute; inset: var(--s-1); border-radius: 50%; background: var(--theme-thumb);
+  opacity: 0; transform: scale(0.6);
+  transition: opacity 0.3s var(--ease-ui), transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.theme-switch:hover { color: var(--ink); }
+.theme-switch:hover::before { opacity: 1; transform: none; }
+html.theme-fade .theme-switch::before { transition: opacity 0.3s var(--ease-ui), transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1), background-color 0.4s var(--ease-ui) !important; } /* the colour fade must not take the disc's spring */
+.theme-switch span { grid-area: 1 / 1; position: relative; display: grid; place-items: center; transition: opacity 0.3s var(--ease-ui), transform 0.5s var(--ease-out); }
+html.theme-fade .theme-switch span { transition: opacity 0.3s var(--ease-ui), transform 0.5s var(--ease-out), color 0.4s var(--ease-ui) !important; }
+.theme-switch svg { width: 16px; height: 16px; }
+/* the icon you can switch to shows, the other turns away */
+:root:not([data-theme='dark']) .theme-switch .is-sun, :root[data-theme='dark'] .theme-switch .is-moon { opacity: 0; transform: rotate(-90deg) scale(0.5); }
+
 /* Say hi — keycap button (soscalemedia.se).
    One shadow recipe; states only change --depth (edge height). */
 .sayhi-btn {
@@ -199,13 +253,13 @@ img, video { display: block; max-width: 100%; }
   white-space: nowrap;
 }
 .nav a:hover { color: var(--ink); }
-.nav a[aria-current='page'], .nav a[aria-current='page']:hover { color: var(--ink); }
+.nav a[aria-current='page'], .nav a[aria-current='page']:hover { color: var(--on-light); } /* dark ink on the white pill, in both themes */
 .nav a.sayhi-btn, .nav a.sayhi-btn:hover { color: var(--on-dark); font-size: var(--fs-xs); }
 /* keycap face (36px) + its 4px edge = the 40px row every tab sits in, so all insets stay 4px */
 .nav a.sayhi-btn { height: calc(var(--control-h) - 4px); align-self: flex-start; }
 .nav-indicator {
   position: absolute; top: var(--s-1); left: 0; height: var(--control-h); width: 0;
-  border-radius: var(--r-pill); background: #fff;
+  border-radius: var(--r-pill); background: var(--nav-pill);
   box-shadow: var(--shadow-s);
 }
 
@@ -227,10 +281,13 @@ img, video { display: block; max-width: 100%; }
 body:not(.is-work) .ctrl { opacity: 0; transform: translateY(var(--s-4)); pointer-events: none; }
 
 @media (max-width: 767px) {
-  .nav { bottom: calc(var(--s-3) + env(safe-area-inset-bottom, 0px)); width: calc(100% - var(--s-6)); justify-content: space-between; }
-  .nav { gap: 0; --glass: blur(24px) saturate(1.4); } /* 80px blur re-rasterises every frame over the moving cards: too heavy on phones */
+  .nav {
+    bottom: calc(var(--s-3) + env(safe-area-inset-bottom, 0px)); width: calc(100% - var(--s-6)); justify-content: space-between; gap: 0;
+    --glass: blur(24px) saturate(1.4); /* 80px blur re-rasterises every frame over the moving cards: too heavy on phones */
+  }
   .nav a { padding: 0 var(--s-1); flex: 1 1 auto; justify-content: center; }
   .ctrl { bottom: calc(80px + env(safe-area-inset-bottom, 0px)); gap: var(--s-3); }
+  .ctrl--view { bottom: calc(132px + env(safe-area-inset-bottom, 0px)); } /* four views no longer fit beside the filter on a phone: they stack */
   .nav a.sayhi-btn { padding: 0 var(--s-3); margin-left: var(--s-1); flex: none; gap: var(--s-1); }
   .logo { top: var(--s-4); }
 }
@@ -238,7 +295,7 @@ body:not(.is-work) .ctrl { opacity: 0; transform: translateY(var(--s-4)); pointe
 /* ---------- pages + router ---------- */
 #pages { position: relative; }
 .page { position: relative; min-height: 100vh; min-height: 100dvh; background: var(--bg); }
-.page--services { overflow: hidden; }
+.page--services { overflow: hidden; background: var(--page); } /* same grey and grid as Work (.page--work::before) */
 .page:focus { outline: none; } /* focus is moved here after a route change */
 .page.is-transit {
   position: fixed; inset: 0; overflow: hidden;
@@ -265,23 +322,45 @@ body:not(.is-work) .ctrl { opacity: 0; transform: translateY(var(--s-4)); pointe
 html.is-loaded .loader { display: none; }
 
 /* ---------- work stage ---------- */
-.page--work { height: 100vh; height: 100dvh; overflow: hidden; background: #F8F8F8; }
+.page--work { height: 100vh; height: 100dvh; overflow: hidden; background: var(--page); }
+/* barely-there 40px grid behind the stage (and the Services list, and SUMMON ME in white), centred on the screen and
+   fading out toward the edges */
+.page--work::before, .page--services::before, .hi::before {
+  content: ''; position: absolute; inset: 0; pointer-events: none;
+  background-image:
+    linear-gradient(to right, var(--grid-line) 1px, transparent 1px),
+    linear-gradient(to bottom, var(--grid-line) 1px, transparent 1px);
+  background-size: 40px 40px;
+  background-position: calc(50% - 20px) calc(50% - 20px);
+  -webkit-mask-image: radial-gradient(ellipse 60% 60% at 50% 50%, #000 20%, transparent 100%);
+  mask-image: radial-gradient(ellipse 60% 60% at 50% 50%, #000 20%, transparent 100%);
+}
 .stage {
   position: fixed; inset: 0;
-  perspective: 1500px;
-  perspective-origin: 50% 46%;
   touch-action: none;
   cursor: grab;
 }
 .stage.is-grid { cursor: default; }
 .stage.is-dragging { cursor: grabbing; }
 .page.is-transit .stage { position: absolute; }
-.stage-world { position: absolute; left: 50%; top: 46%; transform-style: preserve-3d; }
+/* the camera: the world is a 0×0 point at the axis, so its perspective origin (0 0) is the axis. It stays flat on
+   purpose: cards paint in z-index order (work.ts sets it from depth) instead of being depth-sorted in one 3D context,
+   where the bleeding WebGL canvases of neighbouring plates intersect and the browser slices them along the cut.
+   The pointer tilt of the whole stage is folded into each card's own transform (work.ts) */
+.stage-world {
+  position: absolute; left: 50%; top: 46%;
+  perspective: 1500px; perspective-origin: 0 0;
+  transition: top 0.75s var(--ease-inout), perspective 0.75s var(--ease-inout); /* the spiral moves its axis lower (work.ts spiralAxis) */
+}
+.stage.is-spiral .stage-world { perspective: 158.6vh; } /* the reference's camera: 8 units out at fov 35° (work.ts spiralUnit) */
+@media (max-width: 899px) { .stage.is-spiral .stage-world { perspective: 120.7vh; } } /* fov 45° under 900px wide */
 .card {
   position: absolute; left: 0; top: 0;
   width: 280px; height: 210px;
-  transform-style: preserve-3d;
-  will-change: transform, opacity;
+  border-radius: var(--r-card); /* the focus ring follows the cover's corners */
+  transform-origin: 0 0; /* work.ts transforms about the world's axis */
+  /* flat on purpose: nothing inside needs 3D, and a 3D rendering context would stop the chips' backdrop blur */
+  will-change: transform; /* not opacity: that would make the card a backdrop root and the chips' blur would see only its see-through face, not the WebGL cover under it */
   cursor: pointer;
   opacity: 0;
 }
@@ -292,57 +371,43 @@ html.is-loaded .loader { display: none; }
   box-shadow: var(--highlight);
 }
 .card-face .ph, .card-face img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
-.card-gl { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; pointer-events: none; z-index: 1; }
+.stage-gl { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; } /* all the covers, drawn by work.ts createStageGL under the see-through CSS cards */
 
-/* hover copy rides on the card, so it follows the tilt (cappen.com + Figma note) */
-.card-task, .chip {
-  opacity: 0; transform: translateY(var(--s-2));
-  transition: opacity 0.3s var(--ease-ui), transform 0.45s var(--ease-out);
-}
-.card-task {
-  position: absolute; pointer-events: none;
-  left: 0; right: -16%; bottom: calc(100% + var(--s-5));
-  font-size: 32px; line-height: var(--lh-ui); letter-spacing: var(--ls-display); font-weight: 500; color: var(--ink);
-  display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 4; overflow: hidden; text-wrap: balance;
-}
-@media (max-width: 767px) { .card-task { font-size: 20px; right: 0; } } /* small cards: smaller headline that fits whole, inside the card width */
-.card-task .rest { color: #959595; } /* two-tone: hook in ink, the rest in grey (same move as the About intro) */
-/* glass chips on the cover (discipline · platform · year); blur only while hovered, it is heavy on moving cards */
+/* glass chips on the cover (discipline · platform · year); blur only while hovered, it is heavy on moving cards.
+   They ride on the card, so they follow its tilt (cappen.com + Figma note) */
 .card-chips {
   position: absolute; left: var(--s-4); right: var(--s-4); bottom: var(--s-4); z-index: 1;
   display: flex; flex-wrap: wrap; gap: var(--s-2); height: 28px; overflow: hidden; pointer-events: none; /* one row: a chip that does not fit wraps below the clip and disappears */
+  /* --chip-k (work.ts) cancels the card's depth scale; the row widens by the same factor so it still fits the card */
+  transform: scale(var(--chip-k, 1)); transform-origin: left bottom; width: calc((100% - 2 * var(--s-4)) / var(--chip-k, 1)); right: auto;
 }
 .chip {
   padding: var(--s-2) var(--s-3); border-radius: var(--r-pill);
   font: 400 var(--fs-xs)/1 var(--font-mono); letter-spacing: var(--ls-caps); text-transform: uppercase; white-space: nowrap; max-width: 100%; overflow: hidden; text-overflow: ellipsis;
   color: var(--on-dark);
   background: rgba(0, 0, 0, 0.28); box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.32); /* darker glass: covers are often light */
+  opacity: 0; transform: translateY(var(--s-2));
+  transition: opacity 0.3s var(--ease-ui), transform 0.45s var(--ease-out);
 }
-.card.is-hover .chip { --glass: blur(24px); backdrop-filter: var(--glass); -webkit-backdrop-filter: var(--glass); }
-.card-face::after { /* soft scrim under the chips */
-  content: ''; position: absolute; inset: auto 0 0 0; height: 48%;
-  background: linear-gradient(to top, rgba(0, 0, 0, 0.45), transparent);
-  opacity: 0; transition: opacity 0.3s var(--ease-ui); pointer-events: none;
-}
-.card.is-hover .card-face::after { opacity: 1; }
-.card.is-hover .card-task, .card.is-hover .chip { opacity: 1; transform: none; }
-.card.is-hover .chip { transition-delay: calc(0.05s + var(--i) * 0.04s); }
+.card.is-hover .chip { --glass: blur(24px); backdrop-filter: var(--glass); -webkit-backdrop-filter: var(--glass); opacity: 1; transform: none; }
 
-/* case cursor: white disc with an arrow follows the pointer over a card (leoleo.studio about block) */
-@media (hover: hover) and (pointer: fine) {
-  .stage .card { cursor: none; }
+/* spiral hover label (pacomepertant.com) — the cursor's arrow disc, then the case's task typed in live — the same box
+   as the Services hover block (.svc-desc, under Services: light glass, spinning rainbow edge and glow, rides the
+   pointer). A pill here (its 64px disc sets the height); motion.ts hoverLabel moves, tilts and scales both */
+.spiral-tag {
+  display: flex; align-items: center; gap: var(--s-4); min-height: 80px;
+  padding: var(--s-2) var(--s-6) var(--s-2) var(--s-2); border-radius: var(--r-pill);
 }
-.case-cursor { position: fixed; left: 0; top: 0; z-index: 40; pointer-events: none; }
-.case-cursor-dot {
-  display: grid; place-items: center;
-  width: 64px; height: 64px; margin: -32px 0 0 -32px; border-radius: var(--r-pill);
-  background: #fff; color: var(--ink); box-shadow: var(--shadow-s);
-  transform: scale(0); opacity: 0;
-  transition: transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.2s var(--ease-ui);
+.spiral-tag-text { flex: 1; min-width: 0; overflow: hidden; font-size: 16px; line-height: var(--lh-body); text-wrap: pretty; }
+/* the white arrow disc (once the case cursor) */
+.spiral-tag-go {
+  flex: none; display: grid; place-items: center;
+  width: 64px; height: 64px; border-radius: var(--r-pill);
+  background: #fff; color: var(--on-light); box-shadow: var(--shadow-s);
 }
-.case-cursor-dot svg { width: 24px; height: 24px; }
-.case-cursor.is-on .case-cursor-dot { transform: scale(1); opacity: 1; }
-@media (hover: none) { .case-cursor { display: none; } }
+.spiral-tag-go svg { width: 24px; height: 24px; }
+@media (hover: none) { .spiral-tag { display: none; } } /* touch has no hover: a tap opens the case */
+.card.is-hover .chip { transition-delay: calc(0.05s + var(--i) * 0.04s); }
 
 /* polka-dot field behind the hero (carterogunsola.com) */
 .dots { position: fixed; inset: 0; width: 100%; height: 100%; pointer-events: none; }
@@ -362,10 +427,10 @@ html.is-loaded .loader { display: none; }
 .case-close {
   position: sticky; top: var(--s-4); float: right; margin: var(--s-4) var(--s-4) 0 0; z-index: 3;
   width: var(--control-h); height: var(--control-h); border-radius: var(--r-pill);
-  background: var(--fill); display: grid; place-items: center; font-size: var(--fs-m);
+  background: var(--button); color: var(--ink); opacity: 1; display: grid; place-items: center; font-size: var(--fs-m);
   transition: background-color var(--dur-micro) var(--ease-ui), transform var(--dur-micro) var(--ease-ui);
 }
-.case-close:hover { background: rgba(0, 0, 0, 0.12); transform: rotate(90deg); }
+.case-close:hover { background: var(--button-hover); transform: rotate(90deg); }
 .case { padding: var(--s-24) clamp(var(--s-4), 4vw, var(--s-16)) var(--s-40); max-width: 1480px; margin: 0 auto; }
 .case-head { display: grid; gap: var(--s-6); margin-bottom: var(--s-16); }
 .case-title { font-size: var(--fs-2xl); line-height: var(--lh-display); letter-spacing: var(--ls-display); font-weight: 500; margin: 0; }
@@ -390,8 +455,16 @@ html.is-loaded .loader { display: none; }
 .case-link:hover .case-link-disc svg { transform: rotate(45deg); }
 /* metrics live inside the Outcomes panel of the story column; 48 is the one size outside the type scale (set apart like the About intro) */
 .metrics { margin-top: var(--s-3); }
-.metric { display: flex; justify-content: space-between; align-items: center; gap: var(--s-4); padding: var(--s-4) 0; border-top: 1px solid var(--line); }
+.metric { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: var(--s-4); padding: var(--s-4) 0; border-top: 1px solid var(--line); }
 .metric > span { color: var(--ink-2); }
+/* before → after: a hairline with a dot at each end, baseline under the left one, when under the right one */
+.metric-scale, .metric-note { grid-column: 1 / -1; }
+.metric-scale { display: flex; justify-content: space-between; position: relative; padding-top: var(--s-4); color: var(--ink-2); }
+.metric-scale i { position: absolute; left: 0; right: 0; top: 0; height: 1px; background: var(--line); }
+.metric-scale i::before, .metric-scale i::after { content: ''; position: absolute; top: -2px; width: 5px; height: 5px; border-radius: 50%; background: var(--ink-3); }
+.metric-scale i::before { left: 0; }
+.metric-scale i::after { right: 0; background: var(--ink); }
+.metric-note { color: var(--ink-3); }
 .metric b { font-size: var(--s-12); font-weight: 500; letter-spacing: var(--ls-display); line-height: 1; }
 .case-body { display: grid; grid-template-columns: minmax(0, 1fr) clamp(240px, 22vw, 320px); /* narrow story column like thegradient.com: more room for the visuals */ gap: clamp(var(--s-6), 3vw, var(--s-12)); align-items: start; }
 .case-media { display: grid; gap: var(--s-4); }
@@ -405,8 +478,8 @@ html.is-loaded .loader { display: none; }
 .acc { position: sticky; top: var(--s-24); }
 .acc-item { border-top: 1px solid var(--line); }
 .acc-item:first-of-type { border-top: 0; }
-.acc-btn { width: 100%; display: flex; justify-content: space-between; align-items: center; padding: var(--s-5) 0; text-align: left; }
-.acc-btn { min-height: 56px; } /* rows keep the taller Gradient-like height with the smaller mono label */
+/* rows keep the taller Gradient-like height (56) with the smaller mono label */
+.acc-btn { width: 100%; min-height: 56px; display: flex; justify-content: space-between; align-items: center; padding: var(--s-5) 0; text-align: left; }
 .acc-icon { position: relative; width: var(--s-3); height: var(--s-3); }
 .acc-icon::before, .acc-icon::after { content: ''; position: absolute; left: 0; top: calc(50% - 0.5px); width: 100%; height: 1px; background: currentColor; transition: transform 0.35s var(--ease-out); }
 .acc-icon::after { transform: rotate(90deg); }
@@ -415,6 +488,10 @@ html.is-loaded .loader { display: none; }
 .acc-panel p { margin: 0 0 var(--s-3); color: var(--ink-body); }
 .acc-panel p:last-child { margin-bottom: 0; padding-bottom: var(--s-6); }
 .acc-panel .metrics { margin-top: 0; }
+/* "my part" opens the Process panel: a mono role · team line, then one sentence */
+.acc-panel .mine { display: grid; gap: var(--s-2); margin-bottom: var(--s-3); }
+.acc-panel .mine > span { color: var(--ink-2); }
+.acc-panel .mine p { margin: 0; color: var(--ink); }
 .acc-item.is-open .acc-btn { color: var(--ink); }
 .acc-item:not(.is-open) .acc-btn { color: var(--ink-2); }
 @media (max-width: 900px) {
@@ -423,25 +500,39 @@ html.is-loaded .loader { display: none; }
 }
 
 /* ---------- services (leoleo.studio) ---------- */
-.services { box-sizing: border-box; padding: var(--s-16) var(--gutter); height: 100vh; height: 100dvh; overflow: hidden; display: grid; place-items: center; text-align: center; }
+.services { position: relative; z-index: 1; padding: var(--s-16) var(--gutter); height: 100vh; height: 100dvh; overflow: hidden; display: grid; place-items: center; text-align: center; }
 .svc-list { list-style: none; margin: 0; padding: 0; }
 /* items clip (overflow hidden for the reveal): keep room for descenders and for the 28px hover shift */
 .svc-item { padding-block: 0.04em; padding-inline: var(--s-8); }
 .svc-item a { display: block; font-size: clamp(36px, 4.76vw, 68px); /* --fs-xl − 15% (5.6vw → 4.76vw, 80 → 68), min snapped to the 4px grid */ line-height: 1.2; letter-spacing: var(--ls-display); font-weight: 400; transition: opacity 0.4s var(--ease-ui); }
 .svc-item a span { display: inline-block; will-change: transform; }
 .svc-list.is-hovering .svc-item:not(.is-hover) a { opacity: 0.22; }
-/* hover description rides the pointer like the old preview card: tilt, scale in/out */
-.svc-desc {
-  position: fixed; left: 0; top: 0; z-index: 20; margin: 0; pointer-events: none;
-  width: 440px; max-width: calc(100vw - 2 * var(--gutter)); padding: var(--s-4) var(--s-5) var(--s-4); border-radius: var(--r-l);
-  display: grid; gap: var(--s-3); text-align: left;
-  color: var(--ink); background: rgba(255, 255, 255, 0.4); box-shadow: var(--shadow-l);
+/* hover description rides the pointer like the old preview card: tilt, scale in/out. The same glass box as the Work
+   label (.spiral-tag); motion.ts hoverLabel moves both */
+.svc-desc, .spiral-tag {
+  position: fixed; left: 0; top: 0; z-index: 20; pointer-events: none;
+  width: 440px; max-width: calc(100vw - 2 * var(--gutter));
+  color: var(--ink); background: var(--glass-light); box-shadow: var(--shadow-l);
   /* via a variable: the CSS minifier otherwise drops the unprefixed property */
   --glass: blur(24px) saturate(1.4);
   backdrop-filter: var(--glass);
   -webkit-backdrop-filter: var(--glass);
   opacity: 0; transform: scale(0.6);
 }
+.svc-desc { margin: 0; padding: var(--s-4) var(--s-5) var(--s-4); border-radius: 24px; display: grid; gap: var(--s-3); text-align: left; }
+/* rainbow edge: a conic gradient spins behind a masked 2px ring, a blurred copy gives the glow */
+@property --svc-ang { syntax: '<angle>'; inherits: false; initial-value: 0deg; }
+.svc-desc::before, .svc-desc::after, .spiral-tag::before, .spiral-tag::after {
+  content: ''; position: absolute; inset: 0; border-radius: inherit; pointer-events: none;
+  background: conic-gradient(from var(--svc-ang), #F26D90, #FFB04D, #F2E85C, #5CD68A, #4DA3FF, #9B7BFF, #F26D90);
+  animation: svc-spin 4s linear infinite;
+}
+.svc-desc::before, .spiral-tag::before { padding: 2px; -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite: xor; mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0); }
+.svc-desc::after, .spiral-tag::after { z-index: -1; filter: blur(16px); opacity: 0.3; }
+@keyframes svc-spin { to { --svc-ang: 360deg; } }
+/* the spin repaints the edge and its blurred glow on the main thread every frame: it only runs while the box is shown */
+:is(.svc-desc, .spiral-tag):not(.is-on)::before, :is(.svc-desc, .spiral-tag):not(.is-on)::after,
+:is(.svc-desc, .spiral-tag):not(.is-on) .svc-caret::after { animation-play-state: paused; }
 .svc-desc-text { margin: 0; overflow: hidden; font-size: 16px; line-height: var(--lh-body); text-wrap: pretty; }
 .svc-caret { position: relative; display: inline-block; width: 0; height: 1em; vertical-align: text-bottom; }
 .svc-caret::after {
@@ -462,10 +553,12 @@ html.is-loaded .loader { display: none; }
   border-radius: var(--r-pill); background: var(--key); color: var(--on-dark); font-size: 16px; white-space: nowrap;
 }
 
-@media (max-width: 767px) { .svc-desc { display: none; } }
+/* phones: no hover box, and no room kept for the hover shift, so every service fits on one line */
+@media (max-width: 767px) { .svc-desc { display: none; } .svc-item { padding-inline: 0; } }
 
 /* ---------- about (laurent.fyi + joshpuckett.me) ---------- */
 .about { --about-sub: #6b6b70; --about-body: #3c3c40; position: relative; } /* local greys: AA on white, darker than --ink-2/-body */
+:root[data-theme='dark'] .about { --about-sub: #9a9aa0; --about-body: #c8c8cc; }
 .about-content { position: relative; z-index: 2; background: var(--bg); padding: 200px var(--gutter) var(--s-40); border-radius: 0 0 var(--r-l) var(--r-l); box-shadow: var(--shadow-l); } /* 200 = clear of the logo */
 .about-col { max-width: 800px; margin: 0 auto; display: grid; gap: var(--s-16); }
 /* two-tone intro: the name drops to grey */
@@ -546,6 +639,7 @@ html.is-loaded .loader { display: none; }
   padding: var(--s-40) var(--gutter) var(--s-16);
   overflow: hidden;
 }
+.hi::before { --grid-line: rgba(255, 255, 255, 0.06); } /* the Work/Services grid (.page--work::before), white on the dark space */
 .hi-links { position: relative; z-index: 2; display: flex; justify-content: center; gap: var(--s-6); color: var(--on-dark-2); }
 .hi-links a { font: 14px/var(--lh-ui) var(--font-mono); letter-spacing: 0; text-transform: lowercase; transition: color var(--dur-micro) var(--ease-ui); }
 .hi-links a:hover { color: var(--on-dark); }
@@ -564,6 +658,7 @@ html.is-loaded .loader { display: none; }
 
 /* ---------- design lab ---------- */
 .page--lab { background: transparent; }
+html:has(> body.is-lab) { overscroll-behavior-y: none; } /* its pull up to go back must not also pull to refresh (Android) */
 .lab-ceiling { will-change: transform; contain: paint; position: relative; height: 50vh; overflow: hidden; z-index: 2; border-radius: 0 0 var(--r-l) var(--r-l); }
 .lab-ceiling-inner { will-change: transform; position: absolute; left: 0; right: 0; bottom: 0; height: 100vh; background: var(--bg); }
 .lab-ceiling-inner > .page { position: absolute !important; inset: 0; min-height: 0; pointer-events: none; overflow: hidden; }
@@ -590,6 +685,7 @@ html.is-loaded .loader { display: none; }
     scroll-behavior: auto !important;
   }
   .svc-caret::after { animation: none; }
+  .svc-desc::before, .svc-desc::after, .spiral-tag::before, .spiral-tag::after { animation: none; }
 }
 
 /* old page kept as the Lab ceiling */

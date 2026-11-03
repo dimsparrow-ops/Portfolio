@@ -1,5 +1,5 @@
 import Lenis from 'lenis';
-import { gsap, ScrollTrigger, ease, dur, reduced } from './motion';
+import { gsap, ScrollTrigger, ease, dur, reduced, onReducedChange } from './motion';
 import { initWork, type WorkApi, type View, type Filter } from './work';
 import { openCase, closeCase, caseIsOpen } from './case';
 import { initServices, initAbout, initLab } from './pages';
@@ -15,11 +15,17 @@ type PageId = (typeof ORDER)[number];
 let lenis: Lenis;
 let current: { id: PageId; el: HTMLElement; destroy: () => void } | null = null;
 let work: WorkApi | null = null;
+// Work while you are down in the Lab: its live page is the Lab's ceiling, and climbing back brings that same page
+// down again, so the stage carries on from where it was instead of loading and playing its intro again
+let parked: { el: HTMLElement; work: WorkApi; destroy: () => void } | null = null;
 let busy = false;
 let caseFromPush = false;
 
 const store = {
-  get view(): View { try { return (sessionStorage.getItem('view') as View) || 'showcase'; } catch { return 'showcase'; } },
+  get view(): View {
+    // grid is hidden for now, so a stored grid falls back to the spiral too
+    try { const v = sessionStorage.getItem('view') as View | null; return v && v !== 'grid' ? v : 'spiral'; } catch { return 'spiral'; }
+  },
   set view(v: View) { try { sessionStorage.setItem('view', v); } catch {} },
   get filter(): Filter { try { return (sessionStorage.getItem('filter') as Filter) || 'all'; } catch { return 'all'; } },
   set filter(f: Filter) { try { sessionStorage.setItem('filter', f); } catch {} },
@@ -62,12 +68,13 @@ const pageOf = (path: string): PageId => {
 function mount(id: PageId, el: HTMLElement, entering: boolean) {
   let destroy = () => {};
   if (id === 'work') {
-    work = initWork(el, { view: store.view, filter: 'all', onOpen: (slug) => go(`/work/${slug}/`) });
+    const w = initWork(el, { view: store.view, filter: 'all', onOpen: (slug) => go(`/work/${slug}/`) });
+    work = w;
     destroy = () => {
-      work?.destroy();
-      work = null;
+      w.destroy();
+      if (work === w) work = null;
     };
-  } else if (id === 'services') destroy = initServices(el, entering);
+  } else if (id === 'services') destroy = initServices(el);
   else if (id === 'about') destroy = initAbout(el);
   else if (id === 'lab') {
     load(labReturn); // warm the page we climb back to so the ascent starts with no fetch delay
@@ -94,15 +101,22 @@ function updateNav(id: PageId, animate: boolean) {
 }
 
 // ---------- transitions ----------
-function slide(oldEl: HTMLElement, newEl: HTMLElement, dir: 1 | -1) {
+// both pages go fixed for the move: the old one keeps showing where it was scrolled to, the new one joins #pages above
+// it (below, for the Lab's descent) and the window jumps to the top. Returns where the old page was scrolled to
+function beginTransit(oldEl: HTMLElement, newEl: HTMLElement, newOnTop: boolean) {
   const y = window.scrollY;
   oldEl.classList.add('is-transit');
   oldEl.scrollTop = y;
-  oldEl.style.zIndex = '1';
+  oldEl.style.zIndex = newOnTop ? '1' : '2';
   newEl.classList.add('is-transit');
-  newEl.style.zIndex = '2';
+  newEl.style.zIndex = newOnTop ? '2' : '1';
   document.getElementById('pages')!.appendChild(newEl);
   lenis.scrollTo(0, { immediate: true, force: true });
+  return y;
+}
+
+function slide(oldEl: HTMLElement, newEl: HTMLElement, dir: 1 | -1) {
+  beginTransit(oldEl, newEl, true);
   return gsap
     .timeline()
     .fromTo(newEl, { xPercent: 100 * dir }, { xPercent: 0, duration: dur.page, ease: ease.inOut }, 0)
@@ -116,15 +130,8 @@ function slide(oldEl: HTMLElement, newEl: HTMLElement, dir: 1 | -1) {
 
 /** Reverse of descend: the page you came from drops back down over the lab. */
 function ascend(labEl: HTMLElement, newEl: HTMLElement) {
-  const y = window.scrollY;
-  labEl.classList.add('is-transit');
-  labEl.scrollTop = y;
-  labEl.style.zIndex = '1';
-  newEl.classList.add('is-transit');
-  newEl.style.zIndex = '2';
+  beginTransit(labEl, newEl, true);
   newEl.style.overflow = 'hidden';
-  document.getElementById('pages')!.appendChild(newEl);
-  lenis.scrollTo(0, { immediate: true, force: true });
   // pick up from the pulled-down ceiling so the incoming page starts exactly where it hangs (no jump)
   const ceiling = labEl.querySelector<HTMLElement>('[data-ceiling]');
   const pulled = ceiling ? Number(gsap.getProperty(ceiling, 'y')) || 0 : 0;
@@ -142,16 +149,9 @@ function ascend(labEl: HTMLElement, newEl: HTMLElement) {
 }
 
 function descend(oldEl: HTMLElement, labEl: HTMLElement) {
-  const y = window.scrollY;
-  oldEl.classList.add('is-transit');
-  oldEl.scrollTop = y;
-  oldEl.style.zIndex = '2';
+  const y = beginTransit(oldEl, labEl, false);
   oldEl.style.overflow = 'hidden';
   gsap.set(oldEl, { borderBottomLeftRadius: 32, borderBottomRightRadius: 32 });
-  labEl.classList.add('is-transit');
-  labEl.style.zIndex = '1';
-  document.getElementById('pages')!.appendChild(labEl);
-  lenis.scrollTo(0, { immediate: true, force: true });
   const body = labEl.querySelector<HTMLElement>('.lab-body')!;
   const inner = labEl.querySelector<HTMLElement>('[data-ceiling-inner]')!;
   return gsap
@@ -237,11 +237,25 @@ async function navigate(href: string, push: boolean, mode?: 'ascend') {
     location.href = href;
     return;
   }
-  const newEl = document.importNode(fresh, true);
+  let newEl = document.importNode(fresh, true);
   const oldEl = current.el;
   const from = current.id;
   if (target === 'lab') labReturn = norm(location.pathname);
-  current.destroy();
+  if (target === 'lab' && from === 'work' && work) {
+    // Work keeps moving while it rises into the ceiling (it only stops listening to the pointer)
+    parked = { el: oldEl, work, destroy: current.destroy };
+    work.ambient(true);
+    work = null;
+  } else current.destroy();
+  // back to Work from the Lab: take the parked page out of the ceiling instead of a fresh copy (not named `back`: that
+  // would shadow back() for the case overlay's onClose above, which then throws)
+  const unparked = target === 'work' && from === 'lab' && parked ? parked : null;
+  if (unparked) {
+    parked = null;
+    unparked.el.inert = false;
+    unparked.el.classList.remove('is-ceiling');
+    newEl = unparked.el;
+  }
   if (push) history.pushState({}, '', path + url.hash);
   document.title = doc.title;
 
@@ -254,9 +268,21 @@ async function navigate(href: string, push: boolean, mode?: 'ascend') {
       : mode === 'ascend' || (from === 'lab' && !push && path === labReturn)
         ? ascend(oldEl, newEl)
         : slide(oldEl, newEl, dir);
-  mount(target, newEl, true);
-  if (target === 'work') work?.intro(0.35);
+  if (unparked) {
+    current = { id: 'work', el: newEl, destroy: unparked.destroy };
+    work = unparked.work;
+    work.ambient(false);
+    document.body.dataset.page = 'work';
+  } else {
+    mount(target, newEl, true);
+    if (target === 'work') work?.intro(0.35);
+  }
   await tl.then();
+  // left the Lab for another page: the parked Work went with the Lab's ceiling
+  if (from === 'lab' && target !== 'lab' && parked) {
+    parked.destroy();
+    parked = null;
+  }
   ScrollTrigger.refresh();
   busy = false;
   // new page: move focus into it so keyboard and screen-reader users start from the top
@@ -316,6 +342,7 @@ function runLoader(): Promise<void> {
 // ---------- boot ----------
 export function boot() {
   lenis = new Lenis({ lerp: 0.1, smoothWheel: !reduced });
+  onReducedChange((r) => (lenis.options.smoothWheel = !r));
   gsap.ticker.add((t) => lenis.raf(t * 1000));
   gsap.ticker.lagSmoothing(0);
   lenis.on('scroll', ScrollTrigger.update);

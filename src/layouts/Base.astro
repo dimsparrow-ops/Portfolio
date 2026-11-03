@@ -20,6 +20,8 @@ const fullTitle = title ? `${title} — Dim` : 'Dim';
     <script is:inline>
       // Loader shows once per browser session; later visits land directly.
       try { if (sessionStorage.getItem('seen')) document.documentElement.classList.add('is-loaded', 'skip-intro'); } catch (e) {}
+      // theme before first paint (the switcher top-right stores it), so a dark visit never flashes white
+      try { if (localStorage.getItem('theme') === 'dark') { document.documentElement.dataset.theme = 'dark'; document.querySelector('meta[name="theme-color"]')?.setAttribute('content', '#161618'); } } catch (e) {}
     </script>
   </head>
   <body class:list={[`is-${page}`]} data-page={page}>
@@ -32,16 +34,44 @@ const fullTitle = title ? `${title} — Dim` : 'Dim';
     </div>
 
     <a class="logo" href="/" data-route aria-label={`${site.name} — home`}></a>
+    <button class="theme-switch" type="button" data-theme-switch aria-label="Switch to dark theme">
+      <span class="is-sun" aria-hidden="true"><svg viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="5"/><path d="M11 1h2v4h-2zM11 19h2v4h-2zM1 11h4v2H1zM19 11h4v2h-4zM4.22 5.64l1.42-1.42 2.83 2.83-1.42 1.42zM15.54 16.95l1.41-1.41 2.83 2.83-1.41 1.41zM4.22 18.36l2.83-2.83 1.42 1.42-2.83 2.83zM15.54 7.05l2.83-2.83 1.41 1.41-2.83 2.83z"/></svg></span>
+      <span class="is-moon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12.59 3.52A8.5 8.5 0 1 0 20.4 10.68A5.5 5.5 0 0 1 12.59 3.52Z"/></svg></span>
+    </button>
+    <script is:inline>
+      (() => {
+        const root = document.documentElement;
+        const btn = document.querySelector('[data-theme-switch]');
+        const meta = document.querySelector('meta[name="theme-color"]');
+        const sync = () => {
+          const dark = root.dataset.theme === 'dark';
+          btn.setAttribute('aria-label', dark ? 'Switch to light theme' : 'Switch to dark theme');
+          meta?.setAttribute('content', dark ? '#161618' : '#ffffff');
+        };
+        sync();
+        btn.addEventListener('click', () => {
+          const dark = root.dataset.theme !== 'dark';
+          root.classList.add('theme-fade');
+          if (dark) root.dataset.theme = 'dark';
+          else delete root.dataset.theme;
+          try { localStorage.setItem('theme', dark ? 'dark' : 'light'); } catch (e) {}
+          sync();
+          clearTimeout(btn._t);
+          btn._t = setTimeout(() => root.classList.remove('theme-fade'), 450);
+        });
+      })();
+    </script>
     <div class="shell">
 
       <div class="ctrl ctrl--view" role="group" aria-label="View">
-        <button type="button" data-view="showcase" class="is-active">showcase</button>
-        <button type="button" data-view="grid">grid</button>
+        <button type="button" data-view="spiral" class="is-active">spiral</button>
+        <button type="button" data-view="showcase">circle</button>
         <button type="button" data-view="slider">slider</button>
+        {/* grid hidden for now — restore: <button type="button" data-view="grid">grid</button> */}
       </div>
       <div class="ctrl ctrl--filter" role="group" aria-label="Space">
         <button type="button" class="is-active" aria-current="page">cases</button>
-        <a href="/lab/" data-route data-lab-link><svg class="ctrl-ico" viewBox="0 0 48 48" aria-hidden="true" fill="currentColor"><path d="M22.14 6c-.46-.26-1.01-.26-1.46 0L9.31 12.7c-.55.33-.89.91-.89 1.56v13.58c0 .88.96 1.43 1.72.98l11.83-6.98c.55-.33.89-.92.89-1.56V7.26c0-.53-.27-1-.73-1.26Z"/><path d="M39.59 32.61c0-.14-.04-.27-.1-.39-.07-.17-.2-.29-.35-.37l-13.77-8.02c-.24-.14-.54.03-.54.31v2.89c0 .13.07.25.18.31l10.78 6.28-5.54 3.23-10-5.82c-.14-.08-.31.02-.31.18v2.72c0 .21.11.41.29.51l7.05 4.13-3.06 1.78c-.09.05-.2.05-.29 0l-7.9-4.6 2.26-1.34c.18-.11.29-.3.29-.51v-3.59c0-.11.06-.21.15-.27l4.42-2.62c.11-.06.18-.18.18-.31v-2.98c0-.28-.3-.45-.54-.31L9.01 31.85c-.59.35-.58 1.21 0 1.56l14.14 8.23c.29.17.61.26.93.26s.63-.08.91-.25l6.75-3.93 5.54-3.23 1.85-1.08c.14-.09.24-.2.32-.33.06-.12.1-.26.1-.39v-.08Z"/></svg>design lab</a>
+        <a href="/lab/" data-route><svg class="ctrl-ico" viewBox="0 0 48 48" aria-hidden="true" fill="currentColor"><path d="M22.14 6c-.46-.26-1.01-.26-1.46 0L9.31 12.7c-.55.33-.89.91-.89 1.56v13.58c0 .88.96 1.43 1.72.98l11.83-6.98c.55-.33.89-.92.89-1.56V7.26c0-.53-.27-1-.73-1.26Z"/><path d="M39.59 32.61c0-.14-.04-.27-.1-.39-.07-.17-.2-.29-.35-.37l-13.77-8.02c-.24-.14-.54.03-.54.31v2.89c0 .13.07.25.18.31l10.78 6.28-5.54 3.23-10-5.82c-.14-.08-.31.02-.31.18v2.72c0 .21.11.41.29.51l7.05 4.13-3.06 1.78c-.09.05-.2.05-.29 0l-7.9-4.6 2.26-1.34c.18-.11.29-.3.29-.51v-3.59c0-.11.06-.21.15-.27l4.42-2.62c.11-.06.18-.18.18-.31v-2.98c0-.28-.3-.45-.54-.31L9.01 31.85c-.59.35-.58 1.21 0 1.56l14.14 8.23c.29.17.61.26.93.26s.63-.08.91-.25l6.75-3.93 5.54-3.23 1.85-1.08c.14-.09.24-.2.32-.33.06-.12.1-.26.1-.39v-.08Z"/></svg>design lab</a>
       </div>
 
       <nav class="nav" aria-label="Main">
@@ -51,13 +81,11 @@ const fullTitle = title ? `${title} — Dim` : 'Dim';
             {p.label}
           </a>
         ))}
-        <a class="sayhi-btn" href="/about/#say-hi" data-route data-sayhi aria-keyshortcuts="Enter" title="Say hi (Enter)"><span class="arrow" aria-hidden="true">↳</span> <span class="sayhi-label">Say hi</span></a>
+        <a class="sayhi-btn" href="/about/#say-hi" data-route aria-keyshortcuts="Enter" title="Say hi (Enter)"><span class="arrow" aria-hidden="true">↳</span> <span class="sayhi-label">Say hi</span></a>
       </nav>
     </div>
 
     <div id="pages"><slot /></div>
-
-    <div class="case-cursor" data-case-cursor aria-hidden="true"><span class="case-cursor-dot"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17 17 7M9 7h8v8"/></svg></span></div>
 
     <div class="case-layer" aria-hidden="true">
       <div class="case-backdrop" data-case-close></div>

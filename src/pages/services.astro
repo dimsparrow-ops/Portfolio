@@ -7,8 +7,8 @@ import { services, site } from '../data/site';
     <section class="services">
       <h1 class="sr-only">Services</h1>
       <ul class="svc-list" data-svc-list>
-        {services.map((s, i) => (
-          <li class="svc-item" data-text={s.text} data-i={i}>
+        {services.map((s) => (
+          <li class="svc-item" data-text={s.text}>
             <a href={`mailto:${site.email}`} aria-label={`${s.title} — email me`}><span>{s.title}</span></a>
           </li>
         ))}

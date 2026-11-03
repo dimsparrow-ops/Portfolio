@@ -18,13 +18,10 @@ sections:
     text: "BluePallet is an end-to-end industrial commerce platform for search, logistics, transactions and everything in between. It works like an e-commerce hub that combines a marketplace with a networking platform, covering the whole chemical procurement cycle: sourcing, negotiation, fulfilment and financing.\n\nWe helped Bluepallet redefine the product and embrace new features."
     media:
       - { kind: image, src: "/work/bluepallet/m1.webp", alt: "Activity feed" }
-  reasoning:
-    text: "The main task was to rebuild navigation around the needs of both buyers and sellers while keeping every transaction regulation-compliant. A chemical marketplace needs tailored features, so the work also covered price negotiation, user interaction strategy and an upgraded networking system."
+  approach:
+    text: "The main task was to rebuild navigation around the needs of both buyers and sellers while keeping every transaction regulation-compliant. A chemical marketplace needs tailored features, so the work also covered price negotiation, user interaction strategy and an upgraded networking system.\n\nWe analysed what buyers and sellers each need, defined the core features and redesigned navigation so every feature is easy to reach. At the centre is a complex price book: dynamic pricing that adjusts in real time to volume, delivery location and other conditions, keeping deals transparent and fair.\n\nInteractive prototypes went through usability testing with buyers and sellers, and we iterated on their feedback before preparing the launch and onboarding materials."
     media:
       - { kind: image, src: "/work/bluepallet/m2.webp", alt: "Marketing pages" }
-  process:
-    text: "We analysed what buyers and sellers each need, defined the core features and redesigned navigation so every feature is easy to reach. At the centre is a complex price book: dynamic pricing that adjusts in real time to volume, delivery location and other conditions, keeping deals transparent and fair.\n\nInteractive prototypes went through usability testing with buyers and sellers, and we iterated on their feedback before preparing the launch and onboarding materials."
-    media:
       - { kind: image, src: "/work/bluepallet/m3.webp", alt: "Listings" }
       - { kind: image, src: "/work/bluepallet/m4.webp", alt: "Mobile screens" }
       - { kind: image, src: "/work/bluepallet/m5.webp", alt: "Mobile screens" }

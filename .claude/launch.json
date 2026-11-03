@@ -1,0 +1,38 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "dev",
+      "runtimeExecutable": "/Users/dimsi/.nvm/versions/node/v22.23.4/bin/npm",
+      "runtimeArgs": [
+        "run",
+        "dev"
+      ],
+      "port": 4321,
+      "env": {
+        "PATH": "/Users/dimsi/.nvm/versions/node/v22.23.4/bin:/usr/local/bin:/usr/bin:/bin"
+      }
+    },
+    {
+      "name": "dev-attach",
+      "port": 4321,
+      "url": "http://localhost:4321"
+    },
+    {
+      "name": "dev-spiral",
+      "runtimeExecutable": "/Users/dimsi/.nvm/versions/node/v22.23.4/bin/npm",
+      "runtimeArgs": [
+        "run",
+        "dev",
+        "--",
+        "--ignore-lock",
+        "--port",
+        "4322"
+      ],
+      "port": 4322,
+      "env": {
+        "PATH": "/Users/dimsi/.nvm/versions/node/v22.23.4/bin:/usr/local/bin:/usr/bin:/bin"
+      }
+    }
+  ]
+}

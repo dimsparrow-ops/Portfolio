@@ -1,4 +1,4 @@
-import { gsap, ScrollTrigger, ease, dur, stagger, reduced, RISE, splitWords } from './motion';
+import { gsap, ScrollTrigger, ease, dur, stagger, reduced, RISE, rise, splitWords, typer, hoverLabel } from './motion';
 
 // hover-driven effects only make sense with a real pointer (taps fire pointerenter too)
 const finePointer = () => window.matchMedia('(hover: hover) and (pointer: fine)').matches;
@@ -6,77 +6,25 @@ const finePointer = () => window.matchMedia('(hover: hover) and (pointer: fine)'
 type Destroy = () => void;
 
 /** Services (leoleo.studio): big list, hovered line shifts, preview follows cursor. */
-export function initServices(root: HTMLElement, entering: boolean): Destroy {
+export function initServices(root: HTMLElement): Destroy {
   const list = root.querySelector<HTMLElement>('[data-svc-list]')!;
   const desc = root.querySelector<HTMLElement>('[data-svc-desc]')!;
-  const typed = desc.querySelector<HTMLElement>('[data-svc-typed]')!;
-  const para = typed.parentElement!;
-  const type = { n: 0 };
-  let target = 0;
-  // the paragraph height is tweened so a new line eases the box open instead of snapping
-  const fit = () => {
-    const cur = para.offsetHeight;
-    para.style.height = 'auto';
-    const h = para.offsetHeight;
-    para.style.height = `${cur}px`;
-    if (h === target) return;
-    target = h;
-    gsap.to(para, { height: h, duration: 0.4, ease: ease.out, overwrite: true });
-  };
-  // once typing ends, hand the height back to the content so nothing can stay clipped
-  const settle = () => {
-    const cur = para.offsetHeight;
-    gsap.killTweensOf(para);
-    para.style.height = 'auto';
-    const h = para.offsetHeight;
-    gsap.fromTo(para, { height: cur }, { height: h, duration: 0.3, ease: ease.out, onComplete: () => { para.style.height = 'auto'; } });
-  };
   // typed live on hover; the box grows line by line with the text
-  const write = (full: string) => {
-    gsap.killTweensOf(type);
-    const text = full.replace(/\.$/, '');
-    const put = () => {
-      const n = Math.round(type.n);
-      typed.textContent = text.slice(0, n);
-      fit();
-    };
-    type.n = reduced ? text.length : 0;
-    gsap.killTweensOf(para);
-    para.style.height = 'auto';
-    target = 0;
-    put();
-    if (reduced) return;
-    // ~170 chars/s, far quicker than reading speed, capped so long texts stay snappy
-    gsap.to(type, { n: text.length, duration: Math.min(text.length / 170, 1.1), ease: 'none', delay: 0.12, onUpdate: put, onComplete: settle });
-  };
+  const { write, kill } = typer(desc.querySelector<HTMLElement>('[data-svc-typed]')!);
   const items = Array.from(list.querySelectorAll<HTMLElement>('.svc-item'));
-
-  const xTo = gsap.quickTo(desc, 'x', { duration: dur.base, ease: ease.out });
-  const yTo = gsap.quickTo(desc, 'y', { duration: dur.base, ease: ease.out });
-  const rTo = gsap.quickTo(desc, 'rotation', { duration: 0.8, ease: ease.out });
-  let lastX = 0;
-
   const spans = items.map((it) => it.querySelector<HTMLElement>('span')!);
   // same masked word rise as About: line by line, words inside each line
-  const words = items.map((it, i) => splitWords(spans[i]));
+  const words = spans.map(splitWords);
   if (!reduced) {
     gsap.set(words.flat(), { yPercent: 110 });
-    const tl = gsap.timeline({ defaults: { ease: RISE.ease }, delay: 0.1 });
-    words.forEach((line, i) =>
-      tl.to(line, { yPercent: 0, duration: RISE.dur, stagger: Math.min(stagger.word, 0.3 / line.length) }, i * 0.09),
-    );
+    const tl = gsap.timeline({ delay: 0.1 });
+    words.forEach((line, i) => tl.to(line, rise(line, 0.3), i * 0.09));
   }
+  if (!finePointer()) return () => gsap.killTweensOf([...spans, ...words.flat()]);
 
-  const onMove = (e: PointerEvent) => {
-    // follows the pointer, kept inside the viewport
-    const w = desc.offsetWidth;
-    const h = desc.offsetHeight;
-    xTo(gsap.utils.clamp(16, window.innerWidth - w - 16, e.clientX + 24));
-    yTo(gsap.utils.clamp(16, window.innerHeight - h - 96, e.clientY - 90));
-    rTo(reduced ? 0 : gsap.utils.clamp(-10, 10, (e.clientX - lastX) * 0.6));
-    lastX = e.clientX;
-  };
-  if (!finePointer()) return () => gsap.killTweensOf([spans, ...words]);
+  const ABOVE = 90; // px the box hangs above the pointer
+  const tag = hoverLabel(desc, (y) => y - ABOVE);
+  const onMove = (e: PointerEvent) => tag.follow(e.clientX, e.clientY);
   const offs = items.map((it, i) => {
     const span = spans[i];
     const enter = () => {
@@ -84,24 +32,22 @@ export function initServices(root: HTMLElement, entering: boolean): Destroy {
       list.classList.add('is-hovering');
       it.classList.add('is-hover');
       write(it.dataset.text ?? '');
-      gsap.to(span, { x: 28, duration: dur.base, ease: ease.out });
-      gsap.to(desc, { opacity: 1, scale: 1, duration: 0.45, ease: ease.out });
+      // overwrite: a quick flick in and out would otherwise leave this longer show tween running past the hide
+      gsap.to(span, { x: 28, duration: dur.base, ease: ease.out, overwrite: 'auto' });
+      tag.show();
     };
     const leave = () => {
       it.classList.remove('is-hover');
       list.classList.remove('is-hovering');
-      gsap.to(span, { x: 0, duration: dur.base, ease: ease.out });
-      gsap.to(desc, { opacity: 0, scale: 0.6, duration: 0.3, ease: ease.ui });
+      gsap.to(span, { x: 0, duration: dur.base, ease: ease.out, overwrite: 'auto' });
+      tag.hide();
     };
-    // keyboard: focusing a line shows the same preview, parked next to it (no pointer to follow)
+    // keyboard: focusing a line shows the same preview, parked beside it with its top 24px above the line
     const link = it.querySelector<HTMLElement>('a')!;
     const onFocus = () => {
       if (!link.matches(':focus-visible')) return;
       const r = span.getBoundingClientRect();
-      const w = desc.offsetWidth;
-      const h = desc.offsetHeight;
-      xTo(gsap.utils.clamp(16, window.innerWidth - w - 16, r.right + 24));
-      yTo(gsap.utils.clamp(16, window.innerHeight - h - 96, r.top - 24));
+      tag.follow(r.right, r.top - 24 + ABOVE);
       enter();
     };
     it.addEventListener('pointerenter', enter);
@@ -119,20 +65,31 @@ export function initServices(root: HTMLElement, entering: boolean): Destroy {
   return () => {
     window.removeEventListener('pointermove', onMove);
     offs.forEach((f) => f());
-    gsap.killTweensOf([desc, type, para, ...spans, ...words]);
+    kill();
+    tag.kill();
+    gsap.killTweensOf([...spans, ...words.flat()]);
   };
 }
 
-/** About: timeline reveals + "Say hi" uncovered from under the content, rubber letters. */
+/** About: the word reveals, the Listening to deck, the AI sparkles, SUMMON ME and the Say hi key. */
 export function initAbout(root: HTMLElement): Destroy {
-  const triggers: ScrollTrigger[] = [];
+  const offs = [initSummon(root), initSparks(root)];
+  const deck = initDeck(root);
+  // the reveals split the words only now: initDeck rewrites the track text, which would wipe the masks
+  offs.push(deck.stop, initReveals(root, deck.burst), initSayHiKey(root));
+  return () => offs.forEach((off) => off());
+}
+
+/** SUMMON ME (soscalemedia.se): sits under the content, fitted to the width; its letters rise as it is uncovered. */
+function initSummon(root: HTMLElement): Destroy {
   const hi = root.querySelector<HTMLElement>('.hi')!;
   const word = root.querySelector<HTMLElement>('[data-hi]')!;
   const letters = Array.from(word.querySelectorAll<HTMLElement>('span:not(.sp)'));
 
-  // fit the word to the viewport width (soscalemedia.se)
+  // fit the word to the viewport width
   let fitRaf = 0;
   const fit = () => {
+    if (!word.isConnected) return; // fonts can settle after the page has gone
     word.style.fontSize = '30vw';
     const first = word.firstElementChild!.getBoundingClientRect();
     const last = word.lastElementChild!.getBoundingClientRect();
@@ -152,21 +109,20 @@ export function initAbout(root: HTMLElement): Destroy {
   // letters rise as the section is uncovered
   gsap.set(letters, { yPercent: 30, scaleY: 0.4 });
   let risen = false; // dock stays idle until the rise ends, so the two never fight over scale
-  triggers.push(
-    ScrollTrigger.create({
-      trigger: hi,
-      start: 'top 70%',
-      once: true,
-      onEnter: () =>
-        // no overwrite: 'auto' here, it would kill the dock's quickTo tweens on the same letters
-        gsap.to(letters, {
-          yPercent: 0, scaleY: 1, duration: 0.9, ease: 'elastic.out(1, 0.5)', stagger: 0.04,
-          onComplete: () => (risen = true),
-        }),
-    }),
-  );
+  const trigger = ScrollTrigger.create({
+    trigger: hi,
+    start: 'top 70%',
+    once: true,
+    onEnter: () =>
+      // no overwrite: 'auto' here, it would kill the dock's quickTo tweens on the same letters
+      gsap.to(letters, {
+        yPercent: 0, scaleY: 1, duration: 0.9, ease: 'elastic.out(1, 0.5)', stagger: 0.04,
+        onComplete: () => (risen = true),
+      }),
+  });
 
-  // dock magnification (macOS Dock): letters near the pointer grow taller
+  // dock magnification (macOS Dock): the letter under the pointer shoots up (+75%), a tight falloff lifts its
+  // neighbours only a little (~+10%) and the rest stay put
   const to = letters.map((l) => ({
     sy: gsap.quickTo(l, 'scaleY', { duration: 0.35, ease: 'power3' }),
     sx: gsap.quickTo(l, 'scaleX', { duration: 0.35, ease: 'power3' }),
@@ -175,10 +131,10 @@ export function initAbout(root: HTMLElement): Destroy {
     if (!risen) return;
     letters.forEach((l, i) => {
       const r = l.getBoundingClientRect();
-      const d = (e.clientX - (r.left + r.width / 2)) / (r.width * 1.4);
+      const d = (e.clientX - (r.left + r.width / 2)) / (r.width * 0.7);
       const inf = Math.exp(-d * d);
-      to[i].sy(1 + 0.4 * inf);
-      to[i].sx(1 + 0.06 * inf);
+      to[i].sy(1 + 0.75 * inf);
+      to[i].sx(1 + 0.08 * inf);
     });
   };
   // return through the same quickTo tweens (overwriting them would kill the dock for good)
@@ -188,85 +144,96 @@ export function initAbout(root: HTMLElement): Destroy {
     hi.addEventListener('pointermove', onMove);
     hi.addEventListener('pointerleave', onLeave);
   }
+  return () => {
+    trigger.kill();
+    hi.removeEventListener('pointermove', onMove);
+    hi.removeEventListener('pointerleave', onLeave);
+    cancelAnimationFrame(fitRaf);
+    window.removeEventListener('resize', onResize);
+    gsap.killTweensOf(letters);
+  };
+}
 
-  const stopSparks = initSparks(root);
-  const deck = initDeck(root);
-
-  // one reveal language for the whole page (lorenzodossi.com): words rise out of their own masks.
-  // Runs after initDeck, which rewrites the track text and would wipe the masks.
-  if (!reduced) {
-    // one timing for everything that appears here: intro, Listening to (divider, text, record), timeline (RISE, shared with Services)
-    const intro = root.querySelector<HTMLElement>('[data-words]')!;
-    const iw = splitWords(intro);
-    gsap.fromTo(iw, { yPercent: 110 }, { yPercent: 0, duration: RISE.dur, ease: RISE.ease, stagger: Math.min(stagger.word, 1.2 / iw.length), delay: 0.1 });
-    // blocks below start as they scroll in; long paragraphs get a tighter stagger so they never drag
-    const rise = (els: HTMLElement[], at: gsap.TweenTarget) => {
-      const words = els.flatMap(splitWords);
-      gsap.set(words, { yPercent: 110 });
-      triggers.push(
-        ScrollTrigger.create({
-          trigger: at as Element,
-          start: 'top 92%',
-          once: true,
-          onEnter: () =>
-            gsap.to(words, { yPercent: 0, duration: RISE.dur, ease: RISE.ease, stagger: Math.min(stagger.word, RISE.span / words.length) }),
-        }),
-      );
-    };
-    const now = root.querySelector<HTMLElement>('.now');
-    if (now) {
-      // divider draws left to right, the sleeve is set down, then the record slides out of it already spinning
-      const words = Array.from(now.querySelectorAll<HTMLElement>('.now-label, .track p')).flatMap(splitWords);
-      const line = now.querySelector<HTMLElement>('.now-line')!;
-      const deckEl = now.querySelector<HTMLElement>('.deck')!;
-      const vinyl = now.querySelector<HTMLElement>('.vinyl')!;
-      const slot = parseFloat(getComputedStyle(deckEl).getPropertyValue('--slot')) || 48;
-      gsap.set(words, { yPercent: 110 });
-      gsap.set(line, { scaleX: 0 });
-      gsap.set(deckEl, { opacity: 0, y: 32, rotate: -5, transformOrigin: '0% 100%' });
-      gsap.set(vinyl, { opacity: 0, x: -slot, rotate: -240 });
-      triggers.push(
-        ScrollTrigger.create({
-          trigger: now,
-          start: 'top 92%',
-          once: true,
-          onEnter: () => {
-            const tl = gsap.timeline({ defaults: { ease: RISE.ease } });
-            tl.to(line, { scaleX: 1, duration: RISE.dur }, 0)
-              .to(words, { yPercent: 0, duration: RISE.dur, stagger: Math.min(stagger.word, RISE.span / words.length) }, 0.1)
-              .to(deckEl, { opacity: 1, y: 0, rotate: 0, duration: RISE.dur }, 0.1)
-              .set(vinyl, { opacity: 1 }, 0.5) // still hidden under the sleeve here
-              .to(vinyl, { x: 0, rotate: 0, duration: RISE.dur + 0.3 }, 0.5)
-              .add(deck.burst, 0.5)
-              .add(() => gsap.set([deckEl, vinyl], { clearProps: 'transform,opacity' })); // hover/pulled transforms are CSS
-          },
-        }),
-      );
-    }
-    root.querySelectorAll<HTMLElement>('.tl-item').forEach((li) => {
-      rise(Array.from(li.querySelectorAll<HTMLElement>('.tl-when, .tl-company, .tl-role, p')), li);
-    });
+/**
+ * One reveal language for the whole page (lorenzodossi.com): words rise out of their own masks, with one timing for
+ * everything that appears here: intro, Listening to (divider, text, record), timeline (RISE, shared with Services).
+ */
+function initReveals(root: HTMLElement, burst: () => void): Destroy {
+  if (reduced) return () => {};
+  const triggers: ScrollTrigger[] = [];
+  const iw = splitWords(root.querySelector<HTMLElement>('[data-words]')!);
+  gsap.fromTo(iw, { yPercent: 110 }, { ...rise(iw, 1.2), delay: 0.1 });
+  // blocks below start as they scroll in; long paragraphs get a tighter stagger so they never drag
+  const riseOnScroll = (els: HTMLElement[], at: Element) => {
+    const words = els.flatMap(splitWords);
+    gsap.set(words, { yPercent: 110 });
+    triggers.push(ScrollTrigger.create({ trigger: at, start: 'top 92%', once: true, onEnter: () => gsap.to(words, rise(words)) }));
+  };
+  const now = root.querySelector<HTMLElement>('.now');
+  if (now) {
+    // divider draws left to right, the sleeve is set down, then the record slides out of it already spinning
+    const words = Array.from(now.querySelectorAll<HTMLElement>('.now-label, .track p')).flatMap(splitWords);
+    const line = now.querySelector<HTMLElement>('.now-line')!;
+    const deckEl = now.querySelector<HTMLElement>('.deck')!;
+    const vinyl = now.querySelector<HTMLElement>('.vinyl')!;
+    const slot = parseFloat(getComputedStyle(deckEl).getPropertyValue('--slot')) || 48;
+    gsap.set(words, { yPercent: 110 });
+    gsap.set(line, { scaleX: 0 });
+    gsap.set(deckEl, { opacity: 0, y: 32, rotate: -5, transformOrigin: '0% 100%' });
+    gsap.set(vinyl, { opacity: 0, x: -slot, rotate: -240 });
+    triggers.push(
+      ScrollTrigger.create({
+        trigger: now,
+        start: 'top 92%',
+        once: true,
+        onEnter: () => {
+          gsap
+            .timeline({ defaults: { ease: RISE.ease } })
+            .to(line, { scaleX: 1, duration: RISE.dur }, 0)
+            .to(words, rise(words), 0.1)
+            .to(deckEl, { opacity: 1, y: 0, rotate: 0, duration: RISE.dur }, 0.1)
+            .set(vinyl, { opacity: 1 }, 0.5) // still hidden under the sleeve here
+            .to(vinyl, { x: 0, rotate: 0, duration: RISE.dur + 0.3 }, 0.5)
+            .add(burst, 0.5)
+            .add(() => gsap.set([deckEl, vinyl], { clearProps: 'transform,opacity' })); // hover/pulled transforms are CSS
+        },
+      }),
+    );
   }
+  root.querySelectorAll<HTMLElement>('.tl-item').forEach((li) => {
+    riseOnScroll(Array.from(li.querySelectorAll<HTMLElement>('.tl-when, .tl-company, .tl-role, p')), li);
+  });
+  return () => {
+    triggers.forEach((t) => t.kill());
+    gsap.killTweensOf(root.querySelectorAll('.wi, .now-line, .deck, .vinyl')); // reveal tweens (words, divider, record)
+  };
+}
 
-  // only while SUMMON ME is uncovered, the nav's Say hi key becomes "email me" (mailto)
+/** Only while SUMMON ME is uncovered, the nav's Say hi key becomes "email me" (mailto). */
+function initSayHiKey(root: HTMLElement): Destroy {
   const key = document.querySelector<HTMLAnchorElement>('.nav .sayhi-btn');
   const label = key?.querySelector<HTMLElement>('.sayhi-label');
   const mail = root.querySelector<HTMLAnchorElement>('.hi-links a[href^="mailto:"]')?.href;
-  const sayHi = { text: 'Say hi', href: '/about/#say-hi' };
-  const setKey = (email: boolean) => {
-    if (!key || !label || !mail) return;
-    const text = email ? 'email me' : sayHi.text;
-    if ((key.dataset.mode ?? 'hi') === (email ? 'email' : 'hi')) return;
+  const content = root.querySelector<HTMLElement>('.about-content');
+  if (!key || !label || !mail || !content) return () => {};
+  const SAY_HI = 'Say hi';
+  // where the key goes; its label is swapped separately
+  const point = (email: boolean) => {
     key.dataset.mode = email ? 'email' : 'hi';
     if (email) {
       key.href = mail;
       key.removeAttribute('data-route');
       key.title = 'Email me (Enter)';
     } else {
-      key.setAttribute('href', sayHi.href);
+      key.setAttribute('href', '/about/#say-hi');
       key.setAttribute('data-route', '');
       key.title = 'Say hi (Enter)';
     }
+  };
+  const setKey = (email: boolean) => {
+    if ((key.dataset.mode ?? 'hi') === (email ? 'email' : 'hi')) return;
+    point(email);
+    const text = email ? 'email me' : SAY_HI;
     if (reduced) {
       label.textContent = text;
       return;
@@ -280,35 +247,16 @@ export function initAbout(root: HTMLElement): Destroy {
       },
     });
   };
-  const content = root.querySelector<HTMLElement>('.about-content');
-  const onScroll = () => {
-    if (content) setKey(content.getBoundingClientRect().bottom < window.innerHeight * 0.6);
-  };
+  const onScroll = () => setKey(content.getBoundingClientRect().bottom < window.innerHeight * 0.6);
   window.addEventListener('scroll', onScroll, { passive: true });
   onScroll();
-
   return () => {
-    stopSparks();
-    deck.stop();
     window.removeEventListener('scroll', onScroll);
-    if (label) gsap.killTweensOf(label);
-    if (key && label && key.dataset.mode === 'email') {
-      key.dataset.mode = 'hi';
-      // leaving About while it reads "email me": put Say hi back at once
-      label.textContent = sayHi.text;
-      label.style.opacity = '';
-      label.style.transform = '';
-      key.setAttribute('href', sayHi.href);
-      key.setAttribute('data-route', '');
-      key.title = 'Say hi (Enter)';
-    }
-    triggers.forEach((t) => t.kill());
-    hi.removeEventListener('pointermove', onMove);
-    hi.removeEventListener('pointerleave', onLeave);
-    cancelAnimationFrame(fitRaf);
-    window.removeEventListener('resize', onResize);
-    gsap.killTweensOf(letters);
-    gsap.killTweensOf(root.querySelectorAll('.wi, .now-line, .deck, .vinyl')); // reveal tweens (words, divider, record)
+    // leaving About mid-swap or while it reads "email me": Say hi, whole, at once
+    gsap.killTweensOf(label);
+    if (key.dataset.mode === 'email') point(false);
+    label.textContent = SAY_HI;
+    gsap.set(label, { clearProps: 'opacity,transform' });
   };
 }
 
@@ -444,12 +392,26 @@ function initSparks(root: HTMLElement): Destroy {
       });
     });
   };
+  // the page can scroll the item out from under a still pointer, and no pointerleave comes until the pointer moves:
+  // on scroll, drop the trail once the last pointer position is no longer over the item
+  let px = -1;
+  let py = -1;
+  const track = (e: PointerEvent) => ((px = e.clientX), (py = e.clientY));
+  const onScroll = () => {
+    if (!inside) return;
+    const r = item.getBoundingClientRect();
+    if (px < r.left || px > r.right || py < r.top || py > r.bottom) leave();
+  };
   item.addEventListener('pointermove', move);
   item.addEventListener('pointerleave', leave);
+  window.addEventListener('pointermove', track, { passive: true });
+  window.addEventListener('scroll', onScroll, { passive: true });
 
   return () => {
     item.removeEventListener('pointermove', move);
     item.removeEventListener('pointerleave', leave);
+    window.removeEventListener('pointermove', track);
+    window.removeEventListener('scroll', onScroll);
     twinkles.forEach((t) => t.kill());
     pulses.forEach((t) => t.kill());
     gsap.killTweensOf(els);
@@ -463,19 +425,21 @@ export function initLab(root: HTMLElement, entering: boolean, onAscend: () => vo
   const ceiling = root.querySelector<HTMLElement>('[data-ceiling]')!;
   const inner = root.querySelector<HTMLElement>('[data-ceiling-inner]')!;
 
-  triggers.push(
-    ScrollTrigger.create({
-      trigger: ceiling,
-      start: 'top top',
-      end: 'bottom top',
-      scrub: true,
-      animation: gsap
-        .timeline()
-        .fromTo(inner, { yPercent: 0, scale: 1 }, { yPercent: -35, scale: 0.94, ease: 'none' }, 0)
-        // corners round off the further you descend (32 = the SUMMON ME corner, up to 96)
-        .fromTo(ceiling, { borderBottomLeftRadius: 32, borderBottomRightRadius: 32 }, { borderBottomLeftRadius: 96, borderBottomRightRadius: 96, ease: 'none' }, 0),
-    }),
-  );
+  // descending, the ceiling drifts up and shrinks (a parallax, so not under reduced motion)
+  if (!reduced)
+    triggers.push(
+      ScrollTrigger.create({
+        trigger: ceiling,
+        start: 'top top',
+        end: 'bottom top',
+        scrub: true,
+        animation: gsap
+          .timeline()
+          .fromTo(inner, { yPercent: 0, scale: 1 }, { yPercent: -35, scale: 0.94, ease: 'none' }, 0)
+          // corners round off the further you descend (32 = the SUMMON ME corner, up to 96)
+          .fromTo(ceiling, { borderBottomLeftRadius: 32, borderBottomRightRadius: 32 }, { borderBottomLeftRadius: 96, borderBottomRightRadius: 96, ease: 'none' }, 0),
+      }),
+    );
 
   const items = Array.from(root.querySelectorAll<HTMLElement>('[data-lab-item]'));
   gsap.set(items, { y: 50, opacity: 0 });
@@ -502,7 +466,8 @@ export function initLab(root: HTMLElement, entering: boolean, onAscend: () => vo
     pull = 0;
     gsap.to(ceiling, { y: 0, duration: 0.6, ease: reduced ? 'power2.out' : 'elastic.out(1, 0.6)', overwrite: true });
   };
-  const add = (d: number) => {
+  // hold: how long the pull waits for more before it springs back
+  const add = (d: number, hold = 320) => {
     if (done) return;
     pull += d;
     show();
@@ -512,7 +477,7 @@ export function initLab(root: HTMLElement, entering: boolean, onAscend: () => vo
       onAscend();
       return;
     }
-    idle = window.setTimeout(release, 320);
+    idle = window.setTimeout(release, hold);
   };
   const atTop = () => window.scrollY <= 4;
   // armed at the top after a short pause, or at once by a fresh pull (deltas growing) —
@@ -541,9 +506,17 @@ export function initLab(root: HTMLElement, entering: boolean, onAscend: () => vo
     if (y > ty) add((y - ty) * 1.6);
     ty = y;
   };
+  // keyboard: at the top, ↑ / PageUp / Home pull too, two presses to climb. A held key doesn't count, so scrolling up
+  // with one never runs on into a pull
+  const onKey = (e: KeyboardEvent) => {
+    if (e.repeat || e.altKey || e.metaKey || e.ctrlKey || !['ArrowUp', 'PageUp', 'Home'].includes(e.key) || !atTop()) return;
+    if ((e.target as HTMLElement | null)?.closest('input, textarea, select, [contenteditable]')) return;
+    add(PULL / 2, 1200);
+  };
   window.addEventListener('wheel', onWheel, { passive: true });
   window.addEventListener('touchstart', onTouchStart, { passive: true });
   window.addEventListener('touchmove', onTouchMove, { passive: true });
+  window.addEventListener('keydown', onKey);
 
   return () => {
     triggers.forEach((t) => t.kill());
@@ -551,5 +524,6 @@ export function initLab(root: HTMLElement, entering: boolean, onAscend: () => vo
     window.removeEventListener('wheel', onWheel);
     window.removeEventListener('touchstart', onTouchStart);
     window.removeEventListener('touchmove', onTouchMove);
+    window.removeEventListener('keydown', onKey);
   };
 }

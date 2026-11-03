@@ -35,14 +35,25 @@ const cases = defineCollection({
     summary: z.string(), // one line, shown on hover
     cover: z.string().optional(), // empty = placeholder
     hue: z.number().default(220), // placeholder tint until real covers exist
+    product: z.string().optional(), // product type, e.g. "B2B platform"; replaces the platform chip on the card and joins the header tags
+    role: z.string().optional(), // "Lead Product Designer" — shown in the header row
+    team: z.string().optional(), // "Team of 6" — shown in the header row
+    mine: z.string().optional(), // one sentence: what exactly was mine (no "we did")
     metrics: z
-      .array(z.object({ value: z.string(), label: z.string() }))
+      .array(
+        z.object({
+          value: z.string(), // the result, big number
+          label: z.string(),
+          before: z.string().optional(), // baseline; with it the row gets a small before → after scale
+          when: z.string().optional(), // when the result was measured, e.g. "at release", "+3 months"
+          note: z.string().optional(), // how it was measured: A/B test, analytics, usability test
+        }),
+      )
       .max(4)
       .optional(),
     sections: z.object({
       input: section,
-      reasoning: section,
-      process: section,
+      approach: section, // the key decision first, then how we got there
       outcomes: section,
     }),
     link: z.object({ label: z.string(), url: z.string() }).optional(),
