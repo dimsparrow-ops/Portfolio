@@ -10,7 +10,6 @@ export const site = {
 
 export const socials = [
   { label: 'LinkedIn', href: 'https://www.linkedin.com/in/dimsi/' },
-  { label: 'Instagram', href: 'https://www.instagram.com/dimsparrow/' },
 ];
 
 export const stats = [
@@ -29,16 +28,15 @@ export const pages = [
 ] as const;
 
 export type PageId = (typeof pages)[number]['id'];
-export const pageIndex = (id: PageId) => pages.findIndex((p) => p.id === id);
 
 export const services = [
-  { title: 'Research & strategy', hue: 212, text: "We have strong opinions, a long backlog and zero evidence. Find out what our users actually struggle with, then turn it into a direction we can defend in front of the board." },
-  { title: 'Product design', hue: 28, text: "Conversion is flat, users drop off halfway and nobody knows why. Dig into the numbers, talk to real users and design changes that actually move revenue. No templates, please." },
-  { title: 'Enterprise UX', hue: 265, text: "We have seven products, seven logins, hundreds of edge cases and an admin panel only one person understands. Turn it all into one ecosystem that feels simple, without breaking anything." },
-  { title: 'Design systems', hue: 150, text: "Five teams, five shades of blue, and every button is slightly different. Build us a system that lets us ship like one team, with docs people will actually read." },
-  { title: 'Design engineering', hue: 190, text: "Skip the 30-page spec. Show me a working prototype by Friday so we can test the idea for real. Use whatever AI magic gets us there." },
-  { title: 'Design leadership', hue: 340, text: "Our designers are talented, but nobody’s steering. Own the outcome, make the hard calls, get product and engineering on the same page, and help the team grow along the way." },
-  { title: 'Uncharted problems', hue: 50, text: "We’re building something nobody has built before. No playbook, no precedent, no obvious answer. Are you in?" },
+  { title: 'Research & strategy', text: "We have strong opinions, a long backlog and zero evidence. Find out what our users actually struggle with, then turn it into a direction we can defend in front of the board." },
+  { title: 'Product design', text: "Conversion is flat, users drop off halfway and nobody knows why. Dig into the numbers, talk to real users and design changes that actually move revenue. No templates, please." },
+  { title: 'Enterprise UX', text: "We have seven products, seven logins, hundreds of edge cases and an admin panel only one person understands. Turn it all into one ecosystem that feels simple, without breaking anything." },
+  { title: 'Design systems', text: "Five teams, five shades of blue, and every button is slightly different. Build us a system that lets us ship like one team, with docs people will actually read." },
+  { title: 'Design engineering', text: "Skip the 30-page spec. Show me a working prototype by Friday so we can test the idea for real. Use whatever AI magic gets us there." },
+  { title: 'Design leadership', text: "Our designers are talented, but nobody’s steering. Own the outcome, make the hard calls, get product and engineering on the same page, and help the team grow along the way." },
+  { title: 'Uncharted problems', text: "We’re building something nobody has built before. No playbook, no precedent, no obvious answer. Are you in?" },
 ];
 
 /** About intro: the name and the closing phrase (tail) are set apart (rendered grey). */

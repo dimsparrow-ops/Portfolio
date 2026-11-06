@@ -4,14 +4,17 @@ import Ph from './Ph.astro';
 interface Props { entry: CollectionEntry<'cases'>; }
 const { entry } = Astro.props;
 const d = entry.data;
-const order = ['input', 'reasoning', 'process', 'outcomes'] as const;
-const label = { input: 'Input', reasoning: 'Reasoning', process: 'Process', outcomes: 'Outcomes' };
+const order = ['input', 'approach', 'outcomes'] as const;
+const label = { input: 'Input', approach: 'Approach', outcomes: 'Outcomes' };
 ---
-<article class="case" data-case-body={entry.id} data-title={d.title}>
+<article class="case" data-title={d.title}>
   <header class="case-head">
-    <h1 class="case-title" data-split>{d.title}{d.client && d.client !== d.title && <span class="client"> — {d.client}</span>}</h1>
+    <h1 class="case-title">{d.title}{d.client && d.client !== d.title && <span class="client"> — {d.client}</span>}</h1>
     <div class="case-meta mono">
-      <span>{d.year}</span><span>{d.country}</span><span>{d.services.join(', ')}</span>
+      {d.role && <span>{d.role}</span>}
+      {d.services.map((s) => <span>{s}</span>)}
+      {d.product && <span>{d.product}</span>}
+      <span>{d.year}</span>
     </div>
   </header>
 
@@ -44,10 +47,27 @@ const label = { input: 'Input', reasoning: 'Reasoning', process: 'Process', outc
             <span class="mono">{label[k]}</span><span class="acc-icon" aria-hidden="true"></span>
           </button>
           <div class="acc-panel" id={`acc-${entry.id}-${k}`} style={i === 0 ? 'height:auto' : undefined}>
+            {k === 'approach' && (d.team || d.mine) && (
+              <div class="mine">
+                {(d.role || d.team) && <span class="mono">{[d.role, d.team].filter(Boolean).join(' · ')}</span>}
+                {d.mine && <p>{d.mine}</p>}
+              </div>
+            )}
             {d.sections[k].text.split(/\n\s*\n/).map((t) => <p>{t}</p>)}
             {k === 'outcomes' && d.metrics && d.metrics.length > 0 && (
               <div class="metrics">
-                {d.metrics.map((m) => <div class="metric"><span>{m.label}</span><b>{m.value}</b></div>)}
+                {d.metrics.map((m) => (
+                  <div class="metric">
+                    <span>{m.label}</span><b>{m.value}</b>
+                    {m.before && (
+                      <div class="metric-scale mono" aria-label={`From ${m.before} to ${m.value}${m.when ? `, ${m.when}` : ''}`}>
+                        <i aria-hidden="true"></i>
+                        <span>{m.before}</span><span>{m.when ?? 'after'}</span>
+                      </div>
+                    )}
+                    {m.note && <small class="metric-note mono">{m.note}</small>}
+                  </div>
+                ))}
               </div>
             )}
           </div>
