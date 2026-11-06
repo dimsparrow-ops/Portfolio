@@ -31,7 +31,7 @@
   --nav-pill: #ffffff;                /* nav active pill: white in both themes */
   --button: #f0f0f0;                  /* case close */
   --button-hover: #e0e0e0;
-  --glass-light: rgba(255, 255, 255, 0.4); /* hover label, Services description */
+  --glass-light: rgba(255, 255, 255, 0.5); /* hover label, Services description */
   --theme-thumb: #e8e8e8;
   --theme-off: #b4b4b8;
 
@@ -107,7 +107,7 @@
   --grid-line: rgba(255, 255, 255, 0.06);
   --button: #2a2a2c;
   --button-hover: #3a3a3d;
-  --glass-light: rgba(28, 28, 30, 0.5);
+  --glass-light: rgba(28, 28, 30, 0.6);
   --theme-thumb: #3a3a3d;
   --theme-off: #6e6e72;
   --shadow-s: 0 2px 8px rgba(0, 0, 0, 0.4);
