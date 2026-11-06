@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="1600" viewBox="0 0 1600 1600">
+<defs>
+<linearGradient id="base" x1="0.3" y1="0" x2="0.7" y2="1">
+<stop offset="0" style="stop-color:hsl(178 52% 34%)"/>
+<stop offset="1" style="stop-color:hsl(198 58% 18%)"/>
+</linearGradient>
+<radialGradient id="glow" cx="0.78" cy="0.2" r="0.65">
+<stop offset="0" style="stop-color:hsl(158 70% 62%)"/>
+<stop offset="1" style="stop-color:hsl(158 70% 62%);stop-opacity:0"/>
+</radialGradient>
+</defs>
+<rect width="1600" height="1600" fill="url(#base)"/>
+<rect width="1600" height="1600" fill="url(#glow)"/>
+<text x="800" y="800" text-anchor="middle" dominant-baseline="central" fill="#fff" font-family="Geist, Inter, -apple-system, 'Helvetica Neue', Arial, sans-serif" font-size="150" font-weight="600" letter-spacing="-4">Honu AI</text>
+</svg>
